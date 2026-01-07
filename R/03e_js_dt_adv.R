@@ -163,70 +163,18 @@ window.dtAdvInit = function() {
 
       function lockHelperColWidths(heads){
         try{
-          // First, get widths from the BODY table columns (more reliable with scrollX)
-          var bodyWidths = [];
-          var $bodyTable = $cont.find("div.dataTables_scrollBody table.dataTable");
-          if ($bodyTable.length) {
-            var $bodyCols = $bodyTable.find("thead tr:first th, tbody tr:first td");
-            if (!$bodyCols.length) $bodyCols = $bodyTable.find("tbody tr:first td");
-            $bodyCols.each(function(i){ bodyWidths[i] = $(this).outerWidth(); });
-          }
-          
-          heads.$theads.each(function(){
-            var $thead = $(this);
-            var $labelCells = $thead.find("tr:not(.dt-sort-row):not(.dt-filter-row):last th");
-            if (!$labelCells.length) return;
-            
-            // Use body widths if available, otherwise fall back to label cell widths
-            var w = bodyWidths.length ? bodyWidths : [];
-            if (!w.length) {
-              $labelCells.each(function(i){ w[i] = $(this).outerWidth(); });
-            }
-            
-            // Apply widths to sort row and filter row
-            ["tr.dt-sort-row th","tr.dt-filter-row th"].forEach(function(sel){
-              var $cells = $thead.find(sel);
-              $cells.each(function(i){
-                if (w[i] > 0) {
-                  $(this).css({ 
-                    width: w[i] + "px", 
-                    minWidth: w[i] + "px", 
-                    maxWidth: w[i] + "px",
-                    boxSizing: "border-box"
-                  });
-                }
-              });
-            });
-            
-            // Also sync the label cells themselves
-            $labelCells.each(function(i){
-              if (w[i] > 0) {
-                $(this).css({ 
-                  width: w[i] + "px", 
-                  minWidth: w[i] + "px", 
-                  maxWidth: w[i] + "px",
-                  boxSizing: "border-box"
-                });
-              }
-            });
-          });
+          // DISABLED: Let CSS handle column widths with table-layout: auto
+          // This function was locking widths which prevented columns from shrinking to content
+          // The sort/filter rows will inherit widths naturally from the table layout
+          return;
         }catch(e){ console.warn("lockHelperColWidths error:", e); }
       }
 
       function syncFilterWidths(heads){
         try{
-          var $theadVis = heads.$theadVis; if (!$theadVis || !$theadVis.length) return;
-          var $labelCells  = $theadVis.find("tr:not(.dt-sort-row):not(.dt-filter-row):last th");
-          var $filterCells = $theadVis.find("tr.dt-filter-row th");
-          if ($labelCells.length !== $filterCells.length) return;
-          $filterCells.each(function(i){
-            var $thFilter = $(this), $thLabel = $labelCells.eq(i);
-            var wLabel = $thLabel.innerWidth();
-            var padL = parseFloat($thFilter.css("padding-left"))||0;
-            var padR = parseFloat($thFilter.css("padding-right"))||0;
-            var target = Math.max(24, Math.min(120, wLabel - padL - padR));
-            $thFilter.find("input.dt-filter-input").css({ width: target+"px", maxWidth: target+"px" });
-          });
+          // DISABLED: Let CSS handle filter input widths
+          // This function was setting fixed widths which forced column expansion
+          return;
         } catch(e){}
       }
 
