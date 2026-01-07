@@ -241,7 +241,7 @@ css_overrides <- tags$style(HTML("
     text-align: right !important;
   }
 
-  /* ===== Column widths: shrink to content ===== */
+  /* ===== Column widths: shrink to exact content ===== */
   table.dataTable {
     width: auto !important;
     table-layout: auto !important;
@@ -250,23 +250,16 @@ css_overrides <- tags$style(HTML("
     white-space: nowrap !important;
     padding: 2px 4px !important;
   }
-  /* CRITICAL: Scroll wrappers must not force 100% width */
-  div.dataTables_scrollHead,
-  div.dataTables_scrollHeadInner,
-  div.dataTables_scrollHeadInner table,
-  div.dataTables_scrollBody,
-  div.dataTables_scrollBody table {
-    width: auto !important;
-    min-width: 0 !important;
-  }
 
   /* ===== Dynamic height - pagination directly under data ===== */
   .bslib-card, .bslib-card .card-body {
     height: auto !important;
     overflow: visible !important;
   }
+  /* Wrapper handles horizontal scroll if table wider than screen */
   .dataTables_wrapper {
-    overflow: visible !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
   }
   /* No fixed height - table grows with data, pagination follows */
   .dataTables_scrollBody {
