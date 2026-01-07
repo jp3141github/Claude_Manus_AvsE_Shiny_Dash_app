@@ -1,0 +1,61 @@
+# ShinyDashAE v1.0.0 - How to Run
+
+## Quick Start (3 steps)
+
+1. **Install Required Packages** (one-time setup)
+   Open R or RStudio and run:
+
+   install.packages(c('shiny', 'bslib', 'DT', 'dplyr', 'tidyr',
+                      'readr', 'readxl', 'lubridate', 'purrr', 'fs',
+                      'glue', 'ggplot2', 'plotly', 'openxlsx', 'zip',
+                      'scales', 'tibble', 'yaml'))
+
+2. **Navigate to This Folder**
+
+   setwd('path/to/ShinyDashAE_app_v1.0.0')
+
+3. **Run the App**
+
+   shiny::runApp()
+
+That's it! The dashboard will open in your browser.
+
+## Alternative Methods
+
+### Method 1: Run from Anywhere
+shiny::runApp('path/to/ShinyDashAE_app_v1.0.0')
+
+### Method 2: RStudio
+1. Open this folder in RStudio
+2. Open app.R
+3. Click the 'Run App' button at the top
+
+## Keyboard Shortcuts
+
+Once the app is running:
+- Ctrl/Cmd+Enter: Run Analysis
+- Ctrl/Cmd+D: Download Excel
+- Ctrl/Cmd+Shift+Z: Download ZIP
+
+## Documentation
+
+- README.md: Complete documentation
+- QUICK_START.md: 2-minute quick start guide
+- INSTALL.md: Installation troubleshooting
+
+## Need Help?
+
+GitHub: https://github.com/jp3141github/Shiny_Dash_AE
+Issues: https://github.com/jp3141github/Shiny_Dash_AE/issues
+
+## Features
+
+✓ 15 interactive chart types
+✓ CSV and Excel data upload
+✓ Dynamic filtering by product, peril, segment
+✓ Export to Excel and ZIP
+✓ Comprehensive data validation
+✓ Keyboard shortcuts for productivity
+
+Enjoy using ShinyDashAE!
+
