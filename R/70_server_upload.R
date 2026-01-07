@@ -85,7 +85,15 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         }
         # Color code A - E column: red for positive (A > E), green for negative (A < E)
         if ("A - E" %in% names(dfp)) {
-          dt <- DT::formatStyle(dt, columns = "A - E", color = DT::styleInterval(c(-1e-12, 1e-12), c("green", "black", "red")))
+          dt <- DT::formatStyle(dt, columns = "A - E",
+                                backgroundColor = DT::styleInterval(
+                                  cuts = c(0),
+                                  values = c("rgba(144, 238, 144, 0.4)", "rgba(255, 182, 182, 0.4)")
+                                ),
+                                color = DT::styleInterval(
+                                  cuts = c(0),
+                                  values = c("darkgreen", "darkred")
+                                ))
         }
         dt
       }, server = TRUE)  # Server-side processing for large datasets
