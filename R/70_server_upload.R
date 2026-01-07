@@ -57,10 +57,12 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         if ("Expected" %in% names(dfp)) dfp[["Expected"]] <- to_float(dfp[["Expected"]])
         dt <- DT::datatable(head(dfp, 500),
                             options  = list(
-                              pageLength = 25,
+                              pageLength = 50,     # Show more rows per page
                               scrollX = TRUE,
-                              fixedHeader = TRUE,  # Freeze column headers when scrolling
-                              autoWidth = TRUE     # Auto-size columns to fit content
+                              scrollY = FALSE,     # No vertical scroll - use pagination
+                              paging = TRUE,
+                              fixedHeader = TRUE,
+                              autoWidth = TRUE
                             ),
                             extensions = c("FixedHeader"),
                             rownames = FALSE, escape = FALSE)
