@@ -69,22 +69,24 @@ register_upload_server <- function(input, output, session, uploaded_df) {
                              format(total_records, big.mark = ","))
         # Find A - E column index for JavaScript callback (0-based)
         ae_col_idx <- if ("A - E" %in% names(dfp)) which(names(dfp) == "A - E") - 1 else -1
-        # JavaScript callback to color A - E cells based on value
-        row_callback_js <- if (ae_col_idx >= 0) {
-          DT::JS(sprintf("function(row, data, index) {
-            var val = parseFloat(data[%d]);
-            var cell = $('td', row).eq(%d);
-            if (!isNaN(val)) {
-              if (val < 0) {
-                cell.css('background-color', 'rgba(144, 238, 144, 0.4)');
-                cell.css('color', 'darkgreen');
-              } else if (val > 0) {
-                cell.css('background-color', 'rgba(255, 182, 182, 0.4)');
-                cell.css('color', 'darkred');
+        # Build columnDefs for A - E coloring using createdCell callback
+        col_defs <- if (ae_col_idx >= 0) {
+          list(list(
+            targets = ae_col_idx,
+            createdCell = DT::JS("function(td, cellData, rowData, row, col) {
+              var val = parseFloat(String(cellData).replace(/,/g, ''));
+              if (!isNaN(val)) {
+                if (val < 0) {
+                  $(td).css('background-color', 'rgba(144, 238, 144, 0.4)');
+                  $(td).css('color', 'darkgreen');
+                } else if (val > 0) {
+                  $(td).css('background-color', 'rgba(255, 182, 182, 0.4)');
+                  $(td).css('color', 'darkred');
+                }
               }
-            }
-          }", ae_col_idx, ae_col_idx))
-        } else NULL
+            }")
+          ))
+        } else list()
         dt <- DT::datatable(dfp,
                             options  = list(
                               pageLength = 25,
@@ -94,7 +96,7 @@ register_upload_server <- function(input, output, session, uploaded_df) {
                               autoWidth = FALSE, # Disable auto-width - CSS 1% trick handles column sizing
                               language = list(info = info_text,
                                               infoFiltered = "(filtered from _MAX_ total records)"),
-                              rowCallback = row_callback_js
+                              columnDefs = col_defs
                             ),
                             extensions = c("FixedHeader"),
                             rownames = FALSE, escape = FALSE)
