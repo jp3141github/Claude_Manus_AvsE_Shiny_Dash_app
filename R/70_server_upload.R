@@ -56,6 +56,23 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         }
         if ("Actual" %in% names(dfp))   dfp[["Actual"]]   <- to_float(dfp[["Actual"]])
         if ("Expected" %in% names(dfp)) dfp[["Expected"]] <- to_float(dfp[["Expected"]])
+
+        # Calculate A - E column if both Actual and Expected exist
+        if ("Actual" %in% names(dfp) && "Expected" %in% names(dfp)) {
+          dfp[["A - E"]] <- dfp[["Actual"]] - dfp[["Expected"]]
+          # Move A - E column to be right after Expected
+          exp_idx <- which(names(dfp) == "Expected")
+          if (length(exp_idx) == 1) {
+            col_order <- seq_along(names(dfp))
+            ae_idx <- which(names(dfp) == "A - E")
+            # Remove A-E from current position, insert after Expected
+            col_order <- col_order[-ae_idx]
+            insert_pos <- which(col_order == exp_idx)
+            col_order <- append(col_order, ae_idx, after = insert_pos)
+            dfp <- dfp[, col_order]
+          }
+        }
+
         # Show full dataset with server-side processing for large data
         info_text <- sprintf("Showing _START_ to _END_ of %s records",
                              format(total_records, big.mark = ","))
@@ -75,6 +92,12 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         if (length(num_cols_fmt)) {
           dt <- DT::formatCurrency(dt, columns = num_cols_fmt, currency = "", interval = 3, mark = ",", digits = 0)
           dt <- DT::formatStyle(dt, columns = num_cols_fmt, color = DT::styleInterval(c(-1e-12, 0), c("red","black","black")))
+        }
+        # Format A - E column: red for positives, blue for negatives
+        if ("A - E" %in% names(dfp)) {
+          dt <- DT::formatCurrency(dt, columns = "A - E", currency = "", interval = 3, mark = ",", digits = 0)
+          dt <- DT::formatStyle(dt, columns = "A - E",
+                                color = DT::styleInterval(c(0), c("blue", "red")))
         }
         dt
       }, server = TRUE)  # Server-side processing for large datasets
