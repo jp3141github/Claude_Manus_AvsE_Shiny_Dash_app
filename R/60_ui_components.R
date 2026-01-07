@@ -248,7 +248,7 @@ css_overrides <- tags$style(HTML("
   }
   table.dataTable th, table.dataTable td {
     white-space: nowrap !important;
-    padding: 3px 6px !important;
+    padding: 2px 4px !important;
   }
   /* CRITICAL: Scroll wrappers must not force 100% width */
   div.dataTables_scrollHead,

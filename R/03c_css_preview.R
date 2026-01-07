@@ -28,12 +28,12 @@ css_preview <- htmltools::HTML(
   /* Keep table layout auto to size columns to content */
   #tbl_preview{ overflow: visible !important; }
   #tbl_preview.dataTable, #tbl_preview table.dataTable{ table-layout: auto !important; }
-  #tbl_preview thead th{ max-width: 260px; }
-  
-  /* Preview: keep filter inputs compact & stable */
+
+  /* Filter inputs: adapt to column width, not fixed */
   #tbl_preview thead tr.dt-filter-row input.dt-filter-input{
-    width: 120px !important;
-    max-width: 120px !important;
+    width: auto !important;
+    min-width: 40px !important;
+    max-width: 100% !important;
     box-sizing: border-box !important;
     padding: 2px 4px !important;
     height: 20px !important;
