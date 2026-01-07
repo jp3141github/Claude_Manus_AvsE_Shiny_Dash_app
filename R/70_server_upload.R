@@ -69,27 +69,32 @@ register_upload_server <- function(input, output, session, uploaded_df) {
                              format(total_records, big.mark = ","))
         # Find A - E column index for JavaScript (0-based)
         ae_col_idx <- if ("A - E" %in% names(dfp)) which(names(dfp) == "A - E") - 1 else -1
-        # Create columnDefs with createdCell callback for A - E coloring
-        # This works with server-side processing unlike formatStyle
+        # Create columnDefs with render callback for A - E coloring and formatting
+        # This handles both formatting and coloring in one place, works with server-side processing
         col_defs <- list()
         if (ae_col_idx >= 0) {
           col_defs <- list(
             list(
               targets = ae_col_idx,
-              createdCell = DT::JS(sprintf("
-                function(td, cellData, rowData, row, col) {
-                  var val = parseFloat(cellData);
-                  if (!isNaN(val)) {
-                    if (val < 0) {
-                      $(td).css('background-color', 'rgba(144, 238, 144, 0.4)');
-                      $(td).css('color', 'darkgreen');
-                    } else if (val > 0) {
-                      $(td).css('background-color', 'rgba(255, 182, 182, 0.4)');
-                      $(td).css('color', 'darkred');
-                    }
+              render = DT::JS("
+                function(data, type, row, meta) {
+                  if (type !== 'display' || data === null || data === '') return data;
+                  var val = parseFloat(data);
+                  if (isNaN(val)) return data;
+                  var formatted = val.toLocaleString('en-US', {maximumFractionDigits: 0});
+                  var bgColor, textColor;
+                  if (val < 0) {
+                    bgColor = 'rgba(144, 238, 144, 0.4)';
+                    textColor = 'darkgreen';
+                  } else if (val > 0) {
+                    bgColor = 'rgba(255, 182, 182, 0.4)';
+                    textColor = 'darkred';
+                  } else {
+                    return formatted;
                   }
+                  return '<span style=\"display:block;background-color:' + bgColor + ';color:' + textColor + ';padding:2px 4px;margin:-2px -4px;\">' + formatted + '</span>';
                 }
-              "))
+              ")
             )
           )
         }
@@ -106,7 +111,8 @@ register_upload_server <- function(input, output, session, uploaded_df) {
                             ),
                             extensions = c("FixedHeader"),
                             rownames = FALSE, escape = FALSE)
-        num_cols_fmt <- intersect(c("Actual","Expected","A - E"), names(dfp))
+        # Format Actual and Expected columns (A - E is formatted via render function above)
+        num_cols_fmt <- intersect(c("Actual","Expected"), names(dfp))
         if (length(num_cols_fmt)) {
           dt <- DT::formatCurrency(dt, columns = num_cols_fmt, currency = "", interval = 3, mark = ",", digits = 0)
         }
