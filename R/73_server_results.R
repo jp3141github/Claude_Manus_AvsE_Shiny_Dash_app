@@ -177,19 +177,41 @@ register_results_server <- function(input, output, session, results_obj, uploade
           display: inline-block !important;
           width: auto !important;
           max-width: 100% !important;
-          min-height: 200px;
         }
         #preview-data-card .card-body {
-          display: block !important;
+          display: inline-block !important;
           width: auto !important;
           overflow-x: auto !important;
-          padding: 0.5rem !important;
+          padding: 0.25rem !important;
+        }
+        /* FORCE table and wrapper to shrink */
+        #tbl_preview_wrapper {
+          width: auto !important;
+          display: inline-block !important;
+        }
+        #tbl_preview_wrapper .dataTables_length,
+        #tbl_preview_wrapper .dataTables_filter,
+        #tbl_preview_wrapper .dataTables_info,
+        #tbl_preview_wrapper .dataTables_paginate {
+          width: auto !important;
+          display: inline-block !important;
+          float: none !important;
+        }
+        #tbl_preview {
+          width: auto !important;
+          table-layout: auto !important;
+        }
+        #tbl_preview th,
+        #tbl_preview td {
+          width: 1% !important;
+          white-space: nowrap !important;
+          padding: 2px 4px !important;
         }
       ")),
       card(
         id = "preview-data-card",
         card_header(
-          sprintf("Input Data — Records: %s | Columns: %d", total_rows, total_cols)
+          sprintf("Records: %s | Columns: %d", total_rows, total_cols)
         ),
         DTOutput("tbl_preview")
       )
