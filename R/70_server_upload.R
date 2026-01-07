@@ -46,6 +46,7 @@ register_upload_server <- function(input, output, session, uploaded_df) {
       # Preview table
       output$tbl_preview <- renderDT({
         dfp <- uploaded_df(); req(!is.null(dfp))
+        total_records <- nrow(dfp)
         if ("ProjectionDate" %in% names(dfp)) {
           cleaned <- parse_projection_date_dateonly(dfp[["ProjectionDate"]])
           dfp[["ProjectionDate"]] <- ifelse(!is.na(cleaned) &
@@ -55,13 +56,18 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         }
         if ("Actual" %in% names(dfp))   dfp[["Actual"]]   <- to_float(dfp[["Actual"]])
         if ("Expected" %in% names(dfp)) dfp[["Expected"]] <- to_float(dfp[["Expected"]])
+        # Custom info text showing full dataset size
+        info_text <- sprintf("Showing _START_ to _END_ of 500 preview rows (full dataset: %s records)",
+                             format(total_records, big.mark = ","))
         dt <- DT::datatable(head(dfp, 500),
                             options  = list(
                               pageLength = 25,
                               scrollX = FALSE,   # Disable DT scroll - let CSS handle overflow
                               paging = TRUE,
                               fixedHeader = TRUE,
-                              autoWidth = FALSE
+                              autoWidth = FALSE,
+                              language = list(info = info_text,
+                                              infoFiltered = "(filtered within preview)")
                             ),
                             extensions = c("FixedHeader"),
                             rownames = FALSE, escape = FALSE)

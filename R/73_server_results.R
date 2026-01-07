@@ -167,6 +167,9 @@ register_results_server <- function(input, output, session, results_obj, uploade
         HTML("<span style='color:red; font-weight:bold;'>&lt;&lt;&lt; Upload a CSV to preview data. (Use Browse Button)</span>")
       ))
     }
+    # Show total record count in header
+    total_rows <- format(nrow(df), big.mark = ",")
+    total_cols <- ncol(df)
     # Card with inline-block display - table controls its own sizing
     tagList(
       tags$style(HTML("
@@ -185,7 +188,9 @@ register_results_server <- function(input, output, session, results_obj, uploade
       ")),
       card(
         id = "preview-data-card",
-        card_header("Uploaded Data"),
+        card_header(
+          sprintf("Input Data — Records: %s | Columns: %d (showing first 500 rows)", total_rows, total_cols)
+        ),
         DTOutput("tbl_preview")
       )
     )
