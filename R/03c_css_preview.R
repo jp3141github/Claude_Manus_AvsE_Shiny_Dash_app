@@ -3,15 +3,25 @@
 css_preview <- htmltools::HTML(
 "
 <style>
-  /* ===== Compact cells with no wrapping ===== */
-  #tbl_preview th,
+  /* ===== Data cells - no wrapping ===== */
   #tbl_preview td {
     white-space: nowrap !important;
     padding: 2px 4px !important;
   }
 
-  /* ===== Sort row - shrink to content ===== */
+  /* ===== Header label row - WRAP text ===== */
+  #tbl_preview thead tr:not(.dt-sort-row):not(.dt-filter-row) th {
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    max-width: 80px !important;
+    padding: 2px 4px !important;
+    vertical-align: bottom !important;
+    line-height: 1.2 !important;
+  }
+
+  /* ===== Sort row - no wrapping ===== */
   #tbl_preview thead tr.dt-sort-row th {
+    white-space: nowrap !important;
     padding: 1px 2px !important;
   }
   #tbl_preview thead tr.dt-sort-row th .dt-sortbox {
@@ -19,8 +29,9 @@ css_preview <- htmltools::HTML(
     width: auto !important;
   }
 
-  /* ===== Filter row - inputs match column header width ===== */
+  /* ===== Filter row ===== */
   #tbl_preview thead tr.dt-filter-row th {
+    white-space: nowrap !important;
     padding: 1px 2px !important;
   }
   #tbl_preview thead tr.dt-filter-row input.dt-filter-input {
@@ -31,12 +42,6 @@ css_preview <- htmltools::HTML(
     padding: 1px 2px !important;
     height: 18px !important;
     font-size: 10px !important;
-  }
-
-  /* ===== Remove ALL extra padding/margins from header cells ===== */
-  #tbl_preview thead th {
-    padding: 2px 4px !important;
-    margin: 0 !important;
   }
 
 </style>

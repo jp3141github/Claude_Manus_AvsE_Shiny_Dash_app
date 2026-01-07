@@ -377,6 +377,30 @@ window.dtAdvInit = function() {
         }catch(e){}
       }
 
+      // Split camelCase and concatenated words in header labels for wrapping
+      function splitHeaderLabels(heads){
+        try{
+          var $labelRow = heads.$theadVis.find("tr:not(.dt-sort-row):not(.dt-filter-row) th");
+          $labelRow.each(function(){
+            var $th = $(this);
+            // Skip if already processed
+            if ($th.data("split-done")) return;
+            $th.data("split-done", true);
+
+            var text = $th.text().trim();
+            // Split camelCase: "ObjectName" -> "Object Name"
+            // Split on capital letters: insert space before caps that follow lowercase
+            var split = text.replace(/([a-z])([A-Z])/g, "$1 $2");
+            // Also handle "ProjectionDate" style
+            split = split.replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2");
+
+            if (split !== text) {
+              $th.text(split);
+            }
+          });
+        }catch(e){ console.warn("splitHeaderLabels error:", e); }
+      }
+
       function ensureClearSort(heads){
         try{
           heads.$theads.each(function(){
@@ -393,6 +417,9 @@ window.dtAdvInit = function() {
       function rebuild(){
         var heads = locateHeads(); if (!heads.$theadVis.length) return;
         heads.$theads.addClass("dtadv-owner-" + id);
+
+        // Split camelCase header labels for wrapping (e.g. ObjectName -> Object Name)
+        splitHeaderLabels(heads);
 
         // Resolve RAW filter inputs to persist:
         var cachedRaw = getSavedRawFilters();
