@@ -3,71 +3,61 @@
 css_preview <- htmltools::HTML(
 "
 <style>
-  /* ===== Column widths based on header text (JS sets explicit widths) ===== */
+  /* ===== FORCE columns to shrink to content ===== */
   #tbl_preview th,
   #tbl_preview td {
+    width: 1% !important;
     white-space: nowrap !important;
-    padding: 3px 4px !important;
+    padding: 2px 6px !important;
     box-sizing: border-box !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
   }
 
-  /* Table uses fixed layout - JS sets column widths */
+  /* Table auto-sizes to content */
   #tbl_preview,
   #tbl_preview.dataTable {
     width: auto !important;
-    table-layout: fixed !important;
+    table-layout: auto !important;
   }
 
-  /* Wrapper allows horizontal scroll if table exceeds container */
+  /* Wrapper shrinks to table size */
   #tbl_preview_wrapper {
     width: auto !important;
     display: inline-block !important;
     max-width: 100% !important;
     overflow-x: auto !important;
-    overflow-y: visible !important;
   }
 
-  /* Sort row - compact with sortbox inline */
+  /* Sort row */
   #tbl_preview thead tr.dt-sort-row th {
+    width: 1% !important;
     white-space: nowrap !important;
-    overflow: visible !important;
-    padding: 2px 4px !important;
+    padding: 2px 6px !important;
   }
-
-  /* Sortbox: compact inline-flex, no extra gaps */
   #tbl_preview thead tr.dt-sort-row th .dt-sortbox {
     display: inline-flex !important;
     gap: 2px !important;
-    margin: 0 !important;
   }
 
-  /* Filter row cells */
+  /* Filter row */
   #tbl_preview thead tr.dt-filter-row th {
+    width: 1% !important;
     white-space: nowrap !important;
-    overflow: visible !important;
-    padding: 2px 4px !important;
+    padding: 2px 6px !important;
   }
-
-  /* Filter inputs: sized by JS to match header width */
   #tbl_preview thead tr.dt-filter-row input.dt-filter-input {
+    width: 100% !important;
+    min-width: 40px !important;
     box-sizing: border-box !important;
     padding: 2px 4px !important;
-    height: 20px !important;
+    height: 18px !important;
     font-size: 11px !important;
   }
 
-  /* Labels row (headers) - compact padding */
+  /* Label row (headers) */
   #tbl_preview thead tr:not(.dt-sort-row):not(.dt-filter-row) th {
+    width: 1% !important;
     white-space: nowrap !important;
-    padding: 3px 4px !important;
-  }
-
-  /* FixedHeader clone must match */
-  .fixedHeader-floating#tbl_preview th,
-  .fixedHeader-floating table#tbl_preview th {
-    white-space: nowrap !important;
+    padding: 2px 6px !important;
   }
 
 </style>

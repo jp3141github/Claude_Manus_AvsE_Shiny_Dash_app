@@ -538,119 +538,40 @@ window.dtAdvInitWithJumper = function(){
   return function(settings){ try{ adv(settings); }catch(e){} try{ jumper(settings); }catch(e){} };
 };
 
-/* -------- SIZE COLUMNS TO HEADER WIDTH ----- */
-function sizeColumnsToHeaders(tableId) {
+/* -------- STRIP ALL WIDTHS - let CSS control sizing ----- */
+function stripTableWidths(tableId) {
   try {
     var $tbl = $("#" + tableId);
     if (!$tbl.length) return;
 
-    console.log("[Column Size] Sizing columns to headers for:", tableId);
-
-    var $cont = $("#" + tableId + "_wrapper");
-
-    // Find the label row (the actual column headers, not sort/filter rows)
-    var $labelRow = $tbl.find("thead tr:not(.dt-sort-row):not(.dt-filter-row)").last();
-    if (!$labelRow.length) {
-      $labelRow = $tbl.find("thead tr").last();
-    }
-
-    var $headers = $labelRow.find("th");
-    if (!$headers.length) return;
-
-    // Create a hidden measuring element matching header font
-    var $measure = $("<span>").css({
-      position: "absolute",
-      visibility: "hidden",
-      whiteSpace: "nowrap",
-      fontSize: $headers.first().css("font-size") || "14px",
-      fontFamily: $headers.first().css("font-family") || "inherit",
-      fontWeight: $headers.first().css("font-weight") || "bold"
-    }).appendTo("body");
-
-    // Measure each header text width (just text, minimal padding)
-    var widths = [];
-    $headers.each(function(i) {
-      var text = $(this).text().trim();
-      $measure.text(text);
-      var textWidth = $measure.outerWidth();
-      // Add minimal padding (8px each side = 16px total)
-      widths[i] = Math.max(50, textWidth + 16);
-    });
-    $measure.remove();
-
-    console.log("[Column Size] Header widths:", widths);
-
-    // Remove colgroup - we will set widths directly
+    // Remove colgroup that DataTables creates
     $tbl.find("colgroup").remove();
 
-    // Set table to fixed layout so widths are respected
-    $tbl.css({
+    // Strip width from table itself
+    $tbl.removeAttr("style").css({
       "width": "auto",
-      "table-layout": "fixed"
+      "table-layout": "auto"
     });
 
-    // Apply widths to ALL header rows (sort, filter, and label rows)
-    $tbl.find("thead tr").each(function() {
-      $(this).find("th").each(function(i) {
-        if (i < widths.length) {
-          $(this).css({
-            "width": widths[i] + "px",
-            "min-width": widths[i] + "px",
-            "max-width": widths[i] + "px",
-            "padding": "3px 4px"
-          });
-        }
-      });
+    // Strip all inline widths from cells
+    $tbl.find("th, td").each(function() {
+      $(this).removeAttr("style").removeAttr("width");
     });
 
-    // Apply widths to body cells too
-    $tbl.find("tbody tr").each(function() {
-      $(this).find("td").each(function(i) {
-        if (i < widths.length) {
-          $(this).css({
-            "width": widths[i] + "px",
-            "min-width": widths[i] + "px",
-            "max-width": widths[i] + "px",
-            "overflow": "hidden",
-            "text-overflow": "ellipsis",
-            "padding": "3px 4px"
-          });
-        }
-      });
-    });
-
-    // Make filter inputs match header text width (minus padding)
-    $tbl.find("thead tr.dt-filter-row th").each(function(i) {
-      var $th = $(this);
-      var $input = $th.find("input.dt-filter-input");
-      if ($input.length && i < widths.length) {
-        // Input width = column width minus cell padding (8px total)
-        var inputWidth = widths[i] - 8;
-        $input.css({
-          "width": inputWidth + "px",
-          "max-width": inputWidth + "px",
-          "box-sizing": "border-box"
-        });
-      }
-    });
-
-    // Set wrapper to auto width
-    if ($cont.length) {
-      $cont.css({
+    // Strip from wrapper
+    var $wrapper = $("#" + tableId + "_wrapper");
+    if ($wrapper.length) {
+      $wrapper.removeAttr("style").css({
         "width": "auto",
         "display": "inline-block"
       });
     }
 
-    // Force card to not stretch
-    var $card = $tbl.closest(".card");
-    if ($card.length) {
-      $card.css({ width: "auto", maxWidth: "100%" });
-    }
+    // Strip from scroll containers
+    $wrapper.find(".dataTables_scrollHead, .dataTables_scrollBody").removeAttr("style");
 
-    console.log("[Column Size] Done");
   } catch(e) {
-    console.warn("[Column Size] Error:", e);
+    console.warn("[Strip Widths] Error:", e);
   }
 }
 
@@ -669,20 +590,20 @@ $(document).on("preInit.dt", function(e, settings){
       console.warn("dtAdvInitWithJumper error:", err);
     }
 
-    // Size columns to header widths after init
+    // Strip widths after init - let CSS control sizing
     var tableId = settings.sTableId;
     if (tableId) {
-      setTimeout(function(){ sizeColumnsToHeaders(tableId); }, 0);
-      setTimeout(function(){ sizeColumnsToHeaders(tableId); }, 100);
-      setTimeout(function(){ sizeColumnsToHeaders(tableId); }, 300);
+      setTimeout(function(){ stripTableWidths(tableId); }, 0);
+      setTimeout(function(){ stripTableWidths(tableId); }, 100);
+      setTimeout(function(){ stripTableWidths(tableId); }, 300);
     }
   });
 
-  // Re-apply column sizing after every draw (pagination, filtering, etc.)
+  // Re-strip widths after every draw (pagination, filtering, etc.)
   api.on("draw.dt", function(){
     var tableId = settings.sTableId;
     if (tableId) {
-      setTimeout(function(){ sizeColumnsToHeaders(tableId); }, 0);
+      setTimeout(function(){ stripTableWidths(tableId); }, 0);
     }
   });
 });
