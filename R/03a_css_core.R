@@ -147,11 +147,11 @@ css_core <- htmltools::HTML(
   /* =======================
      LARGE DT WRAPPERS
      ======================= */
-  /* Generic page area (keeps wrapper tall but allows inner DT to manage its own scroll) */
+  /* Generic page area - NO vertical scroll, use pagination instead */
   #tabs_main .nav-content .bslib-card .dataTables_wrapper {
-    min-height:600px !important;
-    max-height:2000px !important;
-    overflow-y:auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-y: visible !important;
   }
 
   /* === FROZEN HEADER WRAPPER ===
