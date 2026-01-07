@@ -2,6 +2,8 @@
 # Adds Apply/Clear filters to ALL tables and persists filter values across rebuilds.
 
 js_dt <- '
+console.log("[JS] DataTables Advanced Header JS loaded");
+
 /* =======================================================================
    DataTables Advanced Header Utilities
    - Per-table A/D/− chips above headers (multi-order with position badges)
@@ -560,10 +562,12 @@ window.dtAdvInitWithJumper = function(){
 
 /* -------- GLOBAL HOOK: Auto-apply advanced features to ALL DataTables ----- */
 $(document).on("preInit.dt", function(e, settings){
+  console.log("[JS] DataTable preInit.dt fired");
   // This fires BEFORE each DataTable is fully initialized
   // We hook into init.dt to apply our advanced features AFTER initialization
   var api = new $.fn.dataTable.Api(settings);
   api.on("init.dt", function(){
+    console.log("[JS] DataTable init.dt fired - applying advanced features");
     try {
       var combo = window.dtAdvInitWithJumper ? window.dtAdvInitWithJumper() : null;
       if (combo) combo(settings);
