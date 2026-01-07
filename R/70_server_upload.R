@@ -67,26 +67,28 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         # Show full dataset with server-side processing for large data
         info_text <- sprintf("Showing _START_ to _END_ of %s records",
                              format(total_records, big.mark = ","))
-        # Find A - E column index for JavaScript callback (0-based)
-        ae_col_idx <- if ("A - E" %in% names(dfp)) which(names(dfp) == "A - E") - 1 else -1
-        # Build columnDefs for A - E coloring using createdCell callback
-        col_defs <- if (ae_col_idx >= 0) {
-          list(list(
-            targets = ae_col_idx,
-            createdCell = DT::JS("function(td, cellData, rowData, row, col) {
-              var val = parseFloat(String(cellData).replace(/,/g, ''));
-              if (!isNaN(val)) {
-                if (val < 0) {
-                  $(td).css('background-color', 'rgba(144, 238, 144, 0.4)');
-                  $(td).css('color', 'darkgreen');
-                } else if (val > 0) {
-                  $(td).css('background-color', 'rgba(255, 182, 182, 0.4)');
-                  $(td).css('color', 'darkred');
-                }
+        # Find A - E column index (1-based for header lookup)
+        ae_col_idx <- if ("A - E" %in% names(dfp)) which(names(dfp) == "A - E") else -1
+        # drawCallback runs AFTER each table draw - most reliable for styling
+        draw_callback_js <- DT::JS(sprintf("function(settings) {
+          var api = this.api();
+          var colIdx = %d - 1;  // Convert to 0-based for cells
+          if (colIdx < 0) return;
+          api.cells(null, colIdx, {page: 'current'}).every(function() {
+            var td = this.node();
+            var data = this.data();
+            var val = parseFloat(String(data).replace(/,/g, ''));
+            if (!isNaN(val)) {
+              if (val < 0) {
+                $(td).css({'background-color': 'rgba(144, 238, 144, 0.4)', 'color': 'darkgreen'});
+              } else if (val > 0) {
+                $(td).css({'background-color': 'rgba(255, 182, 182, 0.4)', 'color': 'darkred'});
+              } else {
+                $(td).css({'background-color': '', 'color': ''});
               }
-            }")
-          ))
-        } else list()
+            }
+          });
+        }", ae_col_idx))
         dt <- DT::datatable(dfp,
                             options  = list(
                               pageLength = 25,
@@ -96,7 +98,7 @@ register_upload_server <- function(input, output, session, uploaded_df) {
                               autoWidth = FALSE, # Disable auto-width - CSS 1% trick handles column sizing
                               language = list(info = info_text,
                                               infoFiltered = "(filtered from _MAX_ total records)"),
-                              columnDefs = col_defs
+                              drawCallback = draw_callback_js
                             ),
                             extensions = c("FixedHeader"),
                             rownames = FALSE, escape = FALSE)
