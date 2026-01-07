@@ -227,7 +227,6 @@ css_overrides <- tags$style(HTML("
   }
 
   /* ===== Right-align numeric columns (sort buttons + filters on right) ===== */
-  /* Use text-align instead of flex to preserve table-cell layout */
   thead tr.dt-sort-row th.dt-col-right {
     text-align: right !important;
   }
@@ -241,37 +240,14 @@ css_overrides <- tags$style(HTML("
     text-align: right !important;
   }
 
-  /* ===== Column widths: shrink to exact content ===== */
-  /* Prevent flex container from stretching table */
-  .dataTables_wrapper {
-    width: fit-content !important;
-    max-width: 100% !important;
-    overflow-x: auto !important;
-    overflow-y: visible !important;
-  }
-  table.dataTable {
-    width: auto !important;
-    table-layout: auto !important;
-  }
-  table.dataTable th, table.dataTable td {
-    white-space: nowrap !important;
-    padding: 2px 4px !important;
-  }
-
   /* ===== Dynamic height - pagination directly under data ===== */
-  .bslib-card, .bslib-card .card-body {
-    height: auto !important;
-    overflow: visible !important;
-    /* Don't stretch children in flex container */
-    align-items: flex-start !important;
-  }
-  /* No fixed height - table grows with data, pagination follows */
   .dataTables_scrollBody {
     height: auto !important;
     max-height: none !important;
     overflow-y: visible !important;
     overflow-x: auto !important;
   }
+
   /* Solid black Browse button at all times */
   #csv_file .btn,
   #csv_file .btn:hover,
@@ -290,11 +266,6 @@ css_overrides <- tags$style(HTML("
     color:#fff !important;
     border-color:#000 !important;
     opacity:.65 !important;
-  }
-    /* Browse button styling */
-  #csv_file .btn {
-    background-color:#000 !important; color:#fff !important; border-color:#000 !important;
-    box-shadow:none !important; outline:none !important;
   }
   /* Before upload: thick red border cue */
   #csv_file:not(.used) .btn {
