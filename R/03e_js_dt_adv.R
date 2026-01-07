@@ -538,49 +538,111 @@ window.dtAdvInitWithJumper = function(){
   return function(settings){ try{ adv(settings); }catch(e){} try{ jumper(settings); }catch(e){} };
 };
 
-/* -------- FORCE COLUMNS TO SHRINK: Strip all inline widths ----- */
-function forceColumnsToShrink(tableId) {
+/* -------- SIZE COLUMNS TO HEADER WIDTH ----- */
+function sizeColumnsToHeaders(tableId) {
   try {
     var $tbl = $("#" + tableId);
     if (!$tbl.length) return;
 
-    console.log("[Column Shrink] Stripping widths from table:", tableId);
+    console.log("[Column Size] Sizing columns to headers for:", tableId);
 
-    // Remove colgroup entirely - it forces column widths
-    $tbl.find("colgroup").remove();
+    var $cont = $("#" + tableId + "_wrapper");
 
-    // CRITICAL: Remove the style attribute entirely from the table
-    // DataTables sets style="width: XXXpx" which overrides CSS
-    $tbl.removeAttr("style");
-    $tbl.attr("style", "width: auto !important; table-layout: auto !important;");
-
-    // Strip ALL inline styles from th and td cells
-    $tbl.find("th, td").each(function(){
-      $(this).removeAttr("style");
-      $(this).removeAttr("width");
-    });
-
-    // Strip from wrapper and set to shrink
-    var $wrapper = $("#" + tableId + "_wrapper");
-    if ($wrapper.length) {
-      $wrapper.removeAttr("style");
-      $wrapper.attr("style", "width: auto !important; display: inline-block !important;");
+    // Find the label row (the actual column headers, not sort/filter rows)
+    var $labelRow = $tbl.find("thead tr:not(.dt-sort-row):not(.dt-filter-row)").last();
+    if (!$labelRow.length) {
+      $labelRow = $tbl.find("thead tr").last();
     }
 
-    // Also strip from any parent scroll containers
-    $tbl.closest(".dataTables_scrollHead, .dataTables_scrollBody").each(function(){
-      $(this).removeAttr("style");
+    var $headers = $labelRow.find("th");
+    if (!$headers.length) return;
+
+    // Create a hidden measuring element
+    var $measure = $("<span>").css({
+      position: "absolute",
+      visibility: "hidden",
+      whiteSpace: "nowrap",
+      fontSize: $headers.first().css("font-size") || "14px",
+      fontFamily: $headers.first().css("font-family") || "inherit",
+      fontWeight: $headers.first().css("font-weight") || "normal",
+      padding: "0 16px"  // Account for cell padding
+    }).appendTo("body");
+
+    // Measure each header and collect widths
+    var widths = [];
+    $headers.each(function(i) {
+      var text = $(this).text().trim();
+      $measure.text(text);
+      var w = $measure.outerWidth();
+      // Minimum width of 60px, add some padding
+      widths[i] = Math.max(60, w + 8);
+    });
+    $measure.remove();
+
+    console.log("[Column Size] Header widths:", widths);
+
+    // Remove colgroup - we will set widths directly
+    $tbl.find("colgroup").remove();
+
+    // Set table to fixed layout so widths are respected
+    $tbl.css({
+      "width": "auto",
+      "table-layout": "fixed"
     });
 
-    // Force the card to not stretch
+    // Apply widths to ALL header rows (sort, filter, and label rows)
+    $tbl.find("thead tr").each(function() {
+      $(this).find("th").each(function(i) {
+        if (i < widths.length) {
+          $(this).css({
+            "width": widths[i] + "px",
+            "min-width": widths[i] + "px",
+            "max-width": widths[i] + "px"
+          });
+        }
+      });
+    });
+
+    // Apply widths to body cells too
+    $tbl.find("tbody tr").each(function() {
+      $(this).find("td").each(function(i) {
+        if (i < widths.length) {
+          $(this).css({
+            "width": widths[i] + "px",
+            "min-width": widths[i] + "px",
+            "max-width": widths[i] + "px",
+            "overflow": "hidden",
+            "text-overflow": "ellipsis"
+          });
+        }
+      });
+    });
+
+    // Make filter inputs fill their cells
+    $tbl.find("thead tr.dt-filter-row input.dt-filter-input").each(function(i) {
+      $(this).css({
+        "width": "100%",
+        "box-sizing": "border-box"
+      });
+    });
+
+    // Set wrapper to auto width
+    if ($cont.length) {
+      $cont.css({
+        "width": "auto",
+        "display": "inline-block"
+      });
+    }
+
+    // Force card to not stretch
     var $card = $tbl.closest(".card");
     if ($card.length) {
       $card.css({ width: "auto", maxWidth: "100%" });
     }
 
-    console.log("[Column Shrink] Done - table style is now:", $tbl.attr("style"));
+    console.log("[Column Size] Done");
   } catch(e) {
-    console.warn("[Column Shrink] Error:", e);
+    console.warn("[Column Size] Error:", e);
   }
 }
 
@@ -599,20 +661,20 @@ $(document).on("preInit.dt", function(e, settings){
       console.warn("dtAdvInitWithJumper error:", err);
     }
 
-    // Force columns to shrink after all other init is done
+    // Size columns to header widths after init
     var tableId = settings.sTableId;
     if (tableId) {
-      setTimeout(function(){ forceColumnsToShrink(tableId); }, 0);
-      setTimeout(function(){ forceColumnsToShrink(tableId); }, 100);
-      setTimeout(function(){ forceColumnsToShrink(tableId); }, 300);
+      setTimeout(function(){ sizeColumnsToHeaders(tableId); }, 0);
+      setTimeout(function(){ sizeColumnsToHeaders(tableId); }, 100);
+      setTimeout(function(){ sizeColumnsToHeaders(tableId); }, 300);
     }
   });
 
-  // Also strip widths after every draw
+  // Re-apply column sizing after every draw (pagination, filtering, etc.)
   api.on("draw.dt", function(){
     var tableId = settings.sTableId;
     if (tableId) {
-      setTimeout(function(){ forceColumnsToShrink(tableId); }, 0);
+      setTimeout(function(){ sizeColumnsToHeaders(tableId); }, 0);
     }
   });
 });

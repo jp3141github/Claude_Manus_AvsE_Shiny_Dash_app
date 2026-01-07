@@ -3,20 +3,21 @@
 css_preview <- htmltools::HTML(
 "
 <style>
-  /* ===== Column widths based on header text ===== */
-  /* Headers determine column width, filter boxes fill that width */
+  /* ===== Column widths based on header text (JS sets explicit widths) ===== */
   #tbl_preview th,
   #tbl_preview td {
     white-space: nowrap !important;
     padding: 3px 8px !important;
     box-sizing: border-box !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 
-  /* Table uses auto layout - columns size to header content */
+  /* Table uses fixed layout - JS sets column widths */
   #tbl_preview,
   #tbl_preview.dataTable {
     width: auto !important;
-    table-layout: auto !important;
+    table-layout: fixed !important;
   }
 
   /* Wrapper allows horizontal scroll if table exceeds container */
@@ -28,10 +29,11 @@ css_preview <- htmltools::HTML(
     overflow-y: visible !important;
   }
 
-  /* Sort row and filter row cells inherit column width */
+  /* Sort row and filter row cells */
   #tbl_preview thead tr.dt-sort-row th,
   #tbl_preview thead tr.dt-filter-row th {
     white-space: nowrap !important;
+    overflow: visible !important;
   }
 
   /* Filter inputs: fill the full column width (same as header) */
@@ -43,7 +45,7 @@ css_preview <- htmltools::HTML(
     font-size: 11px !important;
   }
 
-  /* Labels row (headers) - nowrap ensures header text determines width */
+  /* Labels row (headers) */
   #tbl_preview thead tr:not(.dt-sort-row):not(.dt-filter-row) th {
     white-space: nowrap !important;
   }
