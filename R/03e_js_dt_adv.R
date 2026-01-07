@@ -172,15 +172,26 @@ window.dtAdvInit = function() {
 
       function syncFilterWidths(heads){
         try{
-          // Get filter cells and set input width to fill the cell (minus small padding)
-          var $filterRow = heads.$theadVis.find("tr.dt-filter-row th");
+          // Measure header text width and set filter input slightly wider
           var $labelRow = heads.$theadVis.find("tr:not(.dt-sort-row):not(.dt-filter-row):last th");
+          var $filterRow = heads.$theadVis.find("tr.dt-filter-row th");
 
           $labelRow.each(function(i){
-            // Use the label cell width as reference (it determines column width)
-            var cellWidth = $(this).outerWidth();
-            // Filter input fills ~95% of cell width
-            var inputWidth = Math.max(30, cellWidth - 8);
+            var headerText = $(this).text().trim();
+            // Create temp span to measure text width
+            var $temp = $("<span>").text(headerText).css({
+              "font-size": $(this).css("font-size"),
+              "font-family": $(this).css("font-family"),
+              "font-weight": $(this).css("font-weight"),
+              "position": "absolute",
+              "visibility": "hidden",
+              "white-space": "nowrap"
+            }).appendTo("body");
+            var textWidth = $temp.width();
+            $temp.remove();
+
+            // Set filter input width: header text width + 20px padding (min 40px)
+            var inputWidth = Math.max(40, textWidth + 20);
             var $filterCell = $filterRow.eq(i);
             var $input = $filterCell.find("input.dt-filter-input");
             if ($input.length) {
