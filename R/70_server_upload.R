@@ -84,9 +84,10 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         if (length(num_cols_fmt)) {
           dt <- DT::formatCurrency(dt, columns = num_cols_fmt, currency = "", interval = 3, mark = ",", digits = 0)
         }
-        # Color A - E: red for positive, green for negative
-        if ("A - E" %in% names(dfp)) {
-          dt <- DT::formatStyle(dt, "A - E", color = DT::styleInterval(0, c("green", "red")))
+        # Color A - E: red for positive, green for negative (use column index, not name)
+        ae_col_idx <- which(names(dfp) == "A - E")
+        if (length(ae_col_idx) == 1) {
+          dt <- DT::formatStyle(dt, ae_col_idx, color = DT::styleInterval(0, c("green", "red")))
         }
         dt
       }, server = FALSE)
