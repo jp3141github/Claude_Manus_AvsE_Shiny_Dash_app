@@ -200,6 +200,32 @@ ui <- page_sidebar(
 )
 
 css_overrides <- tags$style(HTML("
+  /* ===== CRITICAL: Sort button styling (A/D/- chips) ===== */
+  .dt-sortbtn {
+    display: inline-block !important;
+    padding: 0 6px !important;
+    line-height: 18px !important;
+    height: 20px !important;
+    border: 1px solid #ccc !important;
+    border-radius: 3px !important;
+    background: #f7f7f7 !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    font-size: 11px !important;
+    color: #444 !important;
+    margin: 0 1px !important;
+  }
+  .dt-sortbtn.active {
+    background: #d4edda !important;
+    border-color: #28a745 !important;
+    font-weight: bold !important;
+  }
+  .dt-sortbox {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+
   /* Remove ALL vertical scrollbars from Input Data tab - use pagination only */
   .bslib-card, .bslib-card .card-body, .bslib-card .dataTables_wrapper {
     overflow-y: visible !important;
