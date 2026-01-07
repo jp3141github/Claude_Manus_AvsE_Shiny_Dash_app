@@ -3,8 +3,8 @@
 css_preview <- htmltools::HTML(
 "
 <style>
-  /* ===== Dynamic column widths based on content ===== */
-  /* Columns size to fit their header or data content (whichever is wider) */
+  /* ===== Column widths based on header text ===== */
+  /* Headers determine column width, filter boxes fill that width */
   #tbl_preview th,
   #tbl_preview td {
     white-space: nowrap !important;
@@ -12,7 +12,7 @@ css_preview <- htmltools::HTML(
     box-sizing: border-box !important;
   }
 
-  /* Table uses auto layout for content-based column sizing */
+  /* Table uses auto layout - columns size to header content */
   #tbl_preview,
   #tbl_preview.dataTable {
     width: auto !important;
@@ -28,24 +28,22 @@ css_preview <- htmltools::HTML(
     overflow-y: visible !important;
   }
 
-  /* Sort row and filter row cells use auto width */
+  /* Sort row and filter row cells inherit column width */
   #tbl_preview thead tr.dt-sort-row th,
   #tbl_preview thead tr.dt-filter-row th {
     white-space: nowrap !important;
   }
 
-  /* Filter inputs: auto width with reasonable bounds */
+  /* Filter inputs: fill the full column width (same as header) */
   #tbl_preview thead tr.dt-filter-row input.dt-filter-input {
-    width: auto !important;
-    min-width: 40px !important;
-    max-width: 150px !important;
+    width: 100% !important;
     box-sizing: border-box !important;
     padding: 2px 4px !important;
     height: 20px !important;
     font-size: 11px !important;
   }
 
-  /* Labels row keeps nowrap for clean headers */
+  /* Labels row (headers) - nowrap ensures header text determines width */
   #tbl_preview thead tr:not(.dt-sort-row):not(.dt-filter-row) th {
     white-space: nowrap !important;
   }
