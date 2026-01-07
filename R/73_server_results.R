@@ -169,7 +169,7 @@ register_results_server <- function(input, output, session, results_obj, uploade
     }
     card(
       card_header("Uploaded Data"),
-      style = "min-height:600px; max-height:2000px;",  # NEW: set card height
+      style = "min-height:400px; overflow:visible;",  # No max-height to avoid scrollbar
       DTOutput("tbl_preview")
     )
   })

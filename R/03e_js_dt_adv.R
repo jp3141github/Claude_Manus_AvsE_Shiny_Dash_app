@@ -275,7 +275,9 @@ window.dtAdvInit = function() {
             var isNumericCol = rightAlignCols.some(function(rc){ return colName.indexOf(rc) >= 0; });
 
             // Also check if column name is a year (e.g., 2010, 2011, 2012, etc.)
-            var isYearCol = /^\\d{4}$/.test(colName.trim());
+            var isYearCol = /^[0-9]{4}$/.test(colName.trim());
+
+            console.log("[DT Alignment] Col", i, "name:", colName, "isTextCol:", isTextCol, "isNumericCol:", isNumericCol, "isYearCol:", isYearCol);
 
             if (isTextCol) {
               isRightAligned = false;
@@ -446,7 +448,18 @@ window.dtAdvInit = function() {
 
         // Detect and apply column alignments (right-align numeric columns)
         var alignments = detectColumnAlignments(heads);
+        console.log("[DT Alignment] Detected alignments:", alignments);
         applyColumnAlignments(heads, alignments);
+
+        // Re-apply alignments after delays to ensure they stick
+        function reapplyAlignments(){
+          var h = locateHeads();
+          var a = detectColumnAlignments(h);
+          applyColumnAlignments(h, a);
+        }
+        setTimeout(reapplyAlignments, 100);
+        setTimeout(reapplyAlignments, 300);
+        setTimeout(reapplyAlignments, 600);
 
         // Add filter controls (positioned above Section column), then restore cached RAW values to inputs
         ensureFilterControls(heads);
