@@ -167,11 +167,12 @@ register_results_server <- function(input, output, session, results_obj, uploade
         HTML("<span style='color:red; font-weight:bold;'>&lt;&lt;&lt; Upload a CSV to preview data. (Use Browse Button)</span>")
       ))
     }
-    # Card with fit-content width to shrink columns to data
+    # Card with inline-block display - table controls its own sizing
     tagList(
       tags$style(HTML("
         #preview-data-card {
-          width: fit-content !important;
+          display: inline-block !important;
+          width: auto !important;
           max-width: 100% !important;
           min-height: 200px;
         }
@@ -179,6 +180,7 @@ register_results_server <- function(input, output, session, results_obj, uploade
           display: block !important;
           width: auto !important;
           overflow-x: auto !important;
+          padding: 0.5rem !important;
         }
       ")),
       card(
