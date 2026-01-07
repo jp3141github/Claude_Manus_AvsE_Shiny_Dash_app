@@ -64,16 +64,10 @@ register_upload_server <- function(input, output, session, uploaded_df) {
                               pageLength = 25,
                               scrollX = TRUE,  # Enable horizontal scroll
                               paging = TRUE,
-                              fixedHeader = TRUE,
-                              autoWidth = FALSE,
-                              # Force ALL columns to shrink to content
-                              columnDefs = list(
-                                list(width = "1px", targets = "_all")
-                              ),
+                              autoWidth = TRUE,  # Let DataTables size columns to content
                               language = list(info = info_text,
                                               infoFiltered = "(filtered from _MAX_ total records)")
                             ),
-                            extensions = c("FixedHeader"),
                             rownames = FALSE, escape = FALSE)
         num_cols_fmt <- intersect(c("Actual","Expected"), names(dfp))
         if (length(num_cols_fmt)) {

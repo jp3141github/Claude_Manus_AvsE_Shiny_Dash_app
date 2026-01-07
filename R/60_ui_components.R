@@ -240,13 +240,8 @@ css_overrides <- tags$style(HTML("
     text-align: right !important;
   }
 
-  /* ===== Dynamic height - pagination directly under data ===== */
-  .dataTables_scrollBody {
-    height: auto !important;
-    max-height: none !important;
-    overflow-y: visible !important;
-    overflow-x: auto !important;
-  }
+  /* ===== Dynamic height - let DataTables control scroll ===== */
+  /* DO NOT override scroll container styles - breaks scrollX */
 
   /* Solid black Browse button at all times */
   #csv_file .btn,

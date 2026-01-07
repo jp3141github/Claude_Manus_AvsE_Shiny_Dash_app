@@ -170,51 +170,12 @@ register_results_server <- function(input, output, session, results_obj, uploade
     # Show total record count in header
     total_rows <- format(nrow(df), big.mark = ",")
     total_cols <- ncol(df)
-    # Card with inline-block display - table controls its own sizing
-    tagList(
-      tags$style(HTML("
-        #preview-data-card {
-          display: inline-block !important;
-          width: auto !important;
-          max-width: 100% !important;
-        }
-        #preview-data-card .card-body {
-          display: inline-block !important;
-          width: auto !important;
-          overflow-x: auto !important;
-          padding: 0.25rem !important;
-        }
-        /* FORCE table and wrapper to shrink */
-        #tbl_preview_wrapper {
-          width: auto !important;
-          display: inline-block !important;
-        }
-        #tbl_preview_wrapper .dataTables_length,
-        #tbl_preview_wrapper .dataTables_filter,
-        #tbl_preview_wrapper .dataTables_info,
-        #tbl_preview_wrapper .dataTables_paginate {
-          width: auto !important;
-          display: inline-block !important;
-          float: none !important;
-        }
-        #tbl_preview {
-          width: auto !important;
-          table-layout: auto !important;
-        }
-        #tbl_preview th,
-        #tbl_preview td {
-          width: 1% !important;
-          white-space: nowrap !important;
-          padding: 2px 4px !important;
-        }
-      ")),
-      card(
-        id = "preview-data-card",
-        card_header(
-          sprintf("v2: %s records, %d cols", total_rows, total_cols)
-        ),
-        DTOutput("tbl_preview")
-      )
+    # Simple card - let DataTables handle sizing
+    card(
+      card_header(
+        sprintf("%s records, %d columns", total_rows, total_cols)
+      ),
+      DTOutput("tbl_preview")
     )
   })
 }

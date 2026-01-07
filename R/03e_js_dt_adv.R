@@ -538,41 +538,11 @@ window.dtAdvInitWithJumper = function(){
   return function(settings){ try{ adv(settings); }catch(e){} try{ jumper(settings); }catch(e){} };
 };
 
-/* -------- STRIP ALL WIDTHS - let CSS control sizing ----- */
+/* -------- STRIP ALL WIDTHS - DISABLED - let DataTables autoWidth handle sizing ----- */
 function stripTableWidths(tableId) {
-  try {
-    var $tbl = $("#" + tableId);
-    if (!$tbl.length) return;
-
-    // Remove colgroup that DataTables creates
-    $tbl.find("colgroup").remove();
-
-    // Strip width from table itself
-    $tbl.removeAttr("style").css({
-      "width": "auto",
-      "table-layout": "auto"
-    });
-
-    // Strip all inline widths from cells
-    $tbl.find("th, td").each(function() {
-      $(this).removeAttr("style").removeAttr("width");
-    });
-
-    // Strip from wrapper
-    var $wrapper = $("#" + tableId + "_wrapper");
-    if ($wrapper.length) {
-      $wrapper.removeAttr("style").css({
-        "width": "auto",
-        "display": "inline-block"
-      });
-    }
-
-    // Strip from scroll containers
-    $wrapper.find(".dataTables_scrollHead, .dataTables_scrollBody").removeAttr("style");
-
-  } catch(e) {
-    console.warn("[Strip Widths] Error:", e);
-  }
+  // DISABLED: Let DataTables autoWidth calculate column widths
+  // Stripping widths was breaking the scroll bars and preventing proper column sizing
+  return;
 }
 
 /* -------- GLOBAL HOOK: Auto-apply advanced features to ALL DataTables ----- */
