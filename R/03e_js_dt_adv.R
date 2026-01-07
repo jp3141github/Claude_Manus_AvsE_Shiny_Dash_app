@@ -411,12 +411,8 @@ window.dtAdvInit = function() {
             api.order(orders).draw(false);
             renderBadges(locateHeads());
 
-            // Force columns to shrink after sort (multiple delays to catch async recalculations)
-            setTimeout(function(){ forceColumnsToShrink(id); }, 0);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 50);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 150);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 300);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 500);
+            // Force columns to shrink after sort (single call at 100ms to catch async recalculations)
+            setTimeout(function(){ forceColumnsToShrink(id); }, 100);
           });
 
         // filters — apply on Enter (simple text search, no regex to avoid numeric column issues)
@@ -433,10 +429,7 @@ window.dtAdvInit = function() {
               api.draw(false);
               setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
               // Force columns to shrink after filter Enter
-              setTimeout(function(){ forceColumnsToShrink(id); }, 0);
-              setTimeout(function(){ forceColumnsToShrink(id); }, 50);
-              setTimeout(function(){ forceColumnsToShrink(id); }, 150);
-              setTimeout(function(){ forceColumnsToShrink(id); }, 300);
+              setTimeout(function(){ forceColumnsToShrink(id); }, 100);
               e.preventDefault();
             }
           });
@@ -469,10 +462,7 @@ window.dtAdvInit = function() {
             api.order([]).draw(false);
             setTimeout(function(){ renderBadges(locateHeads()); }, 0);
             // Force columns to shrink after clear sort
-            setTimeout(function(){ forceColumnsToShrink(id); }, 0);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 50);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 150);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 300);
+            setTimeout(function(){ forceColumnsToShrink(id); }, 100);
           });
 
         // Apply all filters (simple text search)
@@ -494,10 +484,7 @@ window.dtAdvInit = function() {
             api.draw(false);
             setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
             // Force columns to shrink after filter apply
-            setTimeout(function(){ forceColumnsToShrink(id); }, 0);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 50);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 150);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 300);
+            setTimeout(function(){ forceColumnsToShrink(id); }, 100);
           });
 
         $(document).off("click"+ns, "thead.dtadv-owner-"+id+" .dt-clear-filters")
@@ -510,10 +497,7 @@ window.dtAdvInit = function() {
             try { var g = $cont.find("div.dataTables_filter input[type=search]"); if (g.length) g.val(""); } catch(_){}
             setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
             // Force columns to shrink after filter clear
-            setTimeout(function(){ forceColumnsToShrink(id); }, 0);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 50);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 150);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 300);
+            setTimeout(function(){ forceColumnsToShrink(id); }, 100);
           });
 
         // Recompute widths → adjust FixedHeader → lock helper widths
@@ -565,7 +549,7 @@ window.dtAdvInitWithJumper = function(){
   return function(settings){ try{ adv(settings); }catch(e){} try{ jumper(settings); }catch(e){} };
 };
 
-/* -------- FORCE COLUMNS TO SHRINK: Strip widths but preserve colors ----- */
+/* -------- FORCE COLUMNS TO SHRINK: Strip all inline widths ----- */
 function forceColumnsToShrink(tableId) {
   try {
     var $tbl = $("#" + tableId);
@@ -574,21 +558,15 @@ function forceColumnsToShrink(tableId) {
     // Remove colgroup entirely - it forces column widths
     $tbl.find("colgroup").remove();
 
-    // CRITICAL: Remove the style attribute entirely from the table then set auto
+    // CRITICAL: Remove the style attribute entirely from the table
+    // DataTables sets style="width: XXXpx" which overrides CSS
     $tbl.removeAttr("style");
     $tbl.attr("style", "width: auto !important; table-layout: auto !important;");
 
-    // Strip ALL inline styles from th and td cells, but PRESERVE color for negative values
+    // Strip ALL inline styles from th and td cells
     $tbl.find("th, td").each(function(){
-      // Save color before stripping (for negative value red styling)
-      var savedColor = this.style.color || "";
-      // Strip everything
       $(this).removeAttr("style");
       $(this).removeAttr("width");
-      // Restore color if it was set
-      if (savedColor) {
-        this.style.color = savedColor;
-      }
     });
 
     // Strip from wrapper and set to shrink
@@ -637,15 +615,11 @@ $(document).on("preInit.dt", function(e, settings){
     }
   });
 
-  // Also strip widths after every draw (multiple delays to catch async recalculations)
+  // Also strip widths after every draw
   api.on("draw.dt", function(){
     var tableId = settings.sTableId;
     if (tableId) {
       setTimeout(function(){ forceColumnsToShrink(tableId); }, 0);
-      setTimeout(function(){ forceColumnsToShrink(tableId); }, 50);
-      setTimeout(function(){ forceColumnsToShrink(tableId); }, 150);
-      setTimeout(function(){ forceColumnsToShrink(tableId); }, 300);
-      setTimeout(function(){ forceColumnsToShrink(tableId); }, 500);
     }
   });
 });
