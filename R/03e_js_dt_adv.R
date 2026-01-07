@@ -549,10 +549,9 @@ function forceColumnsToShrink(tableId) {
     // Remove colgroup entirely - it forces column widths
     $tbl.find("colgroup").remove();
 
-    // CRITICAL: Remove the style attribute entirely from the table
-    // DataTables sets style="width: XXXpx" which overrides CSS
+    // CRITICAL: Set width to 0 so table only grows to fit content
     $tbl.removeAttr("style");
-    $tbl.attr("style", "width: auto !important; table-layout: auto !important;");
+    $tbl.attr("style", "width: 0 !important; min-width: 0 !important; table-layout: auto !important;");
 
     // Strip ALL inline styles from th and td cells
     $tbl.find("th, td").each(function(){
@@ -560,11 +559,11 @@ function forceColumnsToShrink(tableId) {
       $(this).removeAttr("width");
     });
 
-    // Strip from wrapper and set to shrink
+    // Strip from wrapper and set width to 0
     var $wrapper = $("#" + tableId + "_wrapper");
     if ($wrapper.length) {
       $wrapper.removeAttr("style");
-      $wrapper.attr("style", "width: auto !important; display: inline-block !important;");
+      $wrapper.attr("style", "width: 0 !important; min-width: 0 !important; display: table !important;");
     }
 
     // Also strip from any parent scroll containers
@@ -572,10 +571,10 @@ function forceColumnsToShrink(tableId) {
       $(this).removeAttr("style");
     });
 
-    // Force the card to not stretch
+    // Force the card to shrink too
     var $card = $tbl.closest(".card");
     if ($card.length) {
-      $card.css({ width: "auto", maxWidth: "100%" });
+      $card.css({ width: "auto", minWidth: "0", maxWidth: "100%" });
     }
 
     console.log("[Column Shrink] Done - table style is now:", $tbl.attr("style"));
