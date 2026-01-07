@@ -226,6 +226,21 @@ css_overrides <- tags$style(HTML("
     gap: 4px !important;
   }
 
+  /* ===== Right-align numeric columns (sort buttons + filters on right) ===== */
+  thead tr.dt-sort-row th.dt-col-right {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+  }
+  thead tr.dt-filter-row th.dt-col-right {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+  }
+  thead tr.dt-filter-row th.dt-col-right input.dt-filter-input {
+    text-align: right !important;
+  }
+
   /* Remove ALL vertical scrollbars from Input Data tab - use pagination only */
   .bslib-card, .bslib-card .card-body, .bslib-card .dataTables_wrapper {
     overflow-y: visible !important;

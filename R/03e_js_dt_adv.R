@@ -341,9 +341,17 @@ window.dtAdvInit = function() {
                   return;
                 }
 
-                // Add the class - CSS handles the flexbox alignment
-                $sortCell.addClass("dt-col-right");
-                $filterCell.addClass("dt-col-right");
+                // Add the class AND inline styles for maximum reliability
+                $sortCell.addClass("dt-col-right").css({
+                  "display": "flex",
+                  "justify-content": "flex-end",
+                  "align-items": "center"
+                });
+                $filterCell.addClass("dt-col-right").css({
+                  "display": "flex",
+                  "justify-content": "flex-end",
+                  "align-items": "center"
+                });
 
                 // Also right-align the filter input text
                 $filterCell.find("input.dt-filter-input").css("text-align", "right");
