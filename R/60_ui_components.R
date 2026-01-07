@@ -241,39 +241,49 @@ css_overrides <- tags$style(HTML("
     text-align: right !important;
   }
 
-  /* ===== Column widths: shrink to fit content ===== */
+  /* ===== Column widths: FORCE shrink to exact content width ===== */
   table.dataTable {
     width: auto !important;
+    table-layout: auto !important;
   }
+  /* Force each cell to shrink to content - width:1% + nowrap = exact fit */
   table.dataTable th, table.dataTable td {
+    width: 1% !important;
     white-space: nowrap !important;
-    padding: 4px 8px !important;
+    padding: 3px 6px !important;
   }
-  /* Scroll wrapper should not force 100% width */
-  div.dataTables_scrollHead, div.dataTables_scrollBody {
-    width: auto !important;
-  }
+  /* Scroll wrappers should not force width */
+  div.dataTables_scrollHead, div.dataTables_scrollBody,
   div.dataTables_scrollHeadInner, div.dataTables_scrollBody table {
     width: auto !important;
   }
 
-  /* Allow scrollY to work - table fills available height */
-  .bslib-card, .bslib-card .card-body {
-    overflow: visible !important;
+  /* ===== Make card fill available screen height ===== */
+  .bslib-page-main {
+    height: calc(100vh - 60px) !important;
+    overflow: hidden !important;
+  }
+  .tab-content, .tab-pane.active {
+    height: calc(100vh - 120px) !important;
+    overflow: hidden !important;
+  }
+  .bslib-card {
+    height: calc(100vh - 160px) !important;
+    overflow: hidden !important;
+  }
+  .bslib-card .card-body {
+    height: 100% !important;
+    overflow: hidden !important;
   }
   .dataTables_wrapper {
-    overflow: visible !important;
+    height: 100% !important;
+    overflow: hidden !important;
   }
-  /* scrollBody needs to scroll vertically */
+  /* scrollBody fills remaining space and scrolls */
   .dataTables_scrollBody {
+    height: calc(100vh - 280px) !important;
     overflow-y: auto !important;
-  }
-  .dataTables_scroll {
-    overflow: visible !important;
-  }
-  /* Ensure the main content area doesn't add scrollbar */
-  .bslib-page-main, .tab-content, .tab-pane {
-    overflow-y: visible !important;
+    overflow-x: auto !important;
   }
   /* Solid black Browse button at all times */
   #csv_file .btn,
