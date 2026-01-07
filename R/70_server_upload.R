@@ -56,18 +56,18 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         }
         if ("Actual" %in% names(dfp))   dfp[["Actual"]]   <- to_float(dfp[["Actual"]])
         if ("Expected" %in% names(dfp)) dfp[["Expected"]] <- to_float(dfp[["Expected"]])
-        # Custom info text showing full dataset size
-        info_text <- sprintf("Showing _START_ to _END_ of 500 preview rows (full dataset: %s records)",
+        # Show full dataset with server-side processing for large data
+        info_text <- sprintf("Showing _START_ to _END_ of %s records",
                              format(total_records, big.mark = ","))
-        dt <- DT::datatable(head(dfp, 500),
+        dt <- DT::datatable(dfp,
                             options  = list(
                               pageLength = 25,
                               scrollX = FALSE,   # Disable DT scroll - let CSS handle overflow
                               paging = TRUE,
                               fixedHeader = TRUE,
-                              autoWidth = FALSE,
+                              autoWidth = TRUE,  # Enable auto-width for dynamic column sizing
                               language = list(info = info_text,
-                                              infoFiltered = "(filtered within preview)")
+                                              infoFiltered = "(filtered from _MAX_ total records)")
                             ),
                             extensions = c("FixedHeader"),
                             rownames = FALSE, escape = FALSE)
@@ -77,7 +77,7 @@ register_upload_server <- function(input, output, session, uploaded_df) {
           dt <- DT::formatStyle(dt, columns = num_cols_fmt, color = DT::styleInterval(c(-1e-12, 0), c("red","black","black")))
         }
         dt
-      }, server = FALSE)  # Client-side processing to allow text filtering on numeric columns
+      }, server = TRUE)  # Server-side processing for large datasets
 
       # Populate chart controls from RAW
       .populate_chart_controls_from_raw()
