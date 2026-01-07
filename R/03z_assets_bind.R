@@ -85,6 +85,22 @@ table.dataTable thead th.dt-head-right,
   text-align: right !important;
 }
 
+/* CRITICAL: Right-align sort and filter rows for numeric columns using flexbox */
+table.dataTable thead tr.dt-sort-row th.dt-col-right,
+div.dataTables_scrollHead table.dataTable thead tr.dt-sort-row th.dt-col-right,
+.fixedHeader-floating thead tr.dt-sort-row th.dt-col-right {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+}
+table.dataTable thead tr.dt-filter-row th.dt-col-right,
+div.dataTables_scrollHead table.dataTable thead tr.dt-filter-row th.dt-col-right,
+.fixedHeader-floating thead tr.dt-filter-row th.dt-col-right {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+}
+
 /* Numeric columns: shrink-to-fit, keep numbers on one line — BODY CELLS ONLY */
 table.dataTable td.dt-numeric-cfit{
   width: 1% !important;
