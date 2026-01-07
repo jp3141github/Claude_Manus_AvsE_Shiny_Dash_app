@@ -341,17 +341,13 @@ window.dtAdvInit = function() {
                   return;
                 }
 
-                // Add the class AND inline styles for maximum reliability
-                $sortCell.addClass("dt-col-right").css({
-                  "display": "flex",
-                  "justify-content": "flex-end",
-                  "align-items": "center"
-                });
-                $filterCell.addClass("dt-col-right").css({
-                  "display": "flex",
-                  "justify-content": "flex-end",
-                  "align-items": "center"
-                });
+                // Add the class - CSS uses text-align:right + float:right for sortbox
+                // DO NOT use display:flex as it breaks table-cell layout
+                $sortCell.addClass("dt-col-right").css("text-align", "right");
+                $filterCell.addClass("dt-col-right").css("text-align", "right");
+
+                // Float the sortbox to the right
+                $sortCell.find(".dt-sortbox").css("float", "right");
 
                 // Also right-align the filter input text
                 $filterCell.find("input.dt-filter-input").css("text-align", "right");

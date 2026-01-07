@@ -65,20 +65,15 @@ css_dt <- htmltools::HTML(
   thead tr.dt-sort-row .dt-sortbox { display: inline-flex; gap: 4px; }
 
   /* Right-aligned columns: align sort buttons and filter to the right */
-  /* Use flexbox on the th to reliably position contents to the right */
+  /* Use text-align + float to preserve table-cell layout */
   thead tr.dt-sort-row th.dt-col-right {
-    display: flex !important;
-    justify-content: flex-end !important;
-    align-items: center !important;
+    text-align: right !important;
   }
   thead tr.dt-sort-row th.dt-col-right .dt-sortbox {
-    justify-content: flex-end !important;
-    flex-shrink: 0 !important;
+    float: right !important;
   }
   thead tr.dt-filter-row th.dt-col-right {
-    display: flex !important;
-    justify-content: flex-end !important;
-    align-items: center !important;
+    text-align: right !important;
   }
   thead tr.dt-filter-row th.dt-col-right input.dt-filter-input {
     text-align: right !important;
