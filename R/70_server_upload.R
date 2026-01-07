@@ -47,12 +47,20 @@ register_upload_server <- function(input, output, session, uploaded_df) {
       output$tbl_preview <- renderDT({
         dfp <- uploaded_df(); req(!is.null(dfp))
         total_records <- nrow(dfp)
+        # Track ProjectionDate column index for sorting
+        proj_date_col_idx <- NULL
         if ("ProjectionDate" %in% names(dfp)) {
           cleaned <- parse_projection_date_dateonly(dfp[["ProjectionDate"]])
+          # Store sortable YYYY-MM-DD format in a hidden column
+          dfp[["_ProjDateSort"]] <- ifelse(!is.na(cleaned) &
+                                             cleaned >= as.Date("2000-01-01") &
+                                             cleaned <= as.Date("2100-12-31"),
+                                           format(cleaned, "%Y-%m-%d"), NA_character_)
           dfp[["ProjectionDate"]] <- ifelse(!is.na(cleaned) &
                                               cleaned >= as.Date("2000-01-01") &
                                               cleaned <= as.Date("2100-12-31"),
                                             format(cleaned, "%d-%m-%Y"), NA_character_)
+          proj_date_col_idx <- which(names(dfp) == "ProjectionDate") - 1  # 0-indexed for JS
         }
         if ("Actual" %in% names(dfp))   dfp[["Actual"]]   <- to_float(dfp[["Actual"]])
         if ("Expected" %in% names(dfp)) dfp[["Expected"]] <- to_float(dfp[["Expected"]])
@@ -67,6 +75,15 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         # Show full dataset with server-side processing for large data
         info_text <- sprintf("Showing _START_ to _END_ of %s records",
                              format(total_records, big.mark = ","))
+        # Build columnDefs for date sorting
+        col_defs <- list()
+        sort_col_idx <- which(names(dfp) == "_ProjDateSort") - 1  # 0-indexed
+        if (!is.null(proj_date_col_idx) && length(sort_col_idx) > 0) {
+          col_defs <- list(
+            list(targets = sort_col_idx, visible = FALSE),  # Hide sort column
+            list(targets = proj_date_col_idx, orderData = sort_col_idx)  # Sort ProjectionDate by hidden column
+          )
+        }
         dt <- DT::datatable(dfp,
                             options  = list(
                               pageLength = 25,
@@ -74,15 +91,22 @@ register_upload_server <- function(input, output, session, uploaded_df) {
                               paging = TRUE,
                               fixedHeader = TRUE,
                               autoWidth = FALSE, # Disable auto-width - CSS 1% trick handles column sizing
+                              columnDefs = col_defs,
                               language = list(info = info_text,
                                               infoFiltered = "(filtered from _MAX_ total records)")
                             ),
                             extensions = c("FixedHeader"),
                             rownames = FALSE, escape = FALSE)
-        num_cols_fmt <- intersect(c("Actual","Expected","A - E"), names(dfp))
-        if (length(num_cols_fmt)) {
-          dt <- DT::formatCurrency(dt, columns = num_cols_fmt, currency = "", interval = 3, mark = ",", digits = 0)
-          dt <- DT::formatStyle(dt, columns = num_cols_fmt, color = DT::styleInterval(c(-1e-12, 0), c("red","black","black")))
+        # Format Actual and Expected (negative = red)
+        ae_cols <- intersect(c("Actual","Expected"), names(dfp))
+        if (length(ae_cols)) {
+          dt <- DT::formatCurrency(dt, columns = ae_cols, currency = "", interval = 3, mark = ",", digits = 0)
+          dt <- DT::formatStyle(dt, columns = ae_cols, color = DT::styleInterval(c(-1e-12, 0), c("red","black","black")))
+        }
+        # Format A - E separately (positive = red, negative = dark green)
+        if ("A - E" %in% names(dfp)) {
+          dt <- DT::formatCurrency(dt, columns = "A - E", currency = "", interval = 3, mark = ",", digits = 0)
+          dt <- DT::formatStyle(dt, columns = "A - E", color = DT::styleInterval(c(0, 1e-12), c("darkgreen","black","red")))
         }
         dt
       }, server = TRUE)  # Server-side processing for large datasets
