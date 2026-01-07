@@ -58,7 +58,7 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         dt <- DT::datatable(head(dfp, 500),
                             options  = list(
                               pageLength = 25,
-                              scrollX = TRUE,
+                              scrollX = FALSE,   # Disable DT scroll - let CSS handle overflow
                               paging = TRUE,
                               fixedHeader = TRUE,
                               autoWidth = FALSE
