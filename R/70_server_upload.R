@@ -64,7 +64,7 @@ register_upload_server <- function(input, output, session, uploaded_df) {
           dt <- DT::formatStyle(dt, columns = num_cols_fmt, color = DT::styleInterval(c(-1e-12, 0), c("red","black","black")))
         }
         dt
-      })
+      }, server = FALSE)  # Client-side processing to allow text filtering on numeric columns
 
       # Populate chart controls from RAW
       .populate_chart_controls_from_raw()
