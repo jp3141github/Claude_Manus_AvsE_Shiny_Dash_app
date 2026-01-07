@@ -255,6 +255,17 @@ css_overrides <- tags$style(HTML("
     flex: 0 0 auto !important;
   }
 
+  /* ===== FORCE header text wrapping ===== */
+  .dataTables_scrollHead table thead tr:not(.dt-sort-row):not(.dt-filter-row) th,
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row) th {
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    max-width: 90px !important;
+    vertical-align: bottom !important;
+    line-height: 1.2 !important;
+  }
+
   /* Solid black Browse button at all times */
   #csv_file .btn,
   #csv_file .btn:hover,
