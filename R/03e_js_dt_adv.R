@@ -549,35 +549,52 @@ function forceColumnsToShrink(tableId) {
     // Remove colgroup entirely - it forces column widths
     $tbl.find("colgroup").remove();
 
-    // CRITICAL: Set width to 0 so table only grows to fit content
-    $tbl.removeAttr("style");
-    $tbl.attr("style", "width: 0 !important; min-width: 0 !important; table-layout: auto !important;");
-
-    // Strip ALL inline styles from th and td cells
-    $tbl.find("th, td").each(function(){
-      $(this).removeAttr("style");
-      $(this).removeAttr("width");
+    // CRITICAL: Use fit-content so table shrinks to content
+    $tbl.css({
+      "width": "fit-content",
+      "max-width": "fit-content",
+      "min-width": "0",
+      "table-layout": "auto"
     });
 
-    // Strip from wrapper and set width to 0
+    // Strip width from th and td cells, but preserve text-align
+    $tbl.find("th, td").each(function(){
+      var $cell = $(this);
+      var textAlign = $cell.css("text-align");  // Preserve alignment
+      $cell.removeAttr("width");
+      $cell.css({
+        "width": "1%",  // Shrink to content trick
+        "text-align": textAlign || "left"
+      });
+    });
+
+    // Strip from wrapper, use fit-content
     var $wrapper = $("#" + tableId + "_wrapper");
     if ($wrapper.length) {
-      $wrapper.removeAttr("style");
-      $wrapper.attr("style", "width: 0 !important; min-width: 0 !important; display: table !important;");
+      $wrapper.css({
+        "width": "fit-content",
+        "max-width": "100%",
+        "min-width": "0",
+        "display": "block",
+        "flex": "0 0 auto"  // Don't stretch in flex container
+      });
     }
 
-    // Also strip from any parent scroll containers
+    // Also fix scroll containers
     $tbl.closest(".dataTables_scrollHead, .dataTables_scrollBody").each(function(){
-      $(this).removeAttr("style");
+      $(this).css({
+        "width": "fit-content",
+        "max-width": "fit-content"
+      });
     });
 
-    // Force the card to shrink too
-    var $card = $tbl.closest(".card");
-    if ($card.length) {
-      $card.css({ width: "auto", minWidth: "0", maxWidth: "100%" });
+    // Force the card body to not stretch content
+    var $cardBody = $tbl.closest(".card-body");
+    if ($cardBody.length) {
+      $cardBody.css({ "display": "block", "width": "auto" });
     }
 
-    console.log("[Column Shrink] Done - table style is now:", $tbl.attr("style"));
+    console.log("[Column Shrink] Done - table width is now:", $tbl.css("width"));
   } catch(e) {
     console.warn("[Column Shrink] Error:", e);
   }

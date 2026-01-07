@@ -85,11 +85,11 @@ css_dt <- htmltools::HTML(
     white-space: nowrap;
   }
 
-  /* ----- FILTERS: adapt to column width, not fixed ----- */
+  /* ----- FILTERS: fill cell width, don't force wider ----- */
   thead tr.dt-filter-row th { padding: 3px 6px !important; }
   thead tr.dt-filter-row input.dt-filter-input{
-    width: auto !important;
-    min-width: 40px !important;
+    width: 100% !important;       /* Fill the cell, but don't force it wider */
+    min-width: 30px !important;   /* Minimum readable size */
     max-width: 100% !important;
     box-sizing: border-box !important;
     padding: 2px 4px !important;
