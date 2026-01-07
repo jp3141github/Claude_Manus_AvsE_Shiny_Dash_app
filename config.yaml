@@ -1,0 +1,72 @@
+# AvE Shiny Dashboard Configuration
+# This file centralizes all configuration values for easy customization
+
+app:
+  debug: true  # Set to false in production
+  upload_max_mb: 25  # Maximum file upload size in megabytes
+
+years:
+  min_default: 2010      # Default minimum year for reports
+  min_absolute: 1980     # Absolute minimum year accepted
+  max_default: null      # null = current year
+  force_include: [2023, 2024, 2025]  # Years always included even if no data
+
+dates:
+  projection_min: "2000-01-01"
+  projection_max: "2100-12-31"
+
+performance:
+  raw_max_rows: 50000           # Don't embed RAW table if above this
+  raw_fast_threshold: 30000     # Use virtual scrolling above this
+  page_length_normal: 100       # Table rows per page (normal)
+  page_length_fast: 50          # Table rows per page (fast mode)
+  page_length_options: [25, 50, 100, 200, 500, 1000]
+  excel_width_sample_rows: 1000 # Sample rows for Excel column width
+
+colors:
+  actual: "#1565C0"       # Blue for Actual values
+  expected: "#EF6C00"     # Orange for Expected values
+  heat_positive: "#D32F2F"  # Red for adverse variance
+  heat_negative: "#2E7D32"  # Green for favorable variance
+  good_ae: "#99FF99"      # Light green for good A-E
+  bad_ae: "#FFCC66"       # Light orange for bad A-E
+  # Excel export colors
+  excel_grey: "#EEEEEE"
+  excel_yellow: "#FFF59D"
+  excel_green: "#C8E6C9"
+  excel_orange: "#FFE0B2"
+  excel_header_text: "#FFFFFF"
+  # Chart-specific colors (for Chart A/B)
+  paid_ave: "#67B8FF"      # Light blue for Paid AvE
+  incurred_ave: "#7B2CBF"  # Purple for Incurred AvE
+
+thresholds:
+  ae_good: -2.5           # A-E below this = good (green background)
+  ae_bad: 2.5             # A-E above this = bad (orange background)
+  zero_tolerance: 0.000000000001  # 1e-12 for zero comparison
+
+chart:
+  bar_width: 0.45         # Bar width for waterfall charts
+  ae_alpha: 0.35          # Transparency for A-E overlay bars
+
+ui:
+  table_min_height: "600px"
+  table_max_height: "2000px"
+  spinner_bottom: "16px"
+  spinner_right: "16px"
+
+timing:
+  js_observer_delay: 500       # JavaScript observer delay (ms)
+  datatable_search_delay: 400  # DataTable search debounce (ms)
+
+defaults:
+  model_type: "Proxy"                        # Default Model Type selection
+  preferred_dates: ["31-05-2025", "31-05-25"]  # Preferred Projection Dates
+  file_accept: [".csv", ".xlsx", ".xls"]     # Accepted file extensions
+  segment_group: "All"                       # Default segment group
+  event_type: "Non-Event"                    # Default event type
+
+features:
+  enable_assistant: true        # Enable assistant modal (Ctrl+K)
+  generate_static_pngs: false   # Generate static PNG charts
+  in_browser: false             # Running in browser vs desktop
