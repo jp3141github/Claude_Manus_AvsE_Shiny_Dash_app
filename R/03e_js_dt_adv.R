@@ -168,7 +168,7 @@ window.dtAdvInit = function() {
         try{
           var $labelRow = heads.$theadVis.find("tr:not(.dt-sort-row):not(.dt-filter-row):last th");
 
-          // First time: capture widths
+          // First time: capture widths from rendered table
           if (!initialColWidths) {
             initialColWidths = [];
             $labelRow.each(function(i){
@@ -177,12 +177,28 @@ window.dtAdvInit = function() {
             console.log("[DT] Captured initial column widths:", initialColWidths);
           }
 
-          // Always: apply locked widths to all header cells
+          // Always: apply locked widths everywhere
           if (initialColWidths && initialColWidths.length > 0) {
-            // Apply to label row
+            // Apply to colgroup cols (this is what DataTables uses for widths)
+            var $headTable = $cont.find(".dataTables_scrollHead table");
+            var $bodyTable = $cont.find(".dataTables_scrollBody table");
+
+            [$headTable, $bodyTable, $tbl].forEach(function($table){
+              if (!$table.length) return;
+              var $colgroup = $table.find("colgroup");
+              if ($colgroup.length) {
+                $colgroup.find("col").each(function(i){
+                  if (initialColWidths[i]) {
+                    $(this).css("width", initialColWidths[i] + "px").attr("width", initialColWidths[i]);
+                  }
+                });
+              }
+            });
+
+            // Apply to header cells
             $labelRow.each(function(i){
               if (initialColWidths[i]) {
-                $(this).css("width", initialColWidths[i] + "px");
+                $(this).css({"width": initialColWidths[i] + "px", "min-width": initialColWidths[i] + "px"});
               }
             });
 
@@ -190,7 +206,7 @@ window.dtAdvInit = function() {
             var $sortRow = heads.$theadVis.find("tr.dt-sort-row th");
             $sortRow.each(function(i){
               if (initialColWidths[i]) {
-                $(this).css("width", initialColWidths[i] + "px");
+                $(this).css({"width": initialColWidths[i] + "px", "min-width": initialColWidths[i] + "px"});
               }
             });
 
@@ -198,7 +214,15 @@ window.dtAdvInit = function() {
             var $filterRow = heads.$theadVis.find("tr.dt-filter-row th");
             $filterRow.each(function(i){
               if (initialColWidths[i]) {
-                $(this).css("width", initialColWidths[i] + "px");
+                $(this).css({"width": initialColWidths[i] + "px", "min-width": initialColWidths[i] + "px"});
+              }
+            });
+
+            // Apply to body cells in first row as reference
+            var $firstBodyRow = $cont.find(".dataTables_scrollBody table tbody tr:first td");
+            $firstBodyRow.each(function(i){
+              if (initialColWidths[i]) {
+                $(this).css({"width": initialColWidths[i] + "px", "min-width": initialColWidths[i] + "px"});
               }
             });
           }
