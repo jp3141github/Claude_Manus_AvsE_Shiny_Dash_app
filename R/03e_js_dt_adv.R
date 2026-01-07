@@ -571,8 +571,8 @@ function forceColumnsToShrink(tableId) {
       colWidths[i] = $measure.width() + 20; // Add padding
     });
 
-    // Measure data cell widths (ALL rows in table for accurate sizing)
-    $tbl.find("tbody tr").each(function() {
+    // Measure data cell widths (visible rows only - current page)
+    $tbl.find("tbody tr:visible").each(function() {
       $(this).find("td").each(function(i) {
         if (i < numCols) {
           var cellText = $(this).text().trim();

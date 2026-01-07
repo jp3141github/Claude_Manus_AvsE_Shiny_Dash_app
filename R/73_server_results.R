@@ -189,7 +189,7 @@ register_results_server <- function(input, output, session, results_obj, uploade
       card(
         id = "preview-data-card",
         card_header(
-          sprintf("Input Data — Records: %s | Columns: %d (showing first 500 rows)", total_rows, total_cols)
+          sprintf("Input Data — Records: %s | Columns: %d", total_rows, total_cols)
         ),
         DTOutput("tbl_preview")
       )
