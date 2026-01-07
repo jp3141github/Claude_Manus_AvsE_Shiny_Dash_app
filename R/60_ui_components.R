@@ -227,15 +227,15 @@ css_overrides <- tags$style(HTML("
   }
 
   /* ===== Right-align numeric columns (sort buttons + filters on right) ===== */
+  /* Use text-align instead of flex to preserve table-cell layout */
   thead tr.dt-sort-row th.dt-col-right {
-    display: flex !important;
-    justify-content: flex-end !important;
-    align-items: center !important;
+    text-align: right !important;
+  }
+  thead tr.dt-sort-row th.dt-col-right .dt-sortbox {
+    float: right !important;
   }
   thead tr.dt-filter-row th.dt-col-right {
-    display: flex !important;
-    justify-content: flex-end !important;
-    align-items: center !important;
+    text-align: right !important;
   }
   thead tr.dt-filter-row th.dt-col-right input.dt-filter-input {
     text-align: right !important;
