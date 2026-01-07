@@ -163,18 +163,70 @@ window.dtAdvInit = function() {
 
       function lockHelperColWidths(heads){
         try{
-          // DISABLED: Let CSS handle column widths with table-layout: auto
-          // This function was locking widths which prevented columns from shrinking to content
-          // The sort/filter rows will inherit widths naturally from the table layout
-          return;
+          // First, get widths from the BODY table columns (more reliable with scrollX)
+          var bodyWidths = [];
+          var $bodyTable = $cont.find("div.dataTables_scrollBody table.dataTable");
+          if ($bodyTable.length) {
+            var $bodyCols = $bodyTable.find("thead tr:first th, tbody tr:first td");
+            if (!$bodyCols.length) $bodyCols = $bodyTable.find("tbody tr:first td");
+            $bodyCols.each(function(i){ bodyWidths[i] = $(this).outerWidth(); });
+          }
+          
+          heads.$theads.each(function(){
+            var $thead = $(this);
+            var $labelCells = $thead.find("tr:not(.dt-sort-row):not(.dt-filter-row):last th");
+            if (!$labelCells.length) return;
+            
+            // Use body widths if available, otherwise fall back to label cell widths
+            var w = bodyWidths.length ? bodyWidths : [];
+            if (!w.length) {
+              $labelCells.each(function(i){ w[i] = $(this).outerWidth(); });
+            }
+            
+            // Apply widths to sort row and filter row
+            ["tr.dt-sort-row th","tr.dt-filter-row th"].forEach(function(sel){
+              var $cells = $thead.find(sel);
+              $cells.each(function(i){
+                if (w[i] > 0) {
+                  $(this).css({ 
+                    width: w[i] + "px", 
+                    minWidth: w[i] + "px", 
+                    maxWidth: w[i] + "px",
+                    boxSizing: "border-box"
+                  });
+                }
+              });
+            });
+            
+            // Also sync the label cells themselves
+            $labelCells.each(function(i){
+              if (w[i] > 0) {
+                $(this).css({ 
+                  width: w[i] + "px", 
+                  minWidth: w[i] + "px", 
+                  maxWidth: w[i] + "px",
+                  boxSizing: "border-box"
+                });
+              }
+            });
+          });
         }catch(e){ console.warn("lockHelperColWidths error:", e); }
       }
 
       function syncFilterWidths(heads){
         try{
-          // DISABLED: Let CSS handle filter input widths
-          // This function was setting fixed widths which forced column expansion
-          return;
+          var $theadVis = heads.$theadVis; if (!$theadVis || !$theadVis.length) return;
+          var $labelCells  = $theadVis.find("tr:not(.dt-sort-row):not(.dt-filter-row):last th");
+          var $filterCells = $theadVis.find("tr.dt-filter-row th");
+          if ($labelCells.length !== $filterCells.length) return;
+          $filterCells.each(function(i){
+            var $thFilter = $(this), $thLabel = $labelCells.eq(i);
+            var wLabel = $thLabel.innerWidth();
+            var padL = parseFloat($thFilter.css("padding-left"))||0;
+            var padR = parseFloat($thFilter.css("padding-right"))||0;
+            var target = Math.max(24, Math.min(120, wLabel - padL - padR));
+            $thFilter.find("input.dt-filter-input").css({ width: target+"px", maxWidth: target+"px" });
+          });
         } catch(e){}
       }
 
@@ -409,14 +461,7 @@ window.dtAdvInit = function() {
 
             var orders = sortStack.map(function(x){ return [x.colIdx, x.dir]; });
             api.order(orders).draw(false);
-            renderBadges(locateHeads());
-
-            // Force columns to shrink after sort (multiple delays to catch async recalculations)
-            setTimeout(function(){ forceColumnsToShrink(id); }, 0);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 50);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 150);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 300);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 500);
+            renderBadges(heads);
           });
 
         // filters — apply on Enter (simple text search, no regex to avoid numeric column issues)
@@ -432,11 +477,6 @@ window.dtAdvInit = function() {
               api.column(i).search(term, false, true, true);
               api.draw(false);
               setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
-              // Force columns to shrink after filter Enter
-              setTimeout(function(){ forceColumnsToShrink(id); }, 0);
-              setTimeout(function(){ forceColumnsToShrink(id); }, 50);
-              setTimeout(function(){ forceColumnsToShrink(id); }, 150);
-              setTimeout(function(){ forceColumnsToShrink(id); }, 300);
               e.preventDefault();
             }
           });
@@ -468,11 +508,6 @@ window.dtAdvInit = function() {
             sortStack = [];
             api.order([]).draw(false);
             setTimeout(function(){ renderBadges(locateHeads()); }, 0);
-            // Force columns to shrink after clear sort
-            setTimeout(function(){ forceColumnsToShrink(id); }, 0);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 50);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 150);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 300);
           });
 
         // Apply all filters (simple text search)
@@ -493,11 +528,6 @@ window.dtAdvInit = function() {
             });
             api.draw(false);
             setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
-            // Force columns to shrink after filter apply
-            setTimeout(function(){ forceColumnsToShrink(id); }, 0);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 50);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 150);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 300);
           });
 
         $(document).off("click"+ns, "thead.dtadv-owner-"+id+" .dt-clear-filters")
@@ -509,11 +539,6 @@ window.dtAdvInit = function() {
             api.draw(false);
             try { var g = $cont.find("div.dataTables_filter input[type=search]"); if (g.length) g.val(""); } catch(_){}
             setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
-            // Force columns to shrink after filter clear
-            setTimeout(function(){ forceColumnsToShrink(id); }, 0);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 50);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 150);
-            setTimeout(function(){ forceColumnsToShrink(id); }, 300);
           });
 
         // Recompute widths → adjust FixedHeader → lock helper widths
@@ -565,35 +590,6 @@ window.dtAdvInitWithJumper = function(){
   return function(settings){ try{ adv(settings); }catch(e){} try{ jumper(settings); }catch(e){} };
 };
 
-/* -------- FORCE COLUMNS TO SHRINK: Strip all inline widths ----- */
-function forceColumnsToShrink(tableId) {
-  try {
-    var $tbl = $("#" + tableId);
-    if (!$tbl.length) return;
-
-    // Remove colgroup entirely - it forces column widths
-    $tbl.find("colgroup").remove();
-
-    // Remove DataTables inline width from table element - let CSS handle it
-    $tbl.removeAttr("style");
-
-    // Strip width attributes from th and td cells - CSS width: 1% will then apply
-    $tbl.find("th, td").removeAttr("style").removeAttr("width");
-
-    // Strip inline styles from wrapper - let CSS handle it
-    var $wrapper = $("#" + tableId + "_wrapper");
-    if ($wrapper.length) {
-      $wrapper.removeAttr("style");
-    }
-
-    // Also strip from any parent scroll containers
-    $tbl.closest(".dataTables_scrollHead, .dataTables_scrollBody").removeAttr("style");
-
-  } catch(e) {
-    console.warn("[Column Shrink] Error:", e);
-  }
-}
-
 /* -------- GLOBAL HOOK: Auto-apply advanced features to ALL DataTables ----- */
 $(document).on("preInit.dt", function(e, settings){
   console.log("[JS] DataTable preInit.dt fired");
@@ -607,26 +603,6 @@ $(document).on("preInit.dt", function(e, settings){
       if (combo) combo(settings);
     } catch(err) {
       console.warn("dtAdvInitWithJumper error:", err);
-    }
-
-    // Force columns to shrink after all other init is done
-    var tableId = settings.sTableId;
-    if (tableId) {
-      setTimeout(function(){ forceColumnsToShrink(tableId); }, 0);
-      setTimeout(function(){ forceColumnsToShrink(tableId); }, 100);
-      setTimeout(function(){ forceColumnsToShrink(tableId); }, 300);
-    }
-  });
-
-  // Also strip widths after every draw (multiple delays to catch async recalculations)
-  api.on("draw.dt", function(){
-    var tableId = settings.sTableId;
-    if (tableId) {
-      setTimeout(function(){ forceColumnsToShrink(tableId); }, 0);
-      setTimeout(function(){ forceColumnsToShrink(tableId); }, 50);
-      setTimeout(function(){ forceColumnsToShrink(tableId); }, 150);
-      setTimeout(function(){ forceColumnsToShrink(tableId); }, 300);
-      setTimeout(function(){ forceColumnsToShrink(tableId); }, 500);
     }
   });
 });

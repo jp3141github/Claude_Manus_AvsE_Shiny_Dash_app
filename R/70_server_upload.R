@@ -46,7 +46,6 @@ register_upload_server <- function(input, output, session, uploaded_df) {
       # Preview table
       output$tbl_preview <- renderDT({
         dfp <- uploaded_df(); req(!is.null(dfp))
-        total_records <- nrow(dfp)
         if ("ProjectionDate" %in% names(dfp)) {
           cleaned <- parse_projection_date_dateonly(dfp[["ProjectionDate"]])
           dfp[["ProjectionDate"]] <- ifelse(!is.na(cleaned) &
@@ -56,18 +55,13 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         }
         if ("Actual" %in% names(dfp))   dfp[["Actual"]]   <- to_float(dfp[["Actual"]])
         if ("Expected" %in% names(dfp)) dfp[["Expected"]] <- to_float(dfp[["Expected"]])
-        # Show full dataset with server-side processing for large data
-        info_text <- sprintf("Showing _START_ to _END_ of %s records",
-                             format(total_records, big.mark = ","))
-        dt <- DT::datatable(dfp,
+        dt <- DT::datatable(head(dfp, 500),
                             options  = list(
                               pageLength = 25,
                               scrollX = FALSE,   # Disable DT scroll - let CSS handle overflow
                               paging = TRUE,
                               fixedHeader = TRUE,
-                              autoWidth = FALSE, # Disable auto-width - CSS 1% trick handles column sizing
-                              language = list(info = info_text,
-                                              infoFiltered = "(filtered from _MAX_ total records)")
+                              autoWidth = FALSE
                             ),
                             extensions = c("FixedHeader"),
                             rownames = FALSE, escape = FALSE)
@@ -77,7 +71,7 @@ register_upload_server <- function(input, output, session, uploaded_df) {
           dt <- DT::formatStyle(dt, columns = num_cols_fmt, color = DT::styleInterval(c(-1e-12, 0), c("red","black","black")))
         }
         dt
-      }, server = TRUE)  # Server-side processing for large datasets
+      }, server = FALSE)  # Client-side processing to allow text filtering on numeric columns
 
       # Populate chart controls from RAW
       .populate_chart_controls_from_raw()
