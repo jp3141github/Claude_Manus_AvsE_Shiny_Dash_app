@@ -62,10 +62,14 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         dt <- DT::datatable(dfp,
                             options  = list(
                               pageLength = 25,
-                              scrollX = FALSE,
+                              scrollX = TRUE,  # Enable horizontal scroll
                               paging = TRUE,
                               fixedHeader = TRUE,
-                              autoWidth = FALSE,  # Let CSS control column widths
+                              autoWidth = FALSE,
+                              # Force ALL columns to shrink to content
+                              columnDefs = list(
+                                list(width = "1px", targets = "_all")
+                              ),
                               language = list(info = info_text,
                                               infoFiltered = "(filtered from _MAX_ total records)")
                             ),
