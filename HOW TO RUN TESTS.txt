@@ -1,0 +1,12 @@
+# Run all tests (from app root)
+source("tests/run_tests.R")
+
+# Or using testthat
+testthat::test_dir("tests/testthat")
+
+# Run specific test file
+testthat::test_file("tests/testthat/test-utils-core.R")
+
+# Include Shiny app tests
+Sys.setenv(RUN_SHINY_TESTS = "true")
+source("tests/run_tests.R")
