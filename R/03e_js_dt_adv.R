@@ -380,23 +380,27 @@ window.dtAdvInit = function() {
       // Split camelCase and concatenated words in header labels for wrapping
       function splitHeaderLabels(heads){
         try{
-          var $labelRow = heads.$theadVis.find("tr:not(.dt-sort-row):not(.dt-filter-row) th");
-          $labelRow.each(function(){
-            var $th = $(this);
-            // Skip if already processed
-            if ($th.data("split-done")) return;
-            $th.data("split-done", true);
+          // Process ALL theads (including scroll head copies)
+          heads.$theads.each(function(){
+            var $thead = $(this);
+            var $labelRow = $thead.find("tr:not(.dt-sort-row):not(.dt-filter-row) th");
+            $labelRow.each(function(){
+              var $th = $(this);
+              // Skip if already processed
+              if ($th.data("split-done")) return;
+              $th.data("split-done", true);
 
-            var text = $th.text().trim();
-            // Split camelCase: "ObjectName" -> "Object Name"
-            // Split on capital letters: insert space before caps that follow lowercase
-            var split = text.replace(/([a-z])([A-Z])/g, "$1 $2");
-            // Also handle "ProjectionDate" style
-            split = split.replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2");
+              var text = $th.text().trim();
+              // Split camelCase: "ObjectName" -> "Object Name"
+              // Split on capital letters: insert space before caps that follow lowercase
+              var split = text.replace(/([a-z])([A-Z])/g, "$1 $2");
+              // Also handle "ProjectionDate" style
+              split = split.replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2");
 
-            if (split !== text) {
-              $th.text(split);
-            }
+              if (split !== text) {
+                $th.text(split);
+              }
+            });
           });
         }catch(e){ console.warn("splitHeaderLabels error:", e); }
       }
