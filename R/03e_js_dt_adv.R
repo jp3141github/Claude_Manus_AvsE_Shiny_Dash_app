@@ -308,7 +308,7 @@ window.dtAdvInit = function() {
         }catch(e){ console.warn("detectColumnAlignments error:", e); return []; }
       }
 
-      // Apply alignment classes to sort and filter rows
+      // Apply alignment to sort and filter rows (using inline styles for reliability)
       function applyColumnAlignments(heads, alignments){
         try{
           heads.$theads.each(function(){
@@ -318,12 +318,15 @@ window.dtAdvInit = function() {
 
             alignments.forEach(function(align, i){
               if (align === "right") {
-                $sortCells.eq(i).addClass("dt-col-right");
-                $filterCells.eq(i).addClass("dt-col-right");
+                // Apply inline styles directly for reliability
+                $sortCells.eq(i).addClass("dt-col-right").css("text-align", "right");
+                $sortCells.eq(i).find(".dt-sortbox").css({"justify-content": "flex-end", "display": "inline-flex"});
+                $filterCells.eq(i).addClass("dt-col-right").css("text-align", "right");
+                $filterCells.eq(i).find("input.dt-filter-input").css("text-align", "right");
               }
             });
           });
-        }catch(e){}
+        }catch(e){ console.warn("applyColumnAlignments error:", e); }
       }
 
       // Find the column index for "Section" (to place filter controls above it)
