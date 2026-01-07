@@ -248,20 +248,114 @@ window.dtAdvInit = function() {
         } catch(e){}
       }
 
-      function ensureFilterControls(heads){
+      // Detect column alignment based on data content (numeric = right-aligned)
+      function detectColumnAlignments(heads){
+        try{
+          // Get column names from header labels
+          var $labelRow = heads.$theadVis.find("tr:not(.dt-sort-row):not(.dt-filter-row):last th");
+          var alignments = [];
+
+          // Check first few rows of data to detect if column is numeric
+          var $bodyTable = $cont.find("div.dataTables_scrollBody table.dataTable");
+          if (!$bodyTable.length) $bodyTable = $tbl;
+          var $rows = $bodyTable.find("tbody tr").slice(0, 10);
+
+          $labelRow.each(function(i){
+            var colName = $(this).text().trim().toLowerCase();
+            var isRightAligned = false;
+
+            // Known text columns that should be left-aligned
+            var leftAlignCols = ["projectiondate", "projection date", "objectname", "object name",
+                                "section", "product", "peril", "measure", "segment", "model type",
+                                "event / non-event", "event/non-event", "current or prior"];
+
+            // Check if column name suggests left-alignment
+            var isTextCol = leftAlignCols.some(function(lc){ return colName.indexOf(lc) >= 0; });
+
+            if (!isTextCol) {
+              // Check actual data - if most values look numeric, right-align
+              var numericCount = 0;
+              var totalChecked = 0;
+              $rows.each(function(){
+                var $cell = $(this).find("td").eq(i);
+                if ($cell.length) {
+                  var val = $cell.text().trim();
+                  totalChecked++;
+                  // Check if value looks numeric (including currency, commas, brackets)
+                  if (/^[\\(\\)\\-\\d,.$£€\\s]+$/.test(val) && val.length > 0 && !/^[\\-\\s]*$/.test(val)) {
+                    numericCount++;
+                  }
+                }
+              });
+              isRightAligned = totalChecked > 0 && (numericCount / totalChecked) > 0.5;
+            }
+
+            alignments[i] = isRightAligned ? "right" : "left";
+          });
+
+          return alignments;
+        }catch(e){ return []; }
+      }
+
+      // Apply alignment classes to sort and filter rows
+      function applyColumnAlignments(heads, alignments){
         try{
           heads.$theads.each(function(){
             var $h = $(this);
-            var $firstTh = $h.find("tr.dt-filter-row th").first();
-            if (!$firstTh.length) return;
-            if ($firstTh.find(".dt-filter-controls").length) return;
+            var $sortCells = $h.find("tr.dt-sort-row th");
+            var $filterCells = $h.find("tr.dt-filter-row th");
+
+            alignments.forEach(function(align, i){
+              if (align === "right") {
+                $sortCells.eq(i).addClass("dt-col-right");
+                $filterCells.eq(i).addClass("dt-col-right");
+              }
+            });
+          });
+        }catch(e){}
+      }
+
+      // Find the column index for "Section" (to place filter controls above it)
+      function findSectionColumnIndex(heads){
+        try{
+          var $labelRow = heads.$theadVis.find("tr:not(.dt-sort-row):not(.dt-filter-row):last th");
+          var sectionIdx = -1;
+          $labelRow.each(function(i){
+            var colName = $(this).text().trim().toLowerCase();
+            if (colName === "section") {
+              sectionIdx = i;
+              return false; // break
+            }
+          });
+          return sectionIdx;
+        }catch(e){ return -1; }
+      }
+
+      function ensureFilterControls(heads){
+        try{
+          // Find Section column index - place controls above it
+          var sectionIdx = findSectionColumnIndex(heads);
+
+          heads.$theads.each(function(){
+            var $h = $(this);
+            var $filterCells = $h.find("tr.dt-filter-row th");
+            if (!$filterCells.length) return;
+
+            // Remove any existing filter controls first
+            $h.find(".dt-filter-controls").remove();
+
+            // Determine which cell to put controls in
+            // If Section column exists, put controls there; otherwise use first column
+            var targetIdx = (sectionIdx >= 0 && sectionIdx < $filterCells.length) ? sectionIdx : 0;
+            var $targetTh = $filterCells.eq(targetIdx);
+
             var html = [
-              \'<span class="dt-filter-controls" style="margin-left:8px;white-space:nowrap;">\',
+              \'<span class="dt-filter-controls" style="white-space:nowrap;display:block;margin-bottom:2px;">\',
               \'<a href="#" class="dt-apply-filters" title="Apply all column filters" style="font-size:11px;text-decoration:none;margin-right:6px;">✔ apply</a>\',
               \'<a href="#" class="dt-clear-filters" title="Clear all column filters" style="font-size:11px;text-decoration:none;">✖ clear filters</a>\',
               \'</span>\'
             ].join("");
-            $firstTh.append(html);
+            $targetTh.prepend(html);
           });
         }catch(e){}
       }
@@ -341,7 +435,11 @@ window.dtAdvInit = function() {
             }
           });
 
-        // Add preview-only filter controls, then restore cached RAW values to inputs
+        // Detect and apply column alignments (right-align numeric columns)
+        var alignments = detectColumnAlignments(heads);
+        applyColumnAlignments(heads, alignments);
+
+        // Add filter controls (positioned above Section column), then restore cached RAW values to inputs
         ensureFilterControls(heads);
         writeRawFilterInputs(heads, cachedRaw);
 
