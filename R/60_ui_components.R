@@ -200,21 +200,27 @@ ui <- page_sidebar(
 )
 
 css_overrides <- tags$style(HTML("
-  .bslib-card .dataTables_wrapper {
-    min-height: 400px !important;
-    max-height: none !important;
-    overflow-y: visible !important;
-    overflow-x: auto !important;
-  }
-  /* Remove vertical scrollbar from Input Data preview - use pagination instead */
-  #tbl_preview_wrapper .dataTables_scrollBody {
+  /* Remove ALL vertical scrollbars from Input Data tab - use pagination only */
+  .bslib-card, .bslib-card .card-body, .bslib-card .dataTables_wrapper {
     overflow-y: visible !important;
     max-height: none !important;
     height: auto !important;
   }
-  /* Keep DataTables compact - no extra scroll containers */
+  .dataTables_wrapper {
+    overflow-y: visible !important;
+    max-height: none !important;
+  }
+  .dataTables_scrollBody {
+    overflow-y: visible !important;
+    max-height: none !important;
+    height: auto !important;
+  }
   .dataTables_scroll {
     overflow: visible !important;
+  }
+  /* Ensure the main content area doesn't add scrollbar */
+  .bslib-page-main, .tab-content, .tab-pane {
+    overflow-y: visible !important;
   }
   /* Solid black Browse button at all times */
   #csv_file .btn,

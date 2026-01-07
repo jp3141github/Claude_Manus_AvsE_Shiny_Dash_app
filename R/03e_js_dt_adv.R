@@ -243,7 +243,7 @@ window.dtAdvInit = function() {
         } catch(e){}
       }
 
-      // Detect column alignment based on data content (numeric = right-aligned)
+      // Detect column alignment based on column name and data content (numeric = right-aligned)
       function detectColumnAlignments(heads){
         try{
           // Get column names from header labels
@@ -264,10 +264,24 @@ window.dtAdvInit = function() {
                                 "section", "product", "peril", "measure", "segment", "model type",
                                 "event / non-event", "event/non-event", "current or prior"];
 
+            // Known numeric columns that should be right-aligned
+            var rightAlignCols = ["actual", "expected", "accident period", "accidentperiod",
+                                 "accident year", "accidentyear", "amount", "value", "count", "total"];
+
             // Check if column name suggests left-alignment
             var isTextCol = leftAlignCols.some(function(lc){ return colName.indexOf(lc) >= 0; });
 
-            if (!isTextCol) {
+            // Check if column name suggests right-alignment (numeric)
+            var isNumericCol = rightAlignCols.some(function(rc){ return colName.indexOf(rc) >= 0; });
+
+            // Also check if column name is a year (e.g., 2010, 2011, 2012, etc.)
+            var isYearCol = /^\\d{4}$/.test(colName.trim());
+
+            if (isTextCol) {
+              isRightAligned = false;
+            } else if (isNumericCol || isYearCol) {
+              isRightAligned = true;
+            } else {
               // Check actual data - if most values look numeric, right-align
               var numericCount = 0;
               var totalChecked = 0;
@@ -276,8 +290,8 @@ window.dtAdvInit = function() {
                 if ($cell.length) {
                   var val = $cell.text().trim();
                   totalChecked++;
-                  // Check if value looks numeric (including currency, commas, brackets)
-                  if (/^[\\(\\)\\-\\d,.$£€\\s]+$/.test(val) && val.length > 0 && !/^[\\-\\s]*$/.test(val)) {
+                  // Check if value looks numeric (including currency, commas, brackets, decimals)
+                  if (/^[()\\-\\d,.$£€\\s]+$/.test(val) && val.length > 0 && /\\d/.test(val)) {
                     numericCount++;
                   }
                 }
@@ -289,7 +303,7 @@ window.dtAdvInit = function() {
           });
 
           return alignments;
-        }catch(e){ return []; }
+        }catch(e){ console.warn("detectColumnAlignments error:", e); return []; }
       }
 
       // Apply alignment classes to sort and filter rows
