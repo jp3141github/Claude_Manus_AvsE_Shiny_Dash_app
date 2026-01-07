@@ -65,7 +65,7 @@ register_upload_server <- function(input, output, session, uploaded_df) {
                               scrollX = FALSE,   # Disable DT scroll - let CSS handle overflow
                               paging = TRUE,
                               fixedHeader = TRUE,
-                              autoWidth = TRUE,  # Enable auto-width for dynamic column sizing
+                              autoWidth = FALSE, # Disable auto-width - CSS 1% trick handles column sizing
                               language = list(info = info_text,
                                               infoFiltered = "(filtered from _MAX_ total records)")
                             ),
