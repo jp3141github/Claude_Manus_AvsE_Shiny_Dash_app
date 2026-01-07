@@ -58,42 +58,38 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         if ("Expected" %in% names(dfp)) dfp[["Expected"]] <- to_float(dfp[["Expected"]])
         # Calculate A - E and insert after Expected column
         if (all(c("Actual", "Expected") %in% names(dfp))) {
-          ae_raw <- dfp[["Actual"]] - dfp[["Expected"]]
-          # Format with color directly in R: red for positive, green for negative
-          ae_formatted <- sapply(ae_raw, function(v) {
-            if (is.na(v)) return(NA_character_)
-            formatted_num <- format(round(v), big.mark = ",", scientific = FALSE)
-            color <- if (v > 0) "red" else if (v < 0) "green" else "black"
-            sprintf('<span style="color:%s">%s</span>', color, formatted_num)
-          })
-          dfp[["A - E"]] <- ae_formatted
+          dfp[["A - E"]] <- dfp[["Actual"]] - dfp[["Expected"]]
           # Reorder to place A - E right after Expected
           exp_idx <- which(names(dfp) == "Expected")
           col_order <- c(names(dfp)[1:exp_idx], "A - E", names(dfp)[(exp_idx + 1):(ncol(dfp) - 1)])
           dfp <- dfp[, col_order, drop = FALSE]
         }
-        # Show full dataset with server-side processing for large data
+        # Show full dataset - client-side for formatting support
         info_text <- sprintf("Showing _START_ to _END_ of %s records",
                              format(total_records, big.mark = ","))
         dt <- DT::datatable(dfp,
                             options  = list(
                               pageLength = 25,
-                              scrollX = FALSE,   # Disable DT scroll - let CSS handle overflow
+                              scrollX = FALSE,
                               paging = TRUE,
                               fixedHeader = TRUE,
-                              autoWidth = FALSE, # Disable auto-width - CSS 1% trick handles column sizing
+                              autoWidth = FALSE,
                               language = list(info = info_text,
                                               infoFiltered = "(filtered from _MAX_ total records)")
                             ),
                             extensions = c("FixedHeader"),
-                            rownames = FALSE, escape = FALSE)
-        # Format Actual and Expected only (A - E already formatted with color)
-        num_cols_fmt <- intersect(c("Actual","Expected"), names(dfp))
+                            rownames = FALSE)
+        # Format numbers with commas
+        num_cols_fmt <- intersect(c("Actual","Expected","A - E"), names(dfp))
         if (length(num_cols_fmt)) {
           dt <- DT::formatCurrency(dt, columns = num_cols_fmt, currency = "", interval = 3, mark = ",", digits = 0)
         }
+        # Color A - E: red for positive, green for negative
+        if ("A - E" %in% names(dfp)) {
+          dt <- DT::formatStyle(dt, "A - E", color = DT::styleInterval(0, c("green", "red")))
+        }
         dt
-      }, server = FALSE)  # Client-side to allow HTML color formatting
+      }, server = FALSE)
 
       # Populate chart controls from RAW
       .populate_chart_controls_from_raw()
