@@ -8,18 +8,16 @@ css_preview <- htmltools::HTML(
   #tbl_preview td {
     width: 1% !important;
     white-space: nowrap !important;
-    padding: 2px 6px !important;
+    padding: 2px 4px !important;
     box-sizing: border-box !important;
   }
 
-  /* Table auto-sizes to content */
   #tbl_preview,
   #tbl_preview.dataTable {
     width: auto !important;
     table-layout: auto !important;
   }
 
-  /* Wrapper shrinks to table size */
   #tbl_preview_wrapper {
     width: auto !important;
     display: inline-block !important;
@@ -27,28 +25,30 @@ css_preview <- htmltools::HTML(
     overflow-x: auto !important;
   }
 
-  /* Sort row */
+  /* Sort row - sortbox shrinks to buttons */
   #tbl_preview thead tr.dt-sort-row th {
     width: 1% !important;
     white-space: nowrap !important;
-    padding: 2px 6px !important;
+    padding: 2px 4px !important;
   }
   #tbl_preview thead tr.dt-sort-row th .dt-sortbox {
     display: inline-flex !important;
-    gap: 2px !important;
+    gap: 1px !important;
+    width: auto !important;
   }
 
-  /* Filter row */
+  /* Filter row - inputs shrink to fit */
   #tbl_preview thead tr.dt-filter-row th {
     width: 1% !important;
     white-space: nowrap !important;
-    padding: 2px 6px !important;
+    padding: 2px 4px !important;
   }
   #tbl_preview thead tr.dt-filter-row input.dt-filter-input {
-    width: 100% !important;
-    min-width: 40px !important;
+    width: auto !important;
+    min-width: 30px !important;
+    max-width: none !important;
     box-sizing: border-box !important;
-    padding: 2px 4px !important;
+    padding: 1px 3px !important;
     height: 18px !important;
     font-size: 11px !important;
   }
@@ -57,7 +57,7 @@ css_preview <- htmltools::HTML(
   #tbl_preview thead tr:not(.dt-sort-row):not(.dt-filter-row) th {
     width: 1% !important;
     white-space: nowrap !important;
-    padding: 2px 6px !important;
+    padding: 2px 4px !important;
   }
 
 </style>
