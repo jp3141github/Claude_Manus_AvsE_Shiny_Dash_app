@@ -242,6 +242,13 @@ css_overrides <- tags$style(HTML("
   }
 
   /* ===== Column widths: shrink to exact content ===== */
+  /* Prevent flex container from stretching table */
+  .dataTables_wrapper {
+    width: fit-content !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+  }
   table.dataTable {
     width: auto !important;
     table-layout: auto !important;
@@ -255,11 +262,8 @@ css_overrides <- tags$style(HTML("
   .bslib-card, .bslib-card .card-body {
     height: auto !important;
     overflow: visible !important;
-  }
-  /* Wrapper handles horizontal scroll if table wider than screen */
-  .dataTables_wrapper {
-    overflow-x: auto !important;
-    overflow-y: visible !important;
+    /* Don't stretch children in flex container */
+    align-items: flex-start !important;
   }
   /* No fixed height - table grows with data, pagination follows */
   .dataTables_scrollBody {
