@@ -58,18 +58,27 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         if ("Expected" %in% names(dfp)) dfp[["Expected"]] <- to_float(dfp[["Expected"]])
 
         # Calculate A - E column if both Actual and Expected exist
-        if ("Actual" %in% names(dfp) && "Expected" %in% names(dfp)) {
+        has_actual <- "Actual" %in% names(dfp)
+        has_expected <- "Expected" %in% names(dfp)
+
+        if (has_actual && has_expected) {
+          # Calculate A - E
           dfp[["A - E"]] <- dfp[["Actual"]] - dfp[["Expected"]]
+
           # Move A - E column to be right after Expected
           exp_idx <- which(names(dfp) == "Expected")
-          if (length(exp_idx) == 1) {
-            col_order <- seq_along(names(dfp))
-            ae_idx <- which(names(dfp) == "A - E")
-            # Remove A-E from current position, insert after Expected
-            col_order <- col_order[-ae_idx]
-            insert_pos <- which(col_order == exp_idx)
-            col_order <- append(col_order, ae_idx, after = insert_pos)
-            dfp <- dfp[, col_order]
+          ae_idx <- which(names(dfp) == "A - E")
+
+          if (length(exp_idx) == 1 && length(ae_idx) == 1) {
+            # Get all column indices
+            all_cols <- seq_along(names(dfp))
+            # Remove A-E from its current position
+            cols_without_ae <- all_cols[-ae_idx]
+            # Find where Expected is in the reduced list
+            exp_pos_in_reduced <- which(cols_without_ae == exp_idx)
+            # Insert A-E right after Expected
+            new_order <- append(cols_without_ae, ae_idx, after = exp_pos_in_reduced)
+            dfp <- dfp[, new_order]
           }
         }
 
