@@ -56,7 +56,13 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         if ("Actual" %in% names(dfp))   dfp[["Actual"]]   <- to_float(dfp[["Actual"]])
         if ("Expected" %in% names(dfp)) dfp[["Expected"]] <- to_float(dfp[["Expected"]])
         dt <- DT::datatable(head(dfp, 500),
-                            options  = list(pageLength = 25, scrollX = TRUE),
+                            options  = list(
+                              pageLength = 25,
+                              scrollX = TRUE,
+                              fixedHeader = TRUE,  # Freeze column headers when scrolling
+                              autoWidth = FALSE
+                            ),
+                            extensions = c("FixedHeader"),
                             rownames = FALSE, escape = FALSE)
         num_cols_fmt <- intersect(c("Actual","Expected"), names(dfp))
         if (length(num_cols_fmt)) {
