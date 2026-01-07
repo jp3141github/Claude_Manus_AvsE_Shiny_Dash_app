@@ -3,8 +3,50 @@
 css_preview <- htmltools::HTML(
 "
 <style>
-  /* Allow page scroll so FixedHeader can pin on preview */
-  #tbl_preview_wrapper { overflow: visible !important; max-height: none !important; min-height: 0 !important; }
+  /* ===== CRITICAL: Force preview table wrapper to shrink to content ===== */
+  #tbl_preview_wrapper {
+    width: fit-content !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    display: block !important;
+  }
+
+  /* The table itself must also shrink to content */
+  #tbl_preview,
+  #tbl_preview.dataTable {
+    width: auto !important;
+    table-layout: auto !important;
+    overflow: visible !important;
+  }
+
+  /* All cells: no wrapping, tight padding for natural column widths */
+  #tbl_preview th,
+  #tbl_preview td {
+    white-space: nowrap !important;
+    padding: 3px 6px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Prevent card body from stretching the table wrapper */
+  .card:has(#tbl_preview_wrapper) .card-body {
+    display: block !important;
+    width: auto !important;
+  }
+
+  /* Also target the card itself to not expand */
+  .card:has(#tbl_preview_wrapper) {
+    width: fit-content !important;
+    max-width: 100% !important;
+  }
+
+  /* Fallback for browsers without :has() - target by structure */
+  .nav-panel-content .card .card-body > #tbl_preview_wrapper,
+  [role='tabpanel'] .card .card-body > #tbl_preview_wrapper {
+    width: fit-content !important;
+  }
 
   /* Horizontal scroll only */
   .auto-height-table .dataTables_scrollBody{
@@ -25,10 +67,6 @@ css_preview <- htmltools::HTML(
     white-space: normal !important; word-break: break-word !important; overflow-wrap: anywhere !important; line-height: 1.15 !important;
   }
 
-  /* Keep table layout auto to size columns to content */
-  #tbl_preview{ overflow: visible !important; }
-  #tbl_preview.dataTable, #tbl_preview table.dataTable{ table-layout: auto !important; }
-
   /* Filter inputs: adapt to column width, not fixed */
   #tbl_preview thead tr.dt-filter-row input.dt-filter-input{
     width: auto !important;
@@ -39,7 +77,7 @@ css_preview <- htmltools::HTML(
     height: 20px !important;
     font-size: 11px !important;
   }
-  
+
 </style>
 "
 )

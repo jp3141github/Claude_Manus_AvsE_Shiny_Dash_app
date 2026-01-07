@@ -167,10 +167,25 @@ register_results_server <- function(input, output, session, results_obj, uploade
         HTML("<span style='color:red; font-weight:bold;'>&lt;&lt;&lt; Upload a CSV to preview data. (Use Browse Button)</span>")
       ))
     }
-    card(
-      card_header("Uploaded Data"),
-      style = "min-height:400px; overflow:visible;",  # No max-height to avoid scrollbar
-      DTOutput("tbl_preview")
+    # Card with fit-content width to shrink columns to data
+    tagList(
+      tags$style(HTML("
+        #preview-data-card {
+          width: fit-content !important;
+          max-width: 100% !important;
+          min-height: 200px;
+        }
+        #preview-data-card .card-body {
+          display: block !important;
+          width: auto !important;
+          overflow-x: auto !important;
+        }
+      ")),
+      card(
+        id = "preview-data-card",
+        card_header("Uploaded Data"),
+        DTOutput("tbl_preview")
+      )
     )
   })
 }
