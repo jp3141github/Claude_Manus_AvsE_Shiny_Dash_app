@@ -7,7 +7,7 @@ css_preview <- htmltools::HTML(
   #tbl_preview th,
   #tbl_preview td {
     white-space: nowrap !important;
-    padding: 3px 8px !important;
+    padding: 3px 4px !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -29,25 +29,39 @@ css_preview <- htmltools::HTML(
     overflow-y: visible !important;
   }
 
-  /* Sort row and filter row cells */
-  #tbl_preview thead tr.dt-sort-row th,
+  /* Sort row - compact with sortbox inline */
+  #tbl_preview thead tr.dt-sort-row th {
+    white-space: nowrap !important;
+    overflow: visible !important;
+    padding: 2px 4px !important;
+  }
+
+  /* Sortbox: compact inline-flex, no extra gaps */
+  #tbl_preview thead tr.dt-sort-row th .dt-sortbox {
+    display: inline-flex !important;
+    gap: 2px !important;
+    margin: 0 !important;
+  }
+
+  /* Filter row cells */
   #tbl_preview thead tr.dt-filter-row th {
     white-space: nowrap !important;
     overflow: visible !important;
+    padding: 2px 4px !important;
   }
 
-  /* Filter inputs: fill the full column width (same as header) */
+  /* Filter inputs: sized by JS to match header width */
   #tbl_preview thead tr.dt-filter-row input.dt-filter-input {
-    width: 100% !important;
     box-sizing: border-box !important;
     padding: 2px 4px !important;
     height: 20px !important;
     font-size: 11px !important;
   }
 
-  /* Labels row (headers) */
+  /* Labels row (headers) - compact padding */
   #tbl_preview thead tr:not(.dt-sort-row):not(.dt-filter-row) th {
     white-space: nowrap !important;
+    padding: 3px 4px !important;
   }
 
   /* FixedHeader clone must match */

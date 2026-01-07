@@ -557,25 +557,24 @@ function sizeColumnsToHeaders(tableId) {
     var $headers = $labelRow.find("th");
     if (!$headers.length) return;
 
-    // Create a hidden measuring element
+    // Create a hidden measuring element matching header font
     var $measure = $("<span>").css({
       position: "absolute",
       visibility: "hidden",
       whiteSpace: "nowrap",
       fontSize: $headers.first().css("font-size") || "14px",
       fontFamily: $headers.first().css("font-family") || "inherit",
-      fontWeight: $headers.first().css("font-weight") || "normal",
-      padding: "0 16px"  // Account for cell padding
+      fontWeight: $headers.first().css("font-weight") || "bold"
     }).appendTo("body");
 
-    // Measure each header and collect widths
+    // Measure each header text width (just text, minimal padding)
     var widths = [];
     $headers.each(function(i) {
       var text = $(this).text().trim();
       $measure.text(text);
-      var w = $measure.outerWidth();
-      // Minimum width of 60px, add some padding
-      widths[i] = Math.max(60, w + 8);
+      var textWidth = $measure.outerWidth();
+      // Add minimal padding (8px each side = 16px total)
+      widths[i] = Math.max(50, textWidth + 16);
     });
     $measure.remove();
 
@@ -597,7 +596,8 @@ function sizeColumnsToHeaders(tableId) {
           $(this).css({
             "width": widths[i] + "px",
             "min-width": widths[i] + "px",
-            "max-width": widths[i] + "px"
+            "max-width": widths[i] + "px",
+            "padding": "3px 4px"
           });
         }
       });
@@ -612,18 +612,26 @@ function sizeColumnsToHeaders(tableId) {
             "min-width": widths[i] + "px",
             "max-width": widths[i] + "px",
             "overflow": "hidden",
-            "text-overflow": "ellipsis"
+            "text-overflow": "ellipsis",
+            "padding": "3px 4px"
           });
         }
       });
     });
 
-    // Make filter inputs fill their cells
-    $tbl.find("thead tr.dt-filter-row input.dt-filter-input").each(function(i) {
-      $(this).css({
-        "width": "100%",
-        "box-sizing": "border-box"
-      });
+    // Make filter inputs match header text width (minus padding)
+    $tbl.find("thead tr.dt-filter-row th").each(function(i) {
+      var $th = $(this);
+      var $input = $th.find("input.dt-filter-input");
+      if ($input.length && i < widths.length) {
+        // Input width = column width minus cell padding (8px total)
+        var inputWidth = widths[i] - 8;
+        $input.css({
+          "width": inputWidth + "px",
+          "max-width": inputWidth + "px",
+          "box-sizing": "border-box"
+        });
+      }
     });
 
     // Set wrapper to auto width
