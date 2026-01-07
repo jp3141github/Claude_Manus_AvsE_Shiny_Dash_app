@@ -313,18 +313,27 @@ window.dtAdvInit = function() {
       // Apply alignment to sort and filter rows (using inline styles for reliability)
       function applyColumnAlignments(heads, alignments){
         try{
+          console.log("[DT Alignment] applyColumnAlignments called, theads count:", heads.$theads.length);
           heads.$theads.each(function(){
             var $h = $(this);
             var $sortCells = $h.find("tr.dt-sort-row th");
             var $filterCells = $h.find("tr.dt-filter-row th");
+            console.log("[DT Alignment] Found sortCells:", $sortCells.length, "filterCells:", $filterCells.length);
 
             alignments.forEach(function(align, i){
               if (align === "right") {
+                console.log("[DT Alignment] Applying right-align to column", i);
                 // Apply inline styles directly for reliability
-                $sortCells.eq(i).addClass("dt-col-right").css("text-align", "right");
-                $sortCells.eq(i).find(".dt-sortbox").css({"justify-content": "flex-end", "display": "inline-flex"});
-                $filterCells.eq(i).addClass("dt-col-right").css("text-align", "right");
-                $filterCells.eq(i).find("input.dt-filter-input").css("text-align", "right");
+                var $sortCell = $sortCells.eq(i);
+                var $filterCell = $filterCells.eq(i);
+                var $sortbox = $sortCell.find(".dt-sortbox");
+
+                $sortCell.addClass("dt-col-right").css("text-align", "right");
+                $sortbox.css({"justify-content": "flex-end", "display": "inline-flex"});
+                $filterCell.addClass("dt-col-right").css("text-align", "right");
+                $filterCell.find("input.dt-filter-input").css("text-align", "right");
+
+                console.log("[DT Alignment] After apply - sortCell text-align:", $sortCell.css("text-align"), "sortbox found:", $sortbox.length);
               }
             });
           });
