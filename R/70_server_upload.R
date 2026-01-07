@@ -56,6 +56,14 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         }
         if ("Actual" %in% names(dfp))   dfp[["Actual"]]   <- to_float(dfp[["Actual"]])
         if ("Expected" %in% names(dfp)) dfp[["Expected"]] <- to_float(dfp[["Expected"]])
+        # Add A - E column (Actual - Expected) right after Expected
+        if ("Actual" %in% names(dfp) && "Expected" %in% names(dfp)) {
+          dfp[["A - E"]] <- dfp[["Actual"]] - dfp[["Expected"]]
+          # Move A - E column to be right after Expected
+          exp_idx <- which(names(dfp) == "Expected")
+          col_order <- c(names(dfp)[1:exp_idx], "A - E", names(dfp)[(exp_idx + 1):(ncol(dfp) - 1)])
+          dfp <- dfp[, col_order]
+        }
         # Show full dataset with server-side processing for large data
         info_text <- sprintf("Showing _START_ to _END_ of %s records",
                              format(total_records, big.mark = ","))
@@ -69,7 +77,7 @@ register_upload_server <- function(input, output, session, uploaded_df) {
                                               infoFiltered = "(filtered from _MAX_ total records)")
                             ),
                             rownames = FALSE, escape = FALSE)
-        num_cols_fmt <- intersect(c("Actual","Expected"), names(dfp))
+        num_cols_fmt <- intersect(c("Actual","Expected","A - E"), names(dfp))
         if (length(num_cols_fmt)) {
           dt <- DT::formatCurrency(dt, columns = num_cols_fmt, currency = "", interval = 3, mark = ",", digits = 0)
           dt <- DT::formatStyle(dt, columns = num_cols_fmt, color = DT::styleInterval(c(-1e-12, 0), c("red","black","black")))
