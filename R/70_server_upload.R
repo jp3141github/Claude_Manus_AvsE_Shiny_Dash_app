@@ -67,21 +67,20 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         # Show full dataset with server-side processing for large data
         info_text <- sprintf("Showing _START_ to _END_ of %s records",
                              format(total_records, big.mark = ","))
-        # Find A - E column index for rowCallback (0-based for JS)
+        # Find A - E column index for columnDefs (0-based for JS)
         ae_col_idx <- if ("A - E" %in% names(dfp)) which(names(dfp) == "A - E") - 1 else -1
-        # JavaScript rowCallback to color A - E column: red for positive, green for negative
-        row_callback <- if (ae_col_idx >= 0) {
-          DT::JS(sprintf("function(row, data) {
-            var val = data[%d];
-            var numVal = parseFloat(String(val).replace(/,/g, ''));
-            if (!isNaN(numVal)) {
-              if (numVal > 0) {
-                $('td:eq(%d)', row).css('color', 'red');
-              } else if (numVal < 0) {
-                $('td:eq(%d)', row).css('color', 'green');
-              }
-            }
-          }", ae_col_idx, ae_col_idx, ae_col_idx))
+        # Use columnDefs with render to color A - E: red for positive, green for negative
+        col_defs <- if (ae_col_idx >= 0) {
+          list(list(
+            targets = ae_col_idx,
+            render = DT::JS("function(data, type, row, meta) {
+              if (type !== 'display') return data;
+              var numVal = parseFloat(String(data).replace(/,/g, ''));
+              if (isNaN(numVal)) return data;
+              var color = numVal > 0 ? 'red' : (numVal < 0 ? 'green' : 'black');
+              return '<span style=\"color:' + color + '\">' + data + '</span>';
+            }")
+          ))
         } else NULL
         dt <- DT::datatable(dfp,
                             options  = list(
@@ -92,7 +91,7 @@ register_upload_server <- function(input, output, session, uploaded_df) {
                               autoWidth = FALSE, # Disable auto-width - CSS 1% trick handles column sizing
                               language = list(info = info_text,
                                               infoFiltered = "(filtered from _MAX_ total records)"),
-                              rowCallback = row_callback
+                              columnDefs = col_defs
                             ),
                             extensions = c("FixedHeader"),
                             rownames = FALSE, escape = FALSE)
