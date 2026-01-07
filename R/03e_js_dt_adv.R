@@ -310,21 +310,47 @@ window.dtAdvInit = function() {
         }catch(e){ console.warn("detectColumnAlignments error:", e); return []; }
       }
 
-      // Apply alignment to sort and filter rows (using inline styles for reliability)
+      // Apply alignment to sort and filter rows (class-based for CSS flexbox)
       function applyColumnAlignments(heads, alignments){
         try{
-          heads.$theads.each(function(){
+          console.log("[DT Alignment] applyColumnAlignments called, theads count:", heads.$theads.length, "alignments:", alignments.length);
+
+          if (!alignments || alignments.length === 0) {
+            console.warn("[DT Alignment] No alignments to apply");
+            return;
+          }
+
+          heads.$theads.each(function(theadIdx){
             var $h = $(this);
             var $sortCells = $h.find("tr.dt-sort-row th");
             var $filterCells = $h.find("tr.dt-filter-row th");
+            console.log("[DT Alignment] Thead", theadIdx, "- sortCells:", $sortCells.length, "filterCells:", $filterCells.length);
+
+            if ($sortCells.length === 0) {
+              console.warn("[DT Alignment] No sort cells found in thead", theadIdx);
+              return;
+            }
 
             alignments.forEach(function(align, i){
               if (align === "right") {
-                // Apply inline styles directly for reliability
-                $sortCells.eq(i).addClass("dt-col-right").css("text-align", "right");
-                $sortCells.eq(i).find(".dt-sortbox").css({"justify-content": "flex-end", "display": "inline-flex"});
-                $filterCells.eq(i).addClass("dt-col-right").css("text-align", "right");
-                $filterCells.eq(i).find("input.dt-filter-input").css("text-align", "right");
+                var $sortCell = $sortCells.eq(i);
+                var $filterCell = $filterCells.eq(i);
+
+                if ($sortCell.length === 0) {
+                  console.warn("[DT Alignment] No sortCell at index", i);
+                  return;
+                }
+
+                // Add the class - CSS handles the flexbox alignment
+                $sortCell.addClass("dt-col-right");
+                $filterCell.addClass("dt-col-right");
+
+                // Also right-align the filter input text
+                $filterCell.find("input.dt-filter-input").css("text-align", "right");
+
+                console.log("[DT Alignment] Applied dt-col-right to col", i,
+                  "- sortCell has class:", $sortCell.hasClass("dt-col-right"),
+                  "- filterCell has class:", $filterCell.hasClass("dt-col-right"));
               }
             });
           });

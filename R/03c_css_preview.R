@@ -25,9 +25,9 @@ css_preview <- htmltools::HTML(
     white-space: normal !important; word-break: break-word !important; overflow-wrap: anywhere !important; line-height: 1.15 !important;
   }
 
-  /* Keep table layout stable with long headers */
+  /* Keep table layout auto to size columns to content */
   #tbl_preview{ overflow: visible !important; }
-  #tbl_preview.dataTable, #tbl_preview table.dataTable{ table-layout: fixed !important; }
+  #tbl_preview.dataTable, #tbl_preview table.dataTable{ table-layout: auto !important; }
   #tbl_preview thead th{ max-width: 260px; }
   
   /* Preview: keep filter inputs compact & stable */

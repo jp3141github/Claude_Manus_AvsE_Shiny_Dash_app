@@ -42,7 +42,7 @@ register_results_server <- function(input, output, session, results_obj, uploade
             pageLength  = if (FAST) 50 else 100,
             lengthMenu  = list(c(25,50,100,200,500,1000), c(25,50,100,200,500,1000)),
             searchDelay = 400,
-            autoWidth   = FALSE,
+            autoWidth   = TRUE,     # Auto-size columns to fit content
             ordering    = TRUE,
             fixedHeader = TRUE
           ),

@@ -60,7 +60,7 @@ register_upload_server <- function(input, output, session, uploaded_df) {
                               pageLength = 25,
                               scrollX = TRUE,
                               fixedHeader = TRUE,  # Freeze column headers when scrolling
-                              autoWidth = FALSE
+                              autoWidth = TRUE     # Auto-size columns to fit content
                             ),
                             extensions = c("FixedHeader"),
                             rownames = FALSE, escape = FALSE)
