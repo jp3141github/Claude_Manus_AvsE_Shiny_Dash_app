@@ -241,6 +241,20 @@ css_overrides <- tags$style(HTML("
     text-align: right !important;
   }
 
+  /* ===== Column widths: shrink to fit content ===== */
+  table.dataTable {
+    width: auto !important;
+    min-width: 0 !important;
+  }
+  table.dataTable th, table.dataTable td {
+    white-space: nowrap !important;
+  }
+  /* Text columns can wrap if needed */
+  table.dataTable td.dt-wrap {
+    white-space: normal !important;
+    max-width: 200px !important;
+  }
+
   /* Remove ALL vertical scrollbars from Input Data tab - use pagination only */
   .bslib-card, .bslib-card .card-body, .bslib-card .dataTables_wrapper {
     overflow-y: visible !important;
