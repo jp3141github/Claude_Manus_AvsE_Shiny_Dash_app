@@ -161,72 +161,26 @@ window.dtAdvInit = function() {
         }catch(e){}
       }
 
-      // Store initial column widths to prevent changes on sort/filter/page
-      var initialColWidths = null;
+      // Lock table layout after initial render to prevent width changes on sort
+      var tableLayoutLocked = false;
 
-      function captureAndLockColWidths(heads){
+      function lockTableLayout(heads){
         try{
-          var $labelRow = heads.$theadVis.find("tr:not(.dt-sort-row):not(.dt-filter-row):last th");
+          if (tableLayoutLocked) return;
+          tableLayoutLocked = true;
 
-          // First time: capture widths from rendered table
-          if (!initialColWidths) {
-            initialColWidths = [];
-            $labelRow.each(function(i){
-              initialColWidths[i] = $(this).outerWidth();
-            });
-            console.log("[DT] Captured initial column widths:", initialColWidths);
-          }
+          // Set table-layout: fixed on both header and body tables
+          var $headTable = $cont.find(".dataTables_scrollHead table");
+          var $bodyTable = $cont.find(".dataTables_scrollBody table");
 
-          // Always: apply locked widths everywhere
-          if (initialColWidths && initialColWidths.length > 0) {
-            // Apply to colgroup cols (this is what DataTables uses for widths)
-            var $headTable = $cont.find(".dataTables_scrollHead table");
-            var $bodyTable = $cont.find(".dataTables_scrollBody table");
+          [$headTable, $bodyTable, $tbl].forEach(function($table){
+            if ($table.length) {
+              $table.css("table-layout", "fixed");
+            }
+          });
 
-            [$headTable, $bodyTable, $tbl].forEach(function($table){
-              if (!$table.length) return;
-              var $colgroup = $table.find("colgroup");
-              if ($colgroup.length) {
-                $colgroup.find("col").each(function(i){
-                  if (initialColWidths[i]) {
-                    $(this).css("width", initialColWidths[i] + "px").attr("width", initialColWidths[i]);
-                  }
-                });
-              }
-            });
-
-            // Apply to header cells
-            $labelRow.each(function(i){
-              if (initialColWidths[i]) {
-                $(this).css({"width": initialColWidths[i] + "px", "min-width": initialColWidths[i] + "px"});
-              }
-            });
-
-            // Apply to sort row
-            var $sortRow = heads.$theadVis.find("tr.dt-sort-row th");
-            $sortRow.each(function(i){
-              if (initialColWidths[i]) {
-                $(this).css({"width": initialColWidths[i] + "px", "min-width": initialColWidths[i] + "px"});
-              }
-            });
-
-            // Apply to filter row
-            var $filterRow = heads.$theadVis.find("tr.dt-filter-row th");
-            $filterRow.each(function(i){
-              if (initialColWidths[i]) {
-                $(this).css({"width": initialColWidths[i] + "px", "min-width": initialColWidths[i] + "px"});
-              }
-            });
-
-            // Apply to body cells in first row as reference
-            var $firstBodyRow = $cont.find(".dataTables_scrollBody table tbody tr:first td");
-            $firstBodyRow.each(function(i){
-              if (initialColWidths[i]) {
-                $(this).css({"width": initialColWidths[i] + "px", "min-width": initialColWidths[i] + "px"});
-              }
-            });
-          }
-        }catch(e){ console.warn("captureAndLockColWidths error:", e); }
+          console.log("[DT] Table layout locked to fixed");
+        }catch(e){ console.warn("lockTableLayout error:", e); }
       }
 
       function syncFilterWidths(heads){
@@ -609,7 +563,7 @@ window.dtAdvInit = function() {
         // Multiple delayed calls to ensure alignment after all rendering completes
         var syncWidths = function(){
           var h = locateHeads();
-          captureAndLockColWidths(h);
+          lockTableLayout(h);
           syncFilterWidths(h);
         };
         
