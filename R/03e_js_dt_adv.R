@@ -409,7 +409,14 @@ window.dtAdvInit = function() {
 
             var orders = sortStack.map(function(x){ return [x.colIdx, x.dir]; });
             api.order(orders).draw(false);
-            renderBadges(heads);
+            renderBadges(locateHeads());
+
+            // Force columns to shrink after sort (multiple delays to catch async recalculations)
+            setTimeout(function(){ forceColumnsToShrink(id); }, 0);
+            setTimeout(function(){ forceColumnsToShrink(id); }, 50);
+            setTimeout(function(){ forceColumnsToShrink(id); }, 150);
+            setTimeout(function(){ forceColumnsToShrink(id); }, 300);
+            setTimeout(function(){ forceColumnsToShrink(id); }, 500);
           });
 
         // filters — apply on Enter (simple text search, no regex to avoid numeric column issues)
@@ -425,6 +432,11 @@ window.dtAdvInit = function() {
               api.column(i).search(term, false, true, true);
               api.draw(false);
               setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
+              // Force columns to shrink after filter Enter
+              setTimeout(function(){ forceColumnsToShrink(id); }, 0);
+              setTimeout(function(){ forceColumnsToShrink(id); }, 50);
+              setTimeout(function(){ forceColumnsToShrink(id); }, 150);
+              setTimeout(function(){ forceColumnsToShrink(id); }, 300);
               e.preventDefault();
             }
           });
@@ -456,6 +468,11 @@ window.dtAdvInit = function() {
             sortStack = [];
             api.order([]).draw(false);
             setTimeout(function(){ renderBadges(locateHeads()); }, 0);
+            // Force columns to shrink after clear sort
+            setTimeout(function(){ forceColumnsToShrink(id); }, 0);
+            setTimeout(function(){ forceColumnsToShrink(id); }, 50);
+            setTimeout(function(){ forceColumnsToShrink(id); }, 150);
+            setTimeout(function(){ forceColumnsToShrink(id); }, 300);
           });
 
         // Apply all filters (simple text search)
@@ -476,6 +493,11 @@ window.dtAdvInit = function() {
             });
             api.draw(false);
             setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
+            // Force columns to shrink after filter apply
+            setTimeout(function(){ forceColumnsToShrink(id); }, 0);
+            setTimeout(function(){ forceColumnsToShrink(id); }, 50);
+            setTimeout(function(){ forceColumnsToShrink(id); }, 150);
+            setTimeout(function(){ forceColumnsToShrink(id); }, 300);
           });
 
         $(document).off("click"+ns, "thead.dtadv-owner-"+id+" .dt-clear-filters")
@@ -487,6 +509,11 @@ window.dtAdvInit = function() {
             api.draw(false);
             try { var g = $cont.find("div.dataTables_filter input[type=search]"); if (g.length) g.val(""); } catch(_){}
             setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
+            // Force columns to shrink after filter clear
+            setTimeout(function(){ forceColumnsToShrink(id); }, 0);
+            setTimeout(function(){ forceColumnsToShrink(id); }, 50);
+            setTimeout(function(){ forceColumnsToShrink(id); }, 150);
+            setTimeout(function(){ forceColumnsToShrink(id); }, 300);
           });
 
         // Recompute widths → adjust FixedHeader → lock helper widths
@@ -608,11 +635,15 @@ $(document).on("preInit.dt", function(e, settings){
     }
   });
 
-  // Also strip widths after every draw
+  // Also strip widths after every draw (multiple delays to catch async recalculations)
   api.on("draw.dt", function(){
     var tableId = settings.sTableId;
     if (tableId) {
       setTimeout(function(){ forceColumnsToShrink(tableId); }, 0);
+      setTimeout(function(){ forceColumnsToShrink(tableId); }, 50);
+      setTimeout(function(){ forceColumnsToShrink(tableId); }, 150);
+      setTimeout(function(){ forceColumnsToShrink(tableId); }, 300);
+      setTimeout(function(){ forceColumnsToShrink(tableId); }, 500);
     }
   });
 });
