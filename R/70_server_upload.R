@@ -67,6 +67,32 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         # Show full dataset with server-side processing for large data
         info_text <- sprintf("Showing _START_ to _END_ of %s records",
                              format(total_records, big.mark = ","))
+        # Find A - E column index for JavaScript (0-based)
+        ae_col_idx <- if ("A - E" %in% names(dfp)) which(names(dfp) == "A - E") - 1 else -1
+        # Create columnDefs with createdCell callback for A - E coloring
+        # This works with server-side processing unlike formatStyle
+        col_defs <- list()
+        if (ae_col_idx >= 0) {
+          col_defs <- list(
+            list(
+              targets = ae_col_idx,
+              createdCell = DT::JS(sprintf("
+                function(td, cellData, rowData, row, col) {
+                  var val = parseFloat(cellData);
+                  if (!isNaN(val)) {
+                    if (val < 0) {
+                      $(td).css('background-color', 'rgba(144, 238, 144, 0.4)');
+                      $(td).css('color', 'darkgreen');
+                    } else if (val > 0) {
+                      $(td).css('background-color', 'rgba(255, 182, 182, 0.4)');
+                      $(td).css('color', 'darkred');
+                    }
+                  }
+                }
+              "))
+            )
+          )
+        }
         dt <- DT::datatable(dfp,
                             options  = list(
                               pageLength = 25,
@@ -74,6 +100,7 @@ register_upload_server <- function(input, output, session, uploaded_df) {
                               paging = TRUE,
                               fixedHeader = TRUE,
                               autoWidth = FALSE, # Disable auto-width - CSS 1% trick handles column sizing
+                              columnDefs = col_defs,
                               language = list(info = info_text,
                                               infoFiltered = "(filtered from _MAX_ total records)")
                             ),
@@ -82,18 +109,6 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         num_cols_fmt <- intersect(c("Actual","Expected","A - E"), names(dfp))
         if (length(num_cols_fmt)) {
           dt <- DT::formatCurrency(dt, columns = num_cols_fmt, currency = "", interval = 3, mark = ",", digits = 0)
-        }
-        # Color code A - E column: red for positive (A > E), green for negative (A < E)
-        if ("A - E" %in% names(dfp)) {
-          dt <- DT::formatStyle(dt, columns = "A - E",
-                                backgroundColor = DT::styleInterval(
-                                  cuts = c(0),
-                                  values = c("rgba(144, 238, 144, 0.4)", "rgba(255, 182, 182, 0.4)")
-                                ),
-                                color = DT::styleInterval(
-                                  cuts = c(0),
-                                  values = c("darkgreen", "darkred")
-                                ))
         }
         dt
       }, server = TRUE)  # Server-side processing for large datasets
