@@ -241,47 +241,41 @@ css_overrides <- tags$style(HTML("
     text-align: right !important;
   }
 
-  /* ===== Column widths: FORCE shrink to exact content width ===== */
+  /* ===== Column widths: shrink to content ===== */
   table.dataTable {
     width: auto !important;
     table-layout: auto !important;
   }
-  /* Force each cell to shrink to content - width:1% + nowrap = exact fit */
   table.dataTable th, table.dataTable td {
-    width: 1% !important;
     white-space: nowrap !important;
     padding: 3px 6px !important;
   }
-  /* Scroll wrappers should not force width */
-  div.dataTables_scrollHead, div.dataTables_scrollBody,
-  div.dataTables_scrollHeadInner, div.dataTables_scrollBody table {
+  /* CRITICAL: Scroll wrappers must not force 100% width */
+  div.dataTables_scrollHead,
+  div.dataTables_scrollHeadInner,
+  div.dataTables_scrollHeadInner table,
+  div.dataTables_scrollBody,
+  div.dataTables_scrollBody table {
     width: auto !important;
+    min-width: 0 !important;
   }
 
-  /* ===== Make card fill available screen height ===== */
-  .bslib-page-main {
-    height: calc(100vh - 60px) !important;
-    overflow: hidden !important;
-  }
-  .tab-content, .tab-pane.active {
-    height: calc(100vh - 120px) !important;
-    overflow: hidden !important;
-  }
+  /* ===== Card/container sizing - NO overflow:hidden so pagination shows ===== */
   .bslib-card {
-    height: calc(100vh - 160px) !important;
-    overflow: hidden !important;
+    height: auto !important;
+    min-height: calc(100vh - 180px) !important;
+    overflow: visible !important;
   }
   .bslib-card .card-body {
-    height: 100% !important;
-    overflow: hidden !important;
+    height: auto !important;
+    overflow: visible !important;
   }
   .dataTables_wrapper {
-    height: 100% !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
-  /* scrollBody fills remaining space and scrolls */
+  /* scrollBody for vertical scroll within table */
   .dataTables_scrollBody {
-    height: calc(100vh - 280px) !important;
+    max-height: calc(100vh - 320px) !important;
     overflow-y: auto !important;
     overflow-x: auto !important;
   }
