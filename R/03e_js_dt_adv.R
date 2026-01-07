@@ -161,26 +161,10 @@ window.dtAdvInit = function() {
         }catch(e){}
       }
 
-      // Lock table layout after initial render to prevent width changes on sort
-      var tableLayoutLocked = false;
-
+      // Placeholder - width locking removed to prevent regressions
       function lockTableLayout(heads){
-        try{
-          if (tableLayoutLocked) return;
-          tableLayoutLocked = true;
-
-          // Set table-layout: fixed on both header and body tables
-          var $headTable = $cont.find(".dataTables_scrollHead table");
-          var $bodyTable = $cont.find(".dataTables_scrollBody table");
-
-          [$headTable, $bodyTable, $tbl].forEach(function($table){
-            if ($table.length) {
-              $table.css("table-layout", "fixed");
-            }
-          });
-
-          console.log("[DT] Table layout locked to fixed");
-        }catch(e){ console.warn("lockTableLayout error:", e); }
+        // Do nothing - let DataTables handle column widths naturally
+        return;
       }
 
       function syncFilterWidths(heads){
