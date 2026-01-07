@@ -64,6 +64,18 @@ css_dt <- htmltools::HTML(
   thead tr.dt-sort-row th { padding: 3px 6px !important; }
   thead tr.dt-sort-row .dt-sortbox { display: inline-flex; gap: 4px; }
 
+  /* Right-aligned columns: align sort buttons and filter to the right */
+  thead tr.dt-sort-row th.dt-col-right { text-align: right !important; }
+  thead tr.dt-sort-row th.dt-col-right .dt-sortbox { justify-content: flex-end; }
+  thead tr.dt-filter-row th.dt-col-right { text-align: right !important; }
+  thead tr.dt-filter-row th.dt-col-right input.dt-filter-input { text-align: right; }
+
+  /* Filter controls container - position above a specific column */
+  .dt-filter-controls {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
   /* ----- FILTERS: much shorter, fixed visible width -----
      Users can type longer; input scrolls horizontally. */
   thead tr.dt-filter-row th { padding: 3px 6px !important; }

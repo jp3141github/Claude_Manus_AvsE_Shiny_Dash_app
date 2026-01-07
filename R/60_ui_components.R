@@ -56,11 +56,12 @@ app_header <- tags$header(
 )
 
 # ---- Assistant UI (HYBRID; include only if ENABLE_ASSISTANT) ----
-# AFTER (robust)
+# NOTE: Help button removed per user request - functionality still available via Ctrl/Cmd+K
 assistant_button <- NULL
 assistant_modal  <- NULL
 if (ENABLE_ASSISTANT) {
-  assistant_button <- tags$button("❓ Help", id = "assist_open", class = "assist-fab")
+  # Help button removed - assistant still accessible via Ctrl/Cmd+K keyboard shortcut
+  assistant_button <- NULL  # Was: tags$button("❓ Help", id = "assist_open", class = "assist-fab")
   assistant_modal  <- modalDialog(
     tags$div(
       h4("Assistant"),
@@ -200,9 +201,20 @@ ui <- page_sidebar(
 
 css_overrides <- tags$style(HTML("
   .bslib-card .dataTables_wrapper {
-    min-height: 600px !important;
-    max-height: 2000px !important;
-    overflow-y: auto !important;
+    min-height: 400px !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+    overflow-x: auto !important;
+  }
+  /* Remove vertical scrollbar from Input Data preview - use pagination instead */
+  #tbl_preview_wrapper .dataTables_scrollBody {
+    overflow-y: visible !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+  /* Keep DataTables compact - no extra scroll containers */
+  .dataTables_scroll {
+    overflow: visible !important;
   }
   /* Solid black Browse button at all times */
   #csv_file .btn,
