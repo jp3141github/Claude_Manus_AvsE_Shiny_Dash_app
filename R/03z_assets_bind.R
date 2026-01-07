@@ -11,59 +11,61 @@ header_css <- htmltools::tagList(css_core, css_dt, css_preview)
 css_overrides <- htmltools::tags$style(htmltools::HTML("
 /* ===== FINAL OVERRIDES: widths & header alignment ===== */
 
-/* CRITICAL: All DataTables shrink to fit content */
+/* CRITICAL: All DataTables use inline-table to shrink to content */
 table.dataTable {
-  width: fit-content !important;
-  max-width: fit-content !important;
+  display: inline-table !important;
+  width: auto !important;
+  max-width: none !important;
   min-width: 0 !important;
   table-layout: auto !important;
 }
 
-/* All cells use 1% width trick to shrink to content */
+/* All cells: auto width, nowrap */
 table.dataTable th,
 table.dataTable td {
-  width: 1% !important;
+  width: auto !important;
   white-space: nowrap !important;
 }
 
-/* Wrapper containers - don't stretch */
+/* Wrapper containers - inline-block to shrink */
 div.dataTables_wrapper {
-  width: fit-content !important;
+  display: inline-block !important;
+  width: auto !important;
   max-width: 100% !important;
   min-width: 0 !important;
-  flex: 0 0 auto !important;
+  flex: none !important;
+  align-self: flex-start !important;
 }
 
-/* CRITICAL: Force header and body tables to shrink to content */
+/* CRITICAL: Force header and body containers to inline-block */
 div.dataTables_scrollHeadInner {
-  width: fit-content !important;
-  max-width: fit-content !important;
+  display: inline-block !important;
+  width: auto !important;
+  max-width: none !important;
   min-width: 0 !important;
 }
 div.dataTables_scrollHeadInner > table.dataTable {
-  width: fit-content !important;
-  max-width: fit-content !important;
+  display: inline-table !important;
+  width: auto !important;
+  max-width: none !important;
   min-width: 0 !important;
   margin: 0 !important;
 }
 
-/* Ensure the scroll-head table shrinks to content */
-div.dataTables_scrollHead table.dataTable {
-  width: fit-content !important;
-  max-width: fit-content !important;
-  min-width: 0 !important;
-}
-
-/* Scroll containers - shrink to fit */
+/* Scroll containers - inline-block to shrink */
+div.dataTables_scroll,
 div.dataTables_scrollHead,
 div.dataTables_scrollBody {
-  width: fit-content !important;
-  max-width: fit-content !important;
+  display: inline-block !important;
+  width: auto !important;
+  max-width: none !important;
 }
 
-/* CRITICAL: Remove table-layout:fixed which causes misalignment with scrollX */
+/* Inner tables: inline-table */
 div.dataTables_scrollHead table.dataTable,
 div.dataTables_scrollBody table.dataTable {
+  display: inline-table !important;
+  width: auto !important;
   table-layout: auto !important;
 }
 

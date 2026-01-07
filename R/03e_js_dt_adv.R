@@ -549,10 +549,11 @@ function forceColumnsToShrink(tableId) {
     // Remove colgroup entirely - it forces column widths
     $tbl.find("colgroup").remove();
 
-    // CRITICAL: Use fit-content so table shrinks to content
+    // CRITICAL: Use inline-table + width:auto to shrink to content
     $tbl.css({
-      "width": "fit-content",
-      "max-width": "fit-content",
+      "display": "inline-table",
+      "width": "auto",
+      "max-width": "none",
       "min-width": "0",
       "table-layout": "auto"
     });
@@ -563,38 +564,42 @@ function forceColumnsToShrink(tableId) {
       var textAlign = $cell.css("text-align");  // Preserve alignment
       $cell.removeAttr("width");
       $cell.css({
-        "width": "1%",  // Shrink to content trick
+        "width": "auto",
         "text-align": textAlign || "left"
       });
     });
 
-    // Strip from wrapper, use fit-content
+    // Strip from wrapper, use inline-block to shrink
     var $wrapper = $("#" + tableId + "_wrapper");
     if ($wrapper.length) {
       $wrapper.css({
-        "width": "fit-content",
+        "display": "inline-block",
+        "width": "auto",
         "max-width": "100%",
         "min-width": "0",
-        "display": "block",
-        "flex": "0 0 auto"  // Don't stretch in flex container
+        "flex": "none",
+        "align-self": "flex-start"
       });
     }
 
-    // Also fix scroll containers
-    $tbl.closest(".dataTables_scrollHead, .dataTables_scrollBody").each(function(){
+    // Also fix scroll containers - inline-block
+    $wrapper.find(".dataTables_scroll, .dataTables_scrollHead, .dataTables_scrollBody, .dataTables_scrollHeadInner").each(function(){
       $(this).css({
-        "width": "fit-content",
-        "max-width": "fit-content"
+        "display": "inline-block",
+        "width": "auto",
+        "max-width": "none"
       });
     });
 
-    // Force the card body to not stretch content
-    var $cardBody = $tbl.closest(".card-body");
-    if ($cardBody.length) {
-      $cardBody.css({ "display": "block", "width": "auto" });
-    }
+    // Inner tables also inline-table
+    $wrapper.find(".dataTables_scrollHead table, .dataTables_scrollBody table").each(function(){
+      $(this).css({
+        "display": "inline-table",
+        "width": "auto"
+      });
+    });
 
-    console.log("[Column Shrink] Done - table width is now:", $tbl.css("width"));
+    console.log("[Column Shrink] Done - table display is now:", $tbl.css("display"), "width:", $tbl.css("width"));
   } catch(e) {
     console.warn("[Column Shrink] Error:", e);
   }
