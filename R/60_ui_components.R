@@ -244,31 +244,29 @@ css_overrides <- tags$style(HTML("
   /* ===== Column widths: shrink to fit content ===== */
   table.dataTable {
     width: auto !important;
-    min-width: 0 !important;
   }
   table.dataTable th, table.dataTable td {
     white-space: nowrap !important;
+    padding: 4px 8px !important;
   }
-  /* Text columns can wrap if needed */
-  table.dataTable td.dt-wrap {
-    white-space: normal !important;
-    max-width: 200px !important;
+  /* Scroll wrapper should not force 100% width */
+  div.dataTables_scrollHead, div.dataTables_scrollBody {
+    width: auto !important;
+  }
+  div.dataTables_scrollHeadInner, div.dataTables_scrollBody table {
+    width: auto !important;
   }
 
-  /* Remove ALL vertical scrollbars from Input Data tab - use pagination only */
-  .bslib-card, .bslib-card .card-body, .bslib-card .dataTables_wrapper {
-    overflow-y: visible !important;
-    max-height: none !important;
-    height: auto !important;
+  /* Allow scrollY to work - table fills available height */
+  .bslib-card, .bslib-card .card-body {
+    overflow: visible !important;
   }
   .dataTables_wrapper {
-    overflow-y: visible !important;
-    max-height: none !important;
+    overflow: visible !important;
   }
+  /* scrollBody needs to scroll vertically */
   .dataTables_scrollBody {
-    overflow-y: visible !important;
-    max-height: none !important;
-    height: auto !important;
+    overflow-y: auto !important;
   }
   .dataTables_scroll {
     overflow: visible !important;
