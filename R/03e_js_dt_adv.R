@@ -538,6 +538,37 @@ window.dtAdvInitWithJumper = function(){
   return function(settings){ try{ adv(settings); }catch(e){} try{ jumper(settings); }catch(e){} };
 };
 
+/* -------- FORCE COLUMNS TO SHRINK: Strip all inline widths ----- */
+function forceColumnsToShrink(tableId) {
+  try {
+    var $tbl = $("#" + tableId);
+    if (!$tbl.length) return;
+
+    console.log("[Column Shrink] Stripping widths from table:", tableId);
+
+    // Remove colgroup entirely - it forces column widths
+    $tbl.find("colgroup").remove();
+
+    // Strip ALL inline width/min-width/max-width from table and cells
+    $tbl.css({ width: "auto", minWidth: "0", maxWidth: "none" });
+    $tbl.find("th, td").each(function(){
+      $(this).css({ width: "", minWidth: "", maxWidth: "" });
+      // Also remove width attribute if present
+      $(this).removeAttr("width");
+    });
+
+    // Also strip from wrapper
+    var $wrapper = $("#" + tableId + "_wrapper");
+    if ($wrapper.length) {
+      $wrapper.css({ width: "auto", minWidth: "0" });
+    }
+
+    console.log("[Column Shrink] Done stripping widths");
+  } catch(e) {
+    console.warn("[Column Shrink] Error:", e);
+  }
+}
+
 /* -------- GLOBAL HOOK: Auto-apply advanced features to ALL DataTables ----- */
 $(document).on("preInit.dt", function(e, settings){
   console.log("[JS] DataTable preInit.dt fired");
@@ -551,6 +582,22 @@ $(document).on("preInit.dt", function(e, settings){
       if (combo) combo(settings);
     } catch(err) {
       console.warn("dtAdvInitWithJumper error:", err);
+    }
+
+    // Force columns to shrink after all other init is done
+    var tableId = settings.sTableId;
+    if (tableId) {
+      setTimeout(function(){ forceColumnsToShrink(tableId); }, 0);
+      setTimeout(function(){ forceColumnsToShrink(tableId); }, 100);
+      setTimeout(function(){ forceColumnsToShrink(tableId); }, 300);
+    }
+  });
+
+  // Also strip widths after every draw
+  api.on("draw.dt", function(){
+    var tableId = settings.sTableId;
+    if (tableId) {
+      setTimeout(function(){ forceColumnsToShrink(tableId); }, 0);
     }
   });
 });
