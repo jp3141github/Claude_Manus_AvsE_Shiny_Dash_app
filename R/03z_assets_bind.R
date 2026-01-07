@@ -8,72 +8,28 @@
 header_css <- htmltools::tagList(css_core, css_dt, css_preview)
 
 # Keep a placeholder for future server-injected overrides
+# NOTE: Column widths are controlled by JavaScript - don't override with CSS width rules
 css_overrides <- htmltools::tags$style(htmltools::HTML("
-/* ===== FINAL OVERRIDES: widths & header alignment ===== */
-
-/* CRITICAL: All DataTables use inline-table to shrink to content */
-table.dataTable {
-  display: inline-table !important;
-  width: auto !important;
-  max-width: none !important;
-  min-width: 0 !important;
-  table-layout: auto !important;
-}
-
-/* All cells: auto width, nowrap */
-table.dataTable th,
-table.dataTable td {
-  width: auto !important;
-  white-space: nowrap !important;
-}
+/* ===== FINAL OVERRIDES: alignment & layout (NOT width - JS controls that) ===== */
 
 /* Wrapper containers - inline-block to shrink */
 div.dataTables_wrapper {
   display: inline-block !important;
-  width: auto !important;
   max-width: 100% !important;
-  min-width: 0 !important;
   flex: none !important;
   align-self: flex-start !important;
 }
 
-/* CRITICAL: Force header and body containers to inline-block */
-div.dataTables_scrollHeadInner {
-  display: inline-block !important;
-  width: auto !important;
-  max-width: none !important;
-  min-width: 0 !important;
-}
-div.dataTables_scrollHeadInner > table.dataTable {
-  display: inline-table !important;
-  width: auto !important;
-  max-width: none !important;
-  min-width: 0 !important;
-  margin: 0 !important;
+/* All cells: nowrap (widths set by JS) */
+table.dataTable th,
+table.dataTable td {
+  white-space: nowrap !important;
 }
 
-/* Scroll containers - inline-block to shrink */
-div.dataTables_scroll,
-div.dataTables_scrollHead,
-div.dataTables_scrollBody {
-  display: inline-block !important;
-  width: auto !important;
-  max-width: none !important;
-}
-
-/* Inner tables: inline-table */
-div.dataTables_scrollHead table.dataTable,
-div.dataTables_scrollBody table.dataTable {
-  display: inline-table !important;
-  width: auto !important;
-  table-layout: auto !important;
-}
-
-/* Filter inputs: fill their cell, don't force it wider */
+/* Filter inputs: fill their cell */
 table.dataTable thead tr.dt-filter-row input.dt-filter-input {
   width: 100% !important;
   min-width: 30px !important;
-  max-width: 100% !important;
 }
 
 /* Avoid header-cell overflow causing unexpected expansion */
