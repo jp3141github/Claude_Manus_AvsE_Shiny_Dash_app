@@ -161,13 +161,48 @@ window.dtAdvInit = function() {
         }catch(e){}
       }
 
-      function lockHelperColWidths(heads){
+      // Store initial column widths to prevent changes on sort/filter/page
+      var initialColWidths = null;
+
+      function captureAndLockColWidths(heads){
         try{
-          // DISABLED: Let CSS handle column widths with table-layout: auto
-          // This function was locking widths which prevented columns from shrinking to content
-          // The sort/filter rows will inherit widths naturally from the table layout
-          return;
-        }catch(e){ console.warn("lockHelperColWidths error:", e); }
+          var $labelRow = heads.$theadVis.find("tr:not(.dt-sort-row):not(.dt-filter-row):last th");
+
+          // First time: capture widths
+          if (!initialColWidths) {
+            initialColWidths = [];
+            $labelRow.each(function(i){
+              initialColWidths[i] = $(this).outerWidth();
+            });
+            console.log("[DT] Captured initial column widths:", initialColWidths);
+          }
+
+          // Always: apply locked widths to all header cells
+          if (initialColWidths && initialColWidths.length > 0) {
+            // Apply to label row
+            $labelRow.each(function(i){
+              if (initialColWidths[i]) {
+                $(this).css("width", initialColWidths[i] + "px");
+              }
+            });
+
+            // Apply to sort row
+            var $sortRow = heads.$theadVis.find("tr.dt-sort-row th");
+            $sortRow.each(function(i){
+              if (initialColWidths[i]) {
+                $(this).css("width", initialColWidths[i] + "px");
+              }
+            });
+
+            // Apply to filter row
+            var $filterRow = heads.$theadVis.find("tr.dt-filter-row th");
+            $filterRow.each(function(i){
+              if (initialColWidths[i]) {
+                $(this).css("width", initialColWidths[i] + "px");
+              }
+            });
+          }
+        }catch(e){ console.warn("captureAndLockColWidths error:", e); }
       }
 
       function syncFilterWidths(heads){
@@ -550,7 +585,7 @@ window.dtAdvInit = function() {
         // Multiple delayed calls to ensure alignment after all rendering completes
         var syncWidths = function(){
           var h = locateHeads();
-          lockHelperColWidths(h);
+          captureAndLockColWidths(h);
           syncFilterWidths(h);
         };
         
