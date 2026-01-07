@@ -67,6 +67,22 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         # Show full dataset with server-side processing for large data
         info_text <- sprintf("Showing _START_ to _END_ of %s records",
                              format(total_records, big.mark = ","))
+        # Find A - E column index for rowCallback (0-based for JS)
+        ae_col_idx <- if ("A - E" %in% names(dfp)) which(names(dfp) == "A - E") - 1 else -1
+        # JavaScript rowCallback to color A - E column: red for positive, green for negative
+        row_callback <- if (ae_col_idx >= 0) {
+          DT::JS(sprintf("function(row, data) {
+            var val = data[%d];
+            var numVal = parseFloat(String(val).replace(/,/g, ''));
+            if (!isNaN(numVal)) {
+              if (numVal > 0) {
+                $('td:eq(%d)', row).css('color', 'red');
+              } else if (numVal < 0) {
+                $('td:eq(%d)', row).css('color', 'green');
+              }
+            }
+          }", ae_col_idx, ae_col_idx, ae_col_idx))
+        } else NULL
         dt <- DT::datatable(dfp,
                             options  = list(
                               pageLength = 25,
@@ -75,17 +91,14 @@ register_upload_server <- function(input, output, session, uploaded_df) {
                               fixedHeader = TRUE,
                               autoWidth = FALSE, # Disable auto-width - CSS 1% trick handles column sizing
                               language = list(info = info_text,
-                                              infoFiltered = "(filtered from _MAX_ total records)")
+                                              infoFiltered = "(filtered from _MAX_ total records)"),
+                              rowCallback = row_callback
                             ),
                             extensions = c("FixedHeader"),
                             rownames = FALSE, escape = FALSE)
         num_cols_fmt <- intersect(c("Actual","Expected","A - E"), names(dfp))
         if (length(num_cols_fmt)) {
           dt <- DT::formatCurrency(dt, columns = num_cols_fmt, currency = "", interval = 3, mark = ",", digits = 0)
-        }
-        # Color code A - E column: red for positive (A > E), green for negative (A < E)
-        if ("A - E" %in% names(dfp)) {
-          dt <- DT::formatStyle(dt, columns = "A - E", color = DT::styleInterval(c(-1e-12, 1e-12), c("green", "black", "red")))
         }
         dt
       }, server = TRUE)  # Server-side processing for large datasets
