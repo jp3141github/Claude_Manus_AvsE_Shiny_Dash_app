@@ -200,6 +200,101 @@ ui <- page_sidebar(
 )
 
 css_overrides <- tags$style(HTML("
+  /* ===== CRITICAL: Force ALL cells to shrink to minimum content width ===== */
+  /* The 1% width trick forces columns to be as narrow as possible */
+  #tbl_preview th,
+  #tbl_preview td {
+    width: 1% !important;
+    white-space: nowrap !important;
+    padding: 3px 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Table must use auto layout and not expand */
+  #tbl_preview,
+  #tbl_preview.dataTable {
+    width: auto !important;
+    table-layout: auto !important;
+  }
+
+  /* Wrapper should not expand either */
+  #tbl_preview_wrapper {
+    width: auto !important;
+    display: inline-block !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+  }
+
+  /* Sort row and filter row cells also need 1% width */
+  #tbl_preview thead tr.dt-sort-row th,
+  #tbl_preview thead tr.dt-filter-row th {
+    width: 1% !important;
+    white-space: nowrap !important;
+  }
+
+  /* Filter inputs: shrink to content */
+  #tbl_preview thead tr.dt-filter-row input.dt-filter-input {
+    width: auto !important;
+    min-width: 30px !important;
+    max-width: 120px !important;
+    box-sizing: border-box !important;
+    padding: 2px 4px !important;
+    height: 20px !important;
+    font-size: 11px !important;
+  }
+
+  /* Labels row can wrap if needed, but keep compact */
+  #tbl_preview thead tr:not(.dt-sort-row):not(.dt-filter-row) th {
+    white-space: nowrap !important;
+    width: 1% !important;
+  }
+
+  /* FixedHeader clone must match */
+  .fixedHeader-floating#tbl_preview th,
+  .fixedHeader-floating table#tbl_preview th {
+    width: 1% !important;
+    white-space: nowrap !important;
+  }
+
+  /* CRITICAL: Force header and body tables to shrink to content */
+  div.dataTables_scrollHeadInner {
+    width: auto !important;
+    min-width: 0 !important;
+  }
+  div.dataTables_scrollHeadInner > table.dataTable {
+    width: auto !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Ensure the scroll-head table shrinks to content */
+  div.dataTables_scrollHead table.dataTable {
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  /* CRITICAL: Remove table-layout:fixed which causes misalignment with scrollX */
+  div.dataTables_scrollHead table.dataTable,
+  div.dataTables_scrollBody table.dataTable {
+    table-layout: auto !important;
+  }
+
+  /* Avoid header-cell overflow causing unexpected expansion */
+  div.dataTables_scrollHead th,
+  div.dataTables_scrollBody th { overflow: hidden !important; }
+
+  /* Force columns to sync between header and body */
+  div.dataTables_scrollHead col,
+  div.dataTables_scrollBody col {
+    width: auto !important;
+  }
+
+  /* Box sizing consistency */
+  table.dataTable, table.dataTable th, table.dataTable td {
+    box-sizing: border-box !important;
+  }
+
   /* ===== CRITICAL: Sort button styling (A/D/- chips) ===== */
   .dt-sortbtn {
     display: inline-block !important;
