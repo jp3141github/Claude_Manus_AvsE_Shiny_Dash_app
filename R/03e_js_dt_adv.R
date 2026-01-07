@@ -102,16 +102,11 @@ window.dtAdvInit = function() {
         return {$srow:$srow, $frow:$frow};
       }
 
-      // ---- OR support: "NIG;DLI" -> /(?:NIG|DLI)/gi; safe-escape terms ----
-      function regexEscape(s){
-        return s.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&");
-      }
-      function buildOrRegex(raw){
+      // ---- Simple text search (no regex to avoid issues with numeric columns) ----
+      // For OR support: "NIG;DLI" is handled by searching for each term
+      function buildSearchTerm(raw){
         if (!raw) return "";
-        var parts = raw.split(/\\s*;\\s*/).map(function(t){ return t.trim(); }).filter(Boolean);
-        if (!parts.length) return "";
-        // Join with |, match anywhere in the cell
-        return "(?:" + parts.map(regexEscape).join("|") + ")";
+        return raw.trim();
       }
 
       // Persist RAW input values (not regex) in container data
@@ -418,7 +413,7 @@ window.dtAdvInit = function() {
             renderBadges(heads);
           });
 
-        // filters — apply on Enter (with OR support, regex=TRUE)
+        // filters — apply on Enter (simple text search, no regex to avoid numeric column issues)
         $(document).off("keydown"+ns, "thead.dtadv-owner-"+id+" tr.dt-filter-row input.dt-filter-input")
           .on("keydown"+ns, "thead.dtadv-owner-"+id+" tr.dt-filter-row input.dt-filter-input", function(e){
             if (e.key === "Enter"){
@@ -426,9 +421,9 @@ window.dtAdvInit = function() {
               var i = parseInt($(this).attr("data-col"),10);
               var raw = this.value || "";
               saveRawFiltersFromHead($thead);
-              var rx = buildOrRegex(raw);
-              if (!rx) { api.column(i).search(""); }
-              else     { api.column(i).search(rx, true, false, true); } // regex=TRUE, smart=FALSE, case-ins=TRUE
+              var term = buildSearchTerm(raw);
+              // Use simple text search (regex=FALSE, smart=TRUE, case-insensitive=TRUE)
+              api.column(i).search(term, false, true, true);
               api.draw(false);
               setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
               e.preventDefault();
@@ -453,7 +448,7 @@ window.dtAdvInit = function() {
             setTimeout(function(){ renderBadges(locateHeads()); }, 0);
           });
 
-        // Preview-only: Apply / Clear filters (with OR)
+        // Apply all filters (simple text search)
         $(document).off("click"+ns, "thead.dtadv-owner-"+id+" .dt-apply-filters")
           .on("click"+ns, "thead.dtadv-owner-"+id+" .dt-apply-filters", function(e){
             e.preventDefault();
@@ -462,12 +457,12 @@ window.dtAdvInit = function() {
             $thead.find("tr.dt-filter-row th input.dt-filter-input").each(function(i){ rawVals[i] = this.value || ""; });
             // Save RAW values
             $cont.data(KEY_FILTERS, rawVals);
-            // Apply as regex OR
+            // Apply as simple text search (no regex to avoid numeric column issues)
             api.columns(":visible").every(function(vidx){
               var raw = rawVals[vidx] || "";
-              var rx  = buildOrRegex(raw);
-              if (!rx) this.search("");
-              else     this.search(rx, true, false, true);
+              var term = buildSearchTerm(raw);
+              // Use simple text search (regex=FALSE, smart=TRUE, case-insensitive=TRUE)
+              this.search(term, false, true, true);
             });
             api.draw(false);
             setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
