@@ -42,7 +42,7 @@ register_results_server <- function(input, output, session, results_obj, uploade
             pageLength  = if (FAST) 50 else 100,
             lengthMenu  = list(c(25,50,100,200,500,1000), c(25,50,100,200,500,1000)),
             searchDelay = 400,
-            autoWidth   = FALSE,
+            autoWidth   = TRUE,     # Auto-size columns to fit content
             ordering    = TRUE,
             fixedHeader = TRUE
           ),
@@ -167,10 +167,25 @@ register_results_server <- function(input, output, session, results_obj, uploade
         HTML("<span style='color:red; font-weight:bold;'>&lt;&lt;&lt; Upload a CSV to preview data. (Use Browse Button)</span>")
       ))
     }
-    card(
-      card_header("Uploaded Data"),
-      style = "min-height:600px; max-height:2000px;",  # NEW: set card height
-      DTOutput("tbl_preview")
+    # Card with fit-content width to shrink columns to data
+    tagList(
+      tags$style(HTML("
+        #preview-data-card {
+          width: fit-content !important;
+          max-width: 100% !important;
+          min-height: 200px;
+        }
+        #preview-data-card .card-body {
+          display: block !important;
+          width: auto !important;
+          overflow-x: auto !important;
+        }
+      ")),
+      card(
+        id = "preview-data-card",
+        card_header("Uploaded Data"),
+        DTOutput("tbl_preview")
+      )
     )
   })
 }

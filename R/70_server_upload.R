@@ -56,7 +56,14 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         if ("Actual" %in% names(dfp))   dfp[["Actual"]]   <- to_float(dfp[["Actual"]])
         if ("Expected" %in% names(dfp)) dfp[["Expected"]] <- to_float(dfp[["Expected"]])
         dt <- DT::datatable(head(dfp, 500),
-                            options  = list(pageLength = 25, scrollX = TRUE),
+                            options  = list(
+                              pageLength = 25,
+                              scrollX = FALSE,   # Disable DT scroll - let CSS handle overflow
+                              paging = TRUE,
+                              fixedHeader = TRUE,
+                              autoWidth = FALSE
+                            ),
+                            extensions = c("FixedHeader"),
                             rownames = FALSE, escape = FALSE)
         num_cols_fmt <- intersect(c("Actual","Expected"), names(dfp))
         if (length(num_cols_fmt)) {
@@ -64,7 +71,7 @@ register_upload_server <- function(input, output, session, uploaded_df) {
           dt <- DT::formatStyle(dt, columns = num_cols_fmt, color = DT::styleInterval(c(-1e-12, 0), c("red","black","black")))
         }
         dt
-      })
+      }, server = FALSE)  # Client-side processing to allow text filtering on numeric columns
 
       # Populate chart controls from RAW
       .populate_chart_controls_from_raw()

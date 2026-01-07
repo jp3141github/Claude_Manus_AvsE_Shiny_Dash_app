@@ -11,21 +11,21 @@ header_css <- htmltools::tagList(css_core, css_dt, css_preview)
 css_overrides <- htmltools::tags$style(htmltools::HTML("
 /* ===== FINAL OVERRIDES: widths & header alignment ===== */
 
-/* CRITICAL: Force header and body tables to use same width calculation */
+/* CRITICAL: Force header and body tables to shrink to content */
 div.dataTables_scrollHeadInner {
   width: auto !important;
-  min-width: 100% !important;
+  min-width: 0 !important;
 }
 div.dataTables_scrollHeadInner > table.dataTable {
   width: auto !important;
-  min-width: 100% !important;
+  min-width: 0 !important;
   margin: 0 !important;
 }
 
-/* Ensure the scroll-head table spans the container exactly */
-div.dataTables_scrollHead table.dataTable { 
-  width: auto !important; 
-  min-width: 100% !important;
+/* Ensure the scroll-head table shrinks to content */
+div.dataTables_scrollHead table.dataTable {
+  width: auto !important;
+  min-width: 0 !important;
 }
 
 /* CRITICAL: Remove table-layout:fixed which causes misalignment with scrollX */
@@ -82,6 +82,22 @@ div.dataTables_scrollBody col {
 table.dataTable thead th.dt-head-right,
 .fixedHeader-floating thead th.dt-head-right,
 .fixedHeader-locked  thead th.dt-head-right{
+  text-align: right !important;
+}
+
+/* CRITICAL: Right-align sort and filter rows for numeric columns */
+/* Use text-align + float to preserve table-cell layout */
+table.dataTable thead tr.dt-sort-row th.dt-col-right,
+div.dataTables_scrollHead table.dataTable thead tr.dt-sort-row th.dt-col-right,
+.fixedHeader-floating thead tr.dt-sort-row th.dt-col-right {
+  text-align: right !important;
+}
+table.dataTable thead tr.dt-sort-row th.dt-col-right .dt-sortbox {
+  float: right !important;
+}
+table.dataTable thead tr.dt-filter-row th.dt-col-right,
+div.dataTables_scrollHead table.dataTable thead tr.dt-filter-row th.dt-col-right,
+.fixedHeader-floating thead tr.dt-filter-row th.dt-col-right {
   text-align: right !important;
 }
 

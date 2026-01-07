@@ -16,12 +16,12 @@ css_dt <- htmltools::HTML(
   thead th .dt-sortbox { display:block; margin-bottom:4px; }
   .fixedHeader-floating thead th .dt-sortbox { display:block; margin-bottom:4px; }
   thead th { position:relative; vertical-align:bottom; }
-  .dt-sortbox { display:inline-flex; align-items:center; gap:4px; }
+  .dt-sortbox { display:inline-flex; align-items:center; gap:2px; }
 
   .dt-sortbtn {
-    padding:0 6px;
-    line-height:18px;
-    height:20px;
+    padding:0 4px;
+    line-height:16px;
+    height:18px;
     border:1px solid #ccc;
     border-radius:3px;
     background:#f7f7f7;
@@ -64,18 +64,37 @@ css_dt <- htmltools::HTML(
   thead tr.dt-sort-row th { padding: 3px 6px !important; }
   thead tr.dt-sort-row .dt-sortbox { display: inline-flex; gap: 4px; }
 
-  /* ----- FILTERS: much shorter, fixed visible width -----
-     Users can type longer; input scrolls horizontally. */
+  /* Right-aligned columns: align sort buttons and filter to the right */
+  /* Use text-align + float to preserve table-cell layout */
+  thead tr.dt-sort-row th.dt-col-right {
+    text-align: right !important;
+  }
+  thead tr.dt-sort-row th.dt-col-right .dt-sortbox {
+    float: right !important;
+  }
+  thead tr.dt-filter-row th.dt-col-right {
+    text-align: right !important;
+  }
+  thead tr.dt-filter-row th.dt-col-right input.dt-filter-input {
+    text-align: right !important;
+  }
+
+  /* Filter controls container - position above a specific column */
+  .dt-filter-controls {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  /* ----- FILTERS: adapt to column width, not fixed ----- */
   thead tr.dt-filter-row th { padding: 3px 6px !important; }
   thead tr.dt-filter-row input.dt-filter-input{
-    width: 120px !important;     /* << shorter visible box */
-    max-width: 120px !important;
-    min-width: 0 !important;
+    width: auto !important;
+    min-width: 40px !important;
+    max-width: 100% !important;
     box-sizing: border-box !important;
     padding: 2px 4px !important;
     height: 20px !important;
     font-size: 11px !important;
-    overflow: hidden !important;  /* show only visible portion */
   }
 
   /* ----- LABEL WRAPPING (bottom row only) -----

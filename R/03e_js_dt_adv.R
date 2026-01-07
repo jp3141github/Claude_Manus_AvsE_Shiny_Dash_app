@@ -2,6 +2,8 @@
 # Adds Apply/Clear filters to ALL tables and persists filter values across rebuilds.
 
 js_dt <- '
+console.log("[JS] DataTables Advanced Header JS loaded");
+
 /* =======================================================================
    DataTables Advanced Header Utilities
    - Per-table A/D/− chips above headers (multi-order with position badges)
@@ -102,16 +104,11 @@ window.dtAdvInit = function() {
         return {$srow:$srow, $frow:$frow};
       }
 
-      // ---- OR support: "NIG;DLI" -> /(?:NIG|DLI)/gi; safe-escape terms ----
-      function regexEscape(s){
-        return s.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&");
-      }
-      function buildOrRegex(raw){
+      // ---- Simple text search (no regex to avoid issues with numeric columns) ----
+      // For OR support: "NIG;DLI" is handled by searching for each term
+      function buildSearchTerm(raw){
         if (!raw) return "";
-        var parts = raw.split(/\\s*;\\s*/).map(function(t){ return t.trim(); }).filter(Boolean);
-        if (!parts.length) return "";
-        // Join with |, match anywhere in the cell
-        return "(?:" + parts.map(regexEscape).join("|") + ")";
+        return raw.trim();
       }
 
       // Persist RAW input values (not regex) in container data
@@ -248,20 +245,163 @@ window.dtAdvInit = function() {
         } catch(e){}
       }
 
+      // Detect column alignment based on column name and data content (numeric = right-aligned)
+      function detectColumnAlignments(heads){
+        try{
+          // Get column names from header labels
+          var $labelRow = heads.$theadVis.find("tr:not(.dt-sort-row):not(.dt-filter-row):last th");
+          var alignments = [];
+
+          // Check first few rows of data to detect if column is numeric
+          var $bodyTable = $cont.find("div.dataTables_scrollBody table.dataTable");
+          if (!$bodyTable.length) $bodyTable = $tbl;
+          var $rows = $bodyTable.find("tbody tr").slice(0, 10);
+
+          $labelRow.each(function(i){
+            var colName = $(this).text().trim().toLowerCase();
+            var isRightAligned = false;
+
+            // Known text columns that should be left-aligned
+            var leftAlignCols = ["projectiondate", "projection date", "objectname", "object name",
+                                "section", "product", "peril", "measure", "segment", "model type",
+                                "event / non-event", "event/non-event", "current or prior"];
+
+            // Known numeric columns that should be right-aligned
+            var rightAlignCols = ["actual", "expected", "accident period", "accidentperiod",
+                                 "accident year", "accidentyear", "amount", "value", "count", "total"];
+
+            // Check if column name suggests left-alignment
+            var isTextCol = leftAlignCols.some(function(lc){ return colName.indexOf(lc) >= 0; });
+
+            // Check if column name suggests right-alignment (numeric)
+            var isNumericCol = rightAlignCols.some(function(rc){ return colName.indexOf(rc) >= 0; });
+
+            // Also check if column name is a year (e.g., 2010, 2011, 2012, etc.)
+            var isYearCol = /^[0-9]{4}$/.test(colName.trim());
+
+            console.log("[DT Alignment] Col", i, "name:", colName, "isTextCol:", isTextCol, "isNumericCol:", isNumericCol, "isYearCol:", isYearCol);
+
+            if (isTextCol) {
+              isRightAligned = false;
+            } else if (isNumericCol || isYearCol) {
+              isRightAligned = true;
+            } else {
+              // Check actual data - if most values look numeric, right-align
+              var numericCount = 0;
+              var totalChecked = 0;
+              $rows.each(function(){
+                var $cell = $(this).find("td").eq(i);
+                if ($cell.length) {
+                  var val = $cell.text().trim();
+                  totalChecked++;
+                  // Check if value looks numeric (including currency, commas, brackets, decimals)
+                  if (/^[()\\-\\d,.$£€\\s]+$/.test(val) && val.length > 0 && /\\d/.test(val)) {
+                    numericCount++;
+                  }
+                }
+              });
+              isRightAligned = totalChecked > 0 && (numericCount / totalChecked) > 0.5;
+            }
+
+            alignments[i] = isRightAligned ? "right" : "left";
+          });
+
+          return alignments;
+        }catch(e){ console.warn("detectColumnAlignments error:", e); return []; }
+      }
+
+      // Apply alignment to sort and filter rows (class-based for CSS flexbox)
+      function applyColumnAlignments(heads, alignments){
+        try{
+          console.log("[DT Alignment] applyColumnAlignments called, theads count:", heads.$theads.length, "alignments:", alignments.length);
+
+          if (!alignments || alignments.length === 0) {
+            console.warn("[DT Alignment] No alignments to apply");
+            return;
+          }
+
+          heads.$theads.each(function(theadIdx){
+            var $h = $(this);
+            var $sortCells = $h.find("tr.dt-sort-row th");
+            var $filterCells = $h.find("tr.dt-filter-row th");
+            console.log("[DT Alignment] Thead", theadIdx, "- sortCells:", $sortCells.length, "filterCells:", $filterCells.length);
+
+            if ($sortCells.length === 0) {
+              console.warn("[DT Alignment] No sort cells found in thead", theadIdx);
+              return;
+            }
+
+            alignments.forEach(function(align, i){
+              if (align === "right") {
+                var $sortCell = $sortCells.eq(i);
+                var $filterCell = $filterCells.eq(i);
+
+                if ($sortCell.length === 0) {
+                  console.warn("[DT Alignment] No sortCell at index", i);
+                  return;
+                }
+
+                // Add the class - CSS uses text-align:right + float:right for sortbox
+                // DO NOT use display:flex as it breaks table-cell layout
+                $sortCell.addClass("dt-col-right").css("text-align", "right");
+                $filterCell.addClass("dt-col-right").css("text-align", "right");
+
+                // Float the sortbox to the right
+                $sortCell.find(".dt-sortbox").css("float", "right");
+
+                // Also right-align the filter input text
+                $filterCell.find("input.dt-filter-input").css("text-align", "right");
+
+                console.log("[DT Alignment] Applied dt-col-right to col", i,
+                  "- sortCell has class:", $sortCell.hasClass("dt-col-right"),
+                  "- filterCell has class:", $filterCell.hasClass("dt-col-right"));
+              }
+            });
+          });
+        }catch(e){ console.warn("applyColumnAlignments error:", e); }
+      }
+
+      // Find the column index for "Section" (to place filter controls above it)
+      function findSectionColumnIndex(heads){
+        try{
+          var $labelRow = heads.$theadVis.find("tr:not(.dt-sort-row):not(.dt-filter-row):last th");
+          var sectionIdx = -1;
+          $labelRow.each(function(i){
+            var colName = $(this).text().trim().toLowerCase();
+            if (colName === "section") {
+              sectionIdx = i;
+              return false; // break
+            }
+          });
+          return sectionIdx;
+        }catch(e){ return -1; }
+      }
+
       function ensureFilterControls(heads){
         try{
+          // Find Section column index - place controls above it
+          var sectionIdx = findSectionColumnIndex(heads);
+
           heads.$theads.each(function(){
             var $h = $(this);
-            var $firstTh = $h.find("tr.dt-filter-row th").first();
-            if (!$firstTh.length) return;
-            if ($firstTh.find(".dt-filter-controls").length) return;
+            var $filterCells = $h.find("tr.dt-filter-row th");
+            if (!$filterCells.length) return;
+
+            // Remove any existing filter controls first
+            $h.find(".dt-filter-controls").remove();
+
+            // Determine which cell to put controls in
+            // If Section column exists, put controls there; otherwise use first column
+            var targetIdx = (sectionIdx >= 0 && sectionIdx < $filterCells.length) ? sectionIdx : 0;
+            var $targetTh = $filterCells.eq(targetIdx);
+
             var html = [
-              \'<span class="dt-filter-controls" style="margin-left:8px;white-space:nowrap;">\',
+              \'<span class="dt-filter-controls" style="white-space:nowrap;display:block;margin-bottom:2px;">\',
               \'<a href="#" class="dt-apply-filters" title="Apply all column filters" style="font-size:11px;text-decoration:none;margin-right:6px;">✔ apply</a>\',
               \'<a href="#" class="dt-clear-filters" title="Clear all column filters" style="font-size:11px;text-decoration:none;">✖ clear filters</a>\',
               \'</span>\'
             ].join("");
-            $firstTh.append(html);
+            $targetTh.prepend(html);
           });
         }catch(e){}
       }
@@ -324,7 +464,7 @@ window.dtAdvInit = function() {
             renderBadges(heads);
           });
 
-        // filters — apply on Enter (with OR support, regex=TRUE)
+        // filters — apply on Enter (simple text search, no regex to avoid numeric column issues)
         $(document).off("keydown"+ns, "thead.dtadv-owner-"+id+" tr.dt-filter-row input.dt-filter-input")
           .on("keydown"+ns, "thead.dtadv-owner-"+id+" tr.dt-filter-row input.dt-filter-input", function(e){
             if (e.key === "Enter"){
@@ -332,16 +472,31 @@ window.dtAdvInit = function() {
               var i = parseInt($(this).attr("data-col"),10);
               var raw = this.value || "";
               saveRawFiltersFromHead($thead);
-              var rx = buildOrRegex(raw);
-              if (!rx) { api.column(i).search(""); }
-              else     { api.column(i).search(rx, true, false, true); } // regex=TRUE, smart=FALSE, case-ins=TRUE
+              var term = buildSearchTerm(raw);
+              // Use simple text search (regex=FALSE, smart=TRUE, case-insensitive=TRUE)
+              api.column(i).search(term, false, true, true);
               api.draw(false);
               setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
               e.preventDefault();
             }
           });
 
-        // Add preview-only filter controls, then restore cached RAW values to inputs
+        // Detect and apply column alignments (right-align numeric columns)
+        var alignments = detectColumnAlignments(heads);
+        console.log("[DT Alignment] Detected alignments:", alignments);
+        applyColumnAlignments(heads, alignments);
+
+        // Re-apply alignments after delays to ensure they stick
+        function reapplyAlignments(){
+          var h = locateHeads();
+          var a = detectColumnAlignments(h);
+          applyColumnAlignments(h, a);
+        }
+        setTimeout(reapplyAlignments, 100);
+        setTimeout(reapplyAlignments, 300);
+        setTimeout(reapplyAlignments, 600);
+
+        // Add filter controls (positioned above Section column), then restore cached RAW values to inputs
         ensureFilterControls(heads);
         writeRawFilterInputs(heads, cachedRaw);
 
@@ -355,7 +510,7 @@ window.dtAdvInit = function() {
             setTimeout(function(){ renderBadges(locateHeads()); }, 0);
           });
 
-        // Preview-only: Apply / Clear filters (with OR)
+        // Apply all filters (simple text search)
         $(document).off("click"+ns, "thead.dtadv-owner-"+id+" .dt-apply-filters")
           .on("click"+ns, "thead.dtadv-owner-"+id+" .dt-apply-filters", function(e){
             e.preventDefault();
@@ -364,12 +519,12 @@ window.dtAdvInit = function() {
             $thead.find("tr.dt-filter-row th input.dt-filter-input").each(function(i){ rawVals[i] = this.value || ""; });
             // Save RAW values
             $cont.data(KEY_FILTERS, rawVals);
-            // Apply as regex OR
+            // Apply as simple text search (no regex to avoid numeric column issues)
             api.columns(":visible").every(function(vidx){
               var raw = rawVals[vidx] || "";
-              var rx  = buildOrRegex(raw);
-              if (!rx) this.search("");
-              else     this.search(rx, true, false, true);
+              var term = buildSearchTerm(raw);
+              // Use simple text search (regex=FALSE, smart=TRUE, case-insensitive=TRUE)
+              this.search(term, false, true, true);
             });
             api.draw(false);
             setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
@@ -437,10 +592,12 @@ window.dtAdvInitWithJumper = function(){
 
 /* -------- GLOBAL HOOK: Auto-apply advanced features to ALL DataTables ----- */
 $(document).on("preInit.dt", function(e, settings){
+  console.log("[JS] DataTable preInit.dt fired");
   // This fires BEFORE each DataTable is fully initialized
   // We hook into init.dt to apply our advanced features AFTER initialization
   var api = new $.fn.dataTable.Api(settings);
   api.on("init.dt", function(){
+    console.log("[JS] DataTable init.dt fired - applying advanced features");
     try {
       var combo = window.dtAdvInitWithJumper ? window.dtAdvInitWithJumper() : null;
       if (combo) combo(settings);

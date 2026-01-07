@@ -56,11 +56,12 @@ app_header <- tags$header(
 )
 
 # ---- Assistant UI (HYBRID; include only if ENABLE_ASSISTANT) ----
-# AFTER (robust)
+# NOTE: Help button removed per user request - functionality still available via Ctrl/Cmd+K
 assistant_button <- NULL
 assistant_modal  <- NULL
 if (ENABLE_ASSISTANT) {
-  assistant_button <- tags$button("❓ Help", id = "assist_open", class = "assist-fab")
+  # Help button removed - assistant still accessible via Ctrl/Cmd+K keyboard shortcut
+  assistant_button <- NULL  # Was: tags$button("❓ Help", id = "assist_open", class = "assist-fab")
   assistant_modal  <- modalDialog(
     tags$div(
       h4("Assistant"),
@@ -199,11 +200,54 @@ ui <- page_sidebar(
 )
 
 css_overrides <- tags$style(HTML("
-  .bslib-card .dataTables_wrapper {
-    min-height: 600px !important;
-    max-height: 2000px !important;
-    overflow-y: auto !important;
+  /* ===== CRITICAL: Sort button styling (A/D/- chips) ===== */
+  .dt-sortbtn {
+    display: inline-block !important;
+    padding: 0 6px !important;
+    line-height: 18px !important;
+    height: 20px !important;
+    border: 1px solid #ccc !important;
+    border-radius: 3px !important;
+    background: #f7f7f7 !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    font-size: 11px !important;
+    color: #444 !important;
+    margin: 0 1px !important;
   }
+  .dt-sortbtn.active {
+    background: #d4edda !important;
+    border-color: #28a745 !important;
+    font-weight: bold !important;
+  }
+  .dt-sortbox {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+
+  /* ===== Right-align numeric columns (sort buttons + filters on right) ===== */
+  thead tr.dt-sort-row th.dt-col-right {
+    text-align: right !important;
+  }
+  thead tr.dt-sort-row th.dt-col-right .dt-sortbox {
+    float: right !important;
+  }
+  thead tr.dt-filter-row th.dt-col-right {
+    text-align: right !important;
+  }
+  thead tr.dt-filter-row th.dt-col-right input.dt-filter-input {
+    text-align: right !important;
+  }
+
+  /* ===== Dynamic height - pagination directly under data ===== */
+  .dataTables_scrollBody {
+    height: auto !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+    overflow-x: auto !important;
+  }
+
   /* Solid black Browse button at all times */
   #csv_file .btn,
   #csv_file .btn:hover,
@@ -222,11 +266,6 @@ css_overrides <- tags$style(HTML("
     color:#fff !important;
     border-color:#000 !important;
     opacity:.65 !important;
-  }
-    /* Browse button styling */
-  #csv_file .btn {
-    background-color:#000 !important; color:#fff !important; border-color:#000 !important;
-    box-shadow:none !important; outline:none !important;
   }
   /* Before upload: thick red border cue */
   #csv_file:not(.used) .btn {
