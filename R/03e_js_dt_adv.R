@@ -538,68 +538,96 @@ window.dtAdvInitWithJumper = function(){
   return function(settings){ try{ adv(settings); }catch(e){} try{ jumper(settings); }catch(e){} };
 };
 
-/* -------- FORCE COLUMNS TO SHRINK: Strip all inline widths ----- */
+/* -------- FORCE COLUMNS TO SHRINK: Calculate and set content-based widths ----- */
 function forceColumnsToShrink(tableId) {
   try {
     var $tbl = $("#" + tableId);
     if (!$tbl.length) return;
 
-    console.log("[Column Shrink] Stripping widths from table:", tableId);
+    console.log("[Column Shrink] Calculating content widths for table:", tableId);
 
     // Remove colgroup entirely - it forces column widths
     $tbl.find("colgroup").remove();
 
-    // CRITICAL: Use inline-table + width:auto to shrink to content
-    $tbl.css({
-      "display": "inline-table",
-      "width": "auto",
-      "max-width": "none",
-      "min-width": "0",
-      "table-layout": "auto"
+    // Step 1: Measure actual content width of each column
+    var colWidths = [];
+    var $headerCells = $tbl.find("thead tr:last th"); // Label row
+    var numCols = $headerCells.length;
+
+    // Create a hidden measurement div
+    var $measure = $("<div>").css({
+      position: "absolute",
+      visibility: "hidden",
+      height: "auto",
+      width: "auto",
+      whiteSpace: "nowrap",
+      font: $tbl.css("font")
+    }).appendTo("body");
+
+    // Measure header text widths
+    $headerCells.each(function(i) {
+      var headerText = $(this).text().trim();
+      $measure.text(headerText);
+      colWidths[i] = $measure.width() + 20; // Add padding
     });
 
-    // Strip width from th and td cells, but preserve text-align
-    $tbl.find("th, td").each(function(){
-      var $cell = $(this);
-      var textAlign = $cell.css("text-align");  // Preserve alignment
-      $cell.removeAttr("width");
-      $cell.css({
-        "width": "auto",
-        "text-align": textAlign || "left"
+    // Measure data cell widths (sample first 25 rows)
+    $tbl.find("tbody tr").slice(0, 25).each(function() {
+      $(this).find("td").each(function(i) {
+        if (i < numCols) {
+          var cellText = $(this).text().trim();
+          $measure.text(cellText);
+          var w = $measure.width() + 20;
+          if (w > colWidths[i]) colWidths[i] = w;
+        }
       });
     });
 
-    // Strip from wrapper, use inline-block to shrink
+    $measure.remove();
+
+    console.log("[Column Shrink] Measured widths:", colWidths);
+
+    // Step 2: Apply measured widths to all cells
+    $tbl.find("thead tr").each(function() {
+      $(this).find("th").each(function(i) {
+        if (i < colWidths.length) {
+          $(this).attr("style", "width:" + colWidths[i] + "px !important; max-width:" + colWidths[i] + "px !important; white-space:nowrap !important;");
+        }
+      });
+    });
+
+    $tbl.find("tbody tr").each(function() {
+      $(this).find("td").each(function(i) {
+        if (i < colWidths.length) {
+          $(this).attr("style", "width:" + colWidths[i] + "px !important; max-width:" + colWidths[i] + "px !important; white-space:nowrap !important;");
+        }
+      });
+    });
+
+    // Step 3: Calculate total table width
+    var totalWidth = colWidths.reduce(function(a, b) { return a + b; }, 0);
+    console.log("[Column Shrink] Total table width:", totalWidth);
+
+    // Step 4: Set table width explicitly
+    $tbl.attr("style", "width:" + totalWidth + "px !important; max-width:" + totalWidth + "px !important; table-layout:fixed !important;");
+
+    // Step 5: Fix wrapper to shrink
     var $wrapper = $("#" + tableId + "_wrapper");
     if ($wrapper.length) {
-      $wrapper.css({
-        "display": "inline-block",
-        "width": "auto",
-        "max-width": "100%",
-        "min-width": "0",
-        "flex": "none",
-        "align-self": "flex-start"
-      });
+      $wrapper.attr("style", "display:inline-block !important; width:auto !important; max-width:100% !important;");
     }
 
-    // Also fix scroll containers - inline-block
+    // Step 6: Fix scroll containers
     $wrapper.find(".dataTables_scroll, .dataTables_scrollHead, .dataTables_scrollBody, .dataTables_scrollHeadInner").each(function(){
-      $(this).css({
-        "display": "inline-block",
-        "width": "auto",
-        "max-width": "none"
-      });
+      $(this).attr("style", "display:inline-block !important; width:auto !important;");
     });
 
-    // Inner tables also inline-table
+    // Inner tables
     $wrapper.find(".dataTables_scrollHead table, .dataTables_scrollBody table").each(function(){
-      $(this).css({
-        "display": "inline-table",
-        "width": "auto"
-      });
+      $(this).attr("style", "width:" + totalWidth + "px !important; max-width:" + totalWidth + "px !important; table-layout:fixed !important;");
     });
 
-    console.log("[Column Shrink] Done - table display is now:", $tbl.css("display"), "width:", $tbl.css("width"));
+    console.log("[Column Shrink] Done - applied explicit widths");
   } catch(e) {
     console.warn("[Column Shrink] Error:", e);
   }
