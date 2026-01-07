@@ -82,7 +82,10 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         num_cols_fmt <- intersect(c("Actual","Expected","A - E"), names(dfp))
         if (length(num_cols_fmt)) {
           dt <- DT::formatCurrency(dt, columns = num_cols_fmt, currency = "", interval = 3, mark = ",", digits = 0)
-          dt <- DT::formatStyle(dt, columns = num_cols_fmt, color = DT::styleInterval(c(-1e-12, 0), c("red","black","black")))
+        }
+        # Color code A - E column: red for positive (A > E), green for negative (A < E)
+        if ("A - E" %in% names(dfp)) {
+          dt <- DT::formatStyle(dt, columns = "A - E", color = DT::styleInterval(c(-1e-12, 1e-12), c("green", "black", "red")))
         }
         dt
       }, server = TRUE)  # Server-side processing for large datasets
