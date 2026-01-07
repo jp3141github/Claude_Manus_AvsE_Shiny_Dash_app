@@ -565,7 +565,7 @@ window.dtAdvInitWithJumper = function(){
   return function(settings){ try{ adv(settings); }catch(e){} try{ jumper(settings); }catch(e){} };
 };
 
-/* -------- FORCE COLUMNS TO SHRINK: Strip width-related inline styles only ----- */
+/* -------- FORCE COLUMNS TO SHRINK: Strip widths but preserve colors ----- */
 function forceColumnsToShrink(tableId) {
   try {
     var $tbl = $("#" + tableId);
@@ -574,27 +574,33 @@ function forceColumnsToShrink(tableId) {
     // Remove colgroup entirely - it forces column widths
     $tbl.find("colgroup").remove();
 
-    // Set table to auto width
-    $tbl.css({ "width": "auto", "table-layout": "auto" });
+    // CRITICAL: Remove the style attribute entirely from the table then set auto
+    $tbl.removeAttr("style");
+    $tbl.attr("style", "width: auto !important; table-layout: auto !important;");
 
-    // Strip only width-related styles from th and td cells, PRESERVE color and other styles
+    // Strip ALL inline styles from th and td cells, but PRESERVE color for negative values
     $tbl.find("th, td").each(function(){
+      // Save color before stripping (for negative value red styling)
+      var savedColor = this.style.color || "";
+      // Strip everything
+      $(this).removeAttr("style");
       $(this).removeAttr("width");
-      // Only remove width CSS, keep color for negative value styling
-      this.style.width = "";
-      this.style.minWidth = "";
-      this.style.maxWidth = "";
+      // Restore color if it was set
+      if (savedColor) {
+        this.style.color = savedColor;
+      }
     });
 
-    // Strip from wrapper
+    // Strip from wrapper and set to shrink
     var $wrapper = $("#" + tableId + "_wrapper");
     if ($wrapper.length) {
-      $wrapper.css({ "width": "auto", "display": "inline-block" });
+      $wrapper.removeAttr("style");
+      $wrapper.attr("style", "width: auto !important; display: inline-block !important;");
     }
 
-    // Strip width from scroll containers but preserve other styles
+    // Also strip from any parent scroll containers
     $tbl.closest(".dataTables_scrollHead, .dataTables_scrollBody").each(function(){
-      this.style.width = "";
+      $(this).removeAttr("style");
     });
 
     // Force the card to not stretch
