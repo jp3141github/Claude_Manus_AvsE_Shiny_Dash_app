@@ -59,10 +59,9 @@ register_upload_server <- function(input, output, session, uploaded_df) {
                             options  = list(
                               pageLength = 25,
                               scrollX = TRUE,
-                              scrollY = "calc(100vh - 320px)",  # Fill available screen height
                               paging = TRUE,
                               fixedHeader = TRUE,
-                              autoWidth = FALSE    # Let CSS control column widths
+                              autoWidth = FALSE
                             ),
                             extensions = c("FixedHeader"),
                             rownames = FALSE, escape = FALSE)

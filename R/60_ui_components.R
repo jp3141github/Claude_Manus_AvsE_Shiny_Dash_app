@@ -260,23 +260,19 @@ css_overrides <- tags$style(HTML("
     min-width: 0 !important;
   }
 
-  /* ===== Card/container sizing - NO overflow:hidden so pagination shows ===== */
-  .bslib-card {
-    height: auto !important;
-    min-height: calc(100vh - 180px) !important;
-    overflow: visible !important;
-  }
-  .bslib-card .card-body {
+  /* ===== Dynamic height - pagination directly under data ===== */
+  .bslib-card, .bslib-card .card-body {
     height: auto !important;
     overflow: visible !important;
   }
   .dataTables_wrapper {
     overflow: visible !important;
   }
-  /* scrollBody for vertical scroll within table */
+  /* No fixed height - table grows with data, pagination follows */
   .dataTables_scrollBody {
-    max-height: calc(100vh - 320px) !important;
-    overflow-y: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow-y: visible !important;
     overflow-x: auto !important;
   }
   /* Solid black Browse button at all times */
