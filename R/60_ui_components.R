@@ -240,8 +240,20 @@ css_overrides <- tags$style(HTML("
     text-align: right !important;
   }
 
-  /* ===== Dynamic height - let DataTables control scroll ===== */
-  /* DO NOT override scroll container styles - breaks scrollX */
+  /* ===== Dynamic height - fill available vertical space ===== */
+  .dataTables_wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    height: calc(100vh - 200px) !important;
+  }
+  .dataTables_scrollBody {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+  }
+  .dataTables_scrollHead {
+    flex: 0 0 auto !important;
+  }
 
   /* Solid black Browse button at all times */
   #csv_file .btn,
