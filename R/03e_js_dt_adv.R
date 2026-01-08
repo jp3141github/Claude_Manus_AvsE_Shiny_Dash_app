@@ -565,7 +565,7 @@ window.dtAdvInitWithJumper = function(){
   return function(settings){ try{ adv(settings); }catch(e){} try{ jumper(settings); }catch(e){} };
 };
 
-/* -------- FORCE COLUMNS TO SHRINK: Strip all inline widths ----- */
+/* -------- FORCE COLUMNS TO SHRINK: Strip width styles but preserve colors ----- */
 function forceColumnsToShrink(tableId) {
   try {
     var $tbl = $("#" + tableId);
@@ -577,8 +577,24 @@ function forceColumnsToShrink(tableId) {
     // Remove DataTables inline width from table element - let CSS handle it
     $tbl.removeAttr("style");
 
-    // Strip width attributes from th and td cells - CSS width: 1% will then apply
-    $tbl.find("th, td").removeAttr("style").removeAttr("width");
+    // Strip only width-related styles from th and td cells, preserve color/background
+    $tbl.find("th, td").each(function(){
+      var $cell = $(this);
+      // Save color-related styles before removing
+      var color = $cell.css("color");
+      var bgColor = $cell.css("background-color");
+      // Remove width attribute
+      $cell.removeAttr("width");
+      // Remove only width from inline style, keep others
+      $cell.css("width", "");
+      // Restore color styles if they were set (not default)
+      if (color && color !== "rgb(0, 0, 0)" && color !== "black") {
+        $cell.css("color", color);
+      }
+      if (bgColor && bgColor !== "rgba(0, 0, 0, 0)" && bgColor !== "transparent" && bgColor !== "rgb(255, 255, 255)" && bgColor !== "white") {
+        $cell.css("background-color", bgColor);
+      }
+    });
 
     // Strip inline styles from wrapper - let CSS handle it
     var $wrapper = $("#" + tableId + "_wrapper");
