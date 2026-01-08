@@ -610,8 +610,8 @@ function forceColumnsToShrink(tableId) {
       $wrapper.removeAttr("style");
     }
 
-    // Also strip from any parent scroll containers
-    $tbl.closest(".dataTables_scrollHead, .dataTables_scrollBody").removeAttr("style");
+    // NOTE: Do NOT strip styles from scroll containers (.dataTables_scrollHead, .dataTables_scrollBody)
+    // Those containers need their height/overflow styles for scrollY freeze pane to work
 
   } catch(e) {
     console.warn("[Column Shrink] Error:", e);
