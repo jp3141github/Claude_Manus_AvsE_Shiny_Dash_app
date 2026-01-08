@@ -56,21 +56,9 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         }
         if ("Actual" %in% names(dfp))   dfp[["Actual"]]   <- to_float(dfp[["Actual"]])
         if ("Expected" %in% names(dfp)) dfp[["Expected"]] <- to_float(dfp[["Expected"]])
-        # Calculate A - E and insert after Expected column with pre-rendered HTML colors
+        # Calculate A - E and insert after Expected column
         if (all(c("Actual", "Expected") %in% names(dfp))) {
-          ae_values <- dfp[["Actual"]] - dfp[["Expected"]]
-          # Pre-render HTML with colors baked in
-          dfp[["A - E"]] <- sapply(ae_values, function(v) {
-            if (is.na(v)) return("")
-            formatted <- format(round(v), big.mark = ",", scientific = FALSE)
-            if (v < 0) {
-              sprintf('<span style="color:darkgreen;background-color:rgba(144,238,144,0.4);padding:2px 5px;display:inline-block;">%s</span>', formatted)
-            } else if (v > 0) {
-              sprintf('<span style="color:darkred;background-color:rgba(255,182,182,0.4);padding:2px 5px;display:inline-block;">%s</span>', formatted)
-            } else {
-              formatted
-            }
-          })
+          dfp[["A - E"]] <- dfp[["Actual"]] - dfp[["Expected"]]
           # Reorder to place A - E right after Expected
           exp_idx <- which(names(dfp) == "Expected")
           col_order <- c(names(dfp)[1:exp_idx], "A - E", names(dfp)[(exp_idx + 1):(ncol(dfp) - 1)])
@@ -82,21 +70,26 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         dt <- DT::datatable(dfp,
                             options  = list(
                               pageLength = 25,
-                              scrollX = FALSE,   # Disable DT scroll - let CSS handle overflow
+                              scrollX = TRUE,
                               paging = TRUE,
                               fixedHeader = TRUE,
-                              autoWidth = FALSE, # Disable auto-width - CSS 1% trick handles column sizing
+                              autoWidth = TRUE,
                               language = list(info = info_text,
                                               infoFiltered = "(filtered from _MAX_ total records)")
                             ),
-                            extensions = c("FixedHeader"),
                             rownames = FALSE, escape = FALSE)
-        num_cols_fmt <- intersect(c("Actual","Expected"), names(dfp))
+        num_cols_fmt <- intersect(c("Actual","Expected","A - E"), names(dfp))
         if (length(num_cols_fmt)) {
           dt <- DT::formatCurrency(dt, columns = num_cols_fmt, currency = "", interval = 3, mark = ",", digits = 0)
         }
+        # Color A - E column: use same pattern as Results tab (formatStyle works with server=TRUE)
+        if ("A - E" %in% names(dfp)) {
+          dt <- DT::formatStyle(dt, columns = "A - E",
+                                color = DT::styleInterval(c(0), c("darkgreen", "darkred")),
+                                backgroundColor = DT::styleInterval(c(0), c("rgba(144,238,144,0.3)", "rgba(255,182,182,0.3)")))
+        }
         dt
-      }, server = FALSE)  # Disable server-side to allow HTML rendering in A-E column
+      }, server = TRUE)
 
       # Populate chart controls from RAW
       .populate_chart_controls_from_raw()
