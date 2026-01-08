@@ -97,7 +97,8 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         dt <- DT::datatable(dfp,
                             options  = list(
                               pageLength = 25,
-                              scrollX = FALSE,   # Disable DT scroll - let CSS handle overflow
+                              scrollX = TRUE,    # Enable horizontal scroll for freeze pane
+                              scrollY = "60vh",  # Enable vertical scroll with fixed height for freeze pane
                               paging = TRUE,
                               fixedHeader = TRUE,
                               autoWidth = FALSE, # Disable auto-width - CSS 1% trick handles column sizing

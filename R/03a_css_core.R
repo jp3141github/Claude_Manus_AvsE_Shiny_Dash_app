@@ -162,12 +162,23 @@ css_core <- htmltools::HTML(
     min-height: 0 !important; height: auto !important;
     max-height: none !important; overflow: hidden !important;
   }
-  .freeze-pane .dataTables_scrollBody{
+  .freeze-pane .dataTables_scrollBody {
     overflow-y: auto !important;
+    overflow-x: auto !important;
     height: 60vh !important;
     max-height: 60vh !important;
   }
-  .freeze-pane table.dataTable { width: 100% !important; }
+  .freeze-pane .dataTables_scrollHead {
+    overflow: visible !important;
+  }
+  .freeze-pane table.dataTable {
+    width: auto !important;
+    table-layout: auto !important;
+  }
+  /* Ensure header and body tables stay aligned */
+  .freeze-pane .dataTables_scroll {
+    overflow: visible !important;
+  }
 
   /* === LEGACY: auto-height tables (no inner scrollbars) ===
      Used where we want the table to grow naturally with the card (e.g., Checks).
