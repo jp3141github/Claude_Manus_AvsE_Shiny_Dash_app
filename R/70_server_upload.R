@@ -96,7 +96,7 @@ register_upload_server <- function(input, output, session, uploaded_df) {
           dt <- DT::formatCurrency(dt, columns = num_cols_fmt, currency = "", interval = 3, mark = ",", digits = 0)
         }
         dt
-      }, server = TRUE)  # Server-side processing for large datasets
+      }, server = FALSE)  # Disable server-side to allow HTML rendering in A-E column
 
       # Populate chart controls from RAW
       .populate_chart_controls_from_raw()
