@@ -56,9 +56,21 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         }
         if ("Actual" %in% names(dfp))   dfp[["Actual"]]   <- to_float(dfp[["Actual"]])
         if ("Expected" %in% names(dfp)) dfp[["Expected"]] <- to_float(dfp[["Expected"]])
-        # Calculate A - E and insert after Expected column
+        # Calculate A - E and insert after Expected column with pre-rendered HTML colors
         if (all(c("Actual", "Expected") %in% names(dfp))) {
-          dfp[["A - E"]] <- dfp[["Actual"]] - dfp[["Expected"]]
+          ae_values <- dfp[["Actual"]] - dfp[["Expected"]]
+          # Pre-render HTML with colors baked in
+          dfp[["A - E"]] <- sapply(ae_values, function(v) {
+            if (is.na(v)) return("")
+            formatted <- format(round(v), big.mark = ",", scientific = FALSE)
+            if (v < 0) {
+              sprintf('<span style="color:darkgreen;background-color:rgba(144,238,144,0.4);padding:2px 5px;display:inline-block;">%s</span>', formatted)
+            } else if (v > 0) {
+              sprintf('<span style="color:darkred;background-color:rgba(255,182,182,0.4);padding:2px 5px;display:inline-block;">%s</span>', formatted)
+            } else {
+              formatted
+            }
+          })
           # Reorder to place A - E right after Expected
           exp_idx <- which(names(dfp) == "Expected")
           col_order <- c(names(dfp)[1:exp_idx], "A - E", names(dfp)[(exp_idx + 1):(ncol(dfp) - 1)])
@@ -67,30 +79,6 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         # Show full dataset with server-side processing for large data
         info_text <- sprintf("Showing _START_ to _END_ of %s records",
                              format(total_records, big.mark = ","))
-        # Find A - E column index for JavaScript (0-based, +1 for 1-based CSS nth-child)
-        ae_col_idx <- if ("A - E" %in% names(dfp)) which(names(dfp) == "A - E") else -1
-        # Create drawCallback to color A - E cells after table is drawn
-        draw_callback <- if (ae_col_idx > 0) {
-          DT::JS(sprintf("
-            function(settings) {
-              var api = this.api();
-              var colIdx = %d;
-              api.column(colIdx - 1).nodes().each(function(td) {
-                var cellText = $(td).text().replace(/,/g, '');
-                var val = parseFloat(cellText);
-                if (!isNaN(val)) {
-                  if (val < 0) {
-                    $(td).css({'background-color': 'rgba(144, 238, 144, 0.4)', 'color': 'darkgreen'});
-                  } else if (val > 0) {
-                    $(td).css({'background-color': 'rgba(255, 182, 182, 0.4)', 'color': 'darkred'});
-                  }
-                }
-              });
-            }
-          ", ae_col_idx))
-        } else {
-          NULL
-        }
         dt <- DT::datatable(dfp,
                             options  = list(
                               pageLength = 25,
@@ -98,13 +86,12 @@ register_upload_server <- function(input, output, session, uploaded_df) {
                               paging = TRUE,
                               fixedHeader = TRUE,
                               autoWidth = FALSE, # Disable auto-width - CSS 1% trick handles column sizing
-                              drawCallback = draw_callback,
                               language = list(info = info_text,
                                               infoFiltered = "(filtered from _MAX_ total records)")
                             ),
                             extensions = c("FixedHeader"),
                             rownames = FALSE, escape = FALSE)
-        num_cols_fmt <- intersect(c("Actual","Expected","A - E"), names(dfp))
+        num_cols_fmt <- intersect(c("Actual","Expected"), names(dfp))
         if (length(num_cols_fmt)) {
           dt <- DT::formatCurrency(dt, columns = num_cols_fmt, currency = "", interval = 3, mark = ",", digits = 0)
         }
