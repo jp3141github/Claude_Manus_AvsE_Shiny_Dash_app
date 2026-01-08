@@ -98,15 +98,13 @@ register_upload_server <- function(input, output, session, uploaded_df) {
                             options  = list(
                               pageLength = 25,
                               scrollX = TRUE,    # Enable horizontal scroll for freeze pane
-                              scrollY = "60vh",  # Enable vertical scroll with fixed height for freeze pane
+                              scrollY = "60vh",  # Enable vertical scroll with fixed height - header auto-freezes
                               paging = TRUE,
-                              fixedHeader = TRUE,
                               autoWidth = FALSE, # Disable auto-width - CSS 1% trick handles column sizing
                               rowCallback = row_callback_js,
                               language = list(info = info_text,
                                               infoFiltered = "(filtered from _MAX_ total records)")
                             ),
-                            extensions = c("FixedHeader"),
                             rownames = FALSE, escape = FALSE)
         num_cols_fmt <- intersect(c("Actual","Expected","A - E"), names(dfp))
         if (length(num_cols_fmt)) {
