@@ -137,6 +137,16 @@ css_dt <- htmltools::HTML(
   table.dataTable thead > tr > th.sorting_desc{
     padding-right: 8px !important;
   }
+
+  /* ----- A-E VALUE COLORING (green for negative, red for positive) ----- */
+  table.dataTable td.ae-negative {
+    background-color: rgba(144, 238, 144, 0.4) !important;
+    color: darkgreen !important;
+  }
+  table.dataTable td.ae-positive {
+    background-color: rgba(255, 182, 182, 0.4) !important;
+    color: darkred !important;
+  }
 </style>
 "
 )

@@ -200,6 +200,27 @@ ui <- page_sidebar(
 )
 
 css_overrides <- tags$style(HTML("
+  /* ===== A-E VALUE COLORING (green for negative, red for positive) ===== */
+  table.dataTable td.ae-negative {
+    background-color: rgba(144, 238, 144, 0.4) !important;
+    color: darkgreen !important;
+  }
+  table.dataTable td.ae-positive {
+    background-color: rgba(255, 182, 182, 0.4) !important;
+    color: darkred !important;
+  }
+
+  /* ===== LINE DIVIDER BETWEEN HEADERS AND DATA ===== */
+  /* Bottom border on the last header row (the bold column names) */
+  #tbl_preview thead tr:last-child th {
+    border-bottom: 2px solid #333 !important;
+  }
+  /* Also style the FixedHeader clone */
+  .fixedHeader-floating thead tr:last-child th,
+  .fixedHeader-locked thead tr:last-child th {
+    border-bottom: 2px solid #333 !important;
+  }
+
   /* ===== CRITICAL: Force ALL cells to shrink to minimum content width ===== */
   /* The 1% width trick forces columns to be as narrow as possible */
   #tbl_preview th,
@@ -255,6 +276,16 @@ css_overrides <- tags$style(HTML("
   .fixedHeader-floating table#tbl_preview th {
     width: 1% !important;
     white-space: nowrap !important;
+  }
+
+  /* ===== FIXED HEADER STYLING ===== */
+  /* Ensure FixedHeader has solid background and proper z-index */
+  .fixedHeader-floating {
+    background-color: #fff !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  }
+  .fixedHeader-floating th {
+    background-color: #f8f9fa !important;
   }
 
   /* CRITICAL: Force header and body tables to shrink to content */

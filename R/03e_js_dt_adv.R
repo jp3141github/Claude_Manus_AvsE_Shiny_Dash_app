@@ -535,6 +535,15 @@ window.dtAdvInit = function() {
         setTimeout(syncWidths, 500);
         
         renderBadges(heads);
+        
+        // Update FixedHeader to include the new header rows (sort buttons, filters)
+        setTimeout(function(){
+          try {
+            if (api.fixedHeader) {
+              api.fixedHeader.update();
+            }
+          } catch(e) { console.warn("FixedHeader update error:", e); }
+        }, 100);
       }
 
       // Initial build
@@ -577,8 +586,23 @@ function forceColumnsToShrink(tableId) {
     // Remove DataTables inline width from table element - let CSS handle it
     $tbl.removeAttr("style");
 
-    // Strip width attributes from th and td cells - CSS width: 1% will then apply
-    $tbl.find("th, td").removeAttr("style").removeAttr("width");
+    // Strip width attributes from th cells
+    $tbl.find("th").removeAttr("style").removeAttr("width");
+    
+    // Strip width from td cells BUT preserve background-color and color for A-E coloring
+    $tbl.find("td").each(function() {
+      var $td = $(this);
+      var bgColor = $td.css("background-color");
+      var textColor = $td.css("color");
+      $td.removeAttr("style").removeAttr("width");
+      // Restore A-E coloring if it was set (non-default colors)
+      if (bgColor && bgColor !== "rgba(0, 0, 0, 0)" && bgColor !== "transparent" && bgColor !== "rgb(255, 255, 255)") {
+        $td.css("background-color", bgColor);
+      }
+      if (textColor && textColor !== "rgb(0, 0, 0)" && textColor !== "rgb(33, 37, 41)") {
+        $td.css("color", textColor);
+      }
+    });
 
     // Strip inline styles from wrapper - let CSS handle it
     var $wrapper = $("#" + tableId + "_wrapper");

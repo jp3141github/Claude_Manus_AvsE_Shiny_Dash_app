@@ -79,6 +79,7 @@ js_code <- paste(js_code, js_code_extra, sep = "\n")
 ```
 
 ### Bug 2: JavaScript not injected into UI
+
 ```r
 # BEFORE (BUG): ui defined without JavaScript
 ui <- page_sidebar(...)
