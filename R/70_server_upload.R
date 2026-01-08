@@ -67,36 +67,29 @@ register_upload_server <- function(input, output, session, uploaded_df) {
         # Show full dataset with server-side processing for large data
         info_text <- sprintf("Showing _START_ to _END_ of %s records",
                              format(total_records, big.mark = ","))
-        # Find A - E column index for JavaScript (0-based)
-        ae_col_idx <- if ("A - E" %in% names(dfp)) which(names(dfp) == "A - E") - 1 else -1
-        # Create columnDefs with render callback for A - E coloring and formatting
-        # This handles both formatting and coloring in one place, works with server-side processing
-        col_defs <- list()
-        if (ae_col_idx >= 0) {
-          col_defs <- list(
-            list(
-              targets = ae_col_idx,
-              render = DT::JS("
-                function(data, type, row, meta) {
-                  if (type !== 'display' || data === null || data === '') return data;
-                  var val = parseFloat(data);
-                  if (isNaN(val)) return data;
-                  var formatted = val.toLocaleString('en-US', {maximumFractionDigits: 0});
-                  var bgColor, textColor;
+        # Find A - E column index for JavaScript (0-based, +1 for 1-based CSS nth-child)
+        ae_col_idx <- if ("A - E" %in% names(dfp)) which(names(dfp) == "A - E") else -1
+        # Create drawCallback to color A - E cells after table is drawn
+        draw_callback <- if (ae_col_idx > 0) {
+          DT::JS(sprintf("
+            function(settings) {
+              var api = this.api();
+              var colIdx = %d;
+              api.column(colIdx - 1).nodes().each(function(td) {
+                var cellText = $(td).text().replace(/,/g, '');
+                var val = parseFloat(cellText);
+                if (!isNaN(val)) {
                   if (val < 0) {
-                    bgColor = 'rgba(144, 238, 144, 0.4)';
-                    textColor = 'darkgreen';
+                    $(td).css({'background-color': 'rgba(144, 238, 144, 0.4)', 'color': 'darkgreen'});
                   } else if (val > 0) {
-                    bgColor = 'rgba(255, 182, 182, 0.4)';
-                    textColor = 'darkred';
-                  } else {
-                    return formatted;
+                    $(td).css({'background-color': 'rgba(255, 182, 182, 0.4)', 'color': 'darkred'});
                   }
-                  return '<span style=\"display:block;background-color:' + bgColor + ';color:' + textColor + ';padding:2px 4px;margin:-2px -4px;\">' + formatted + '</span>';
                 }
-              ")
-            )
-          )
+              });
+            }
+          ", ae_col_idx))
+        } else {
+          NULL
         }
         dt <- DT::datatable(dfp,
                             options  = list(
@@ -105,14 +98,13 @@ register_upload_server <- function(input, output, session, uploaded_df) {
                               paging = TRUE,
                               fixedHeader = TRUE,
                               autoWidth = FALSE, # Disable auto-width - CSS 1% trick handles column sizing
-                              columnDefs = col_defs,
+                              drawCallback = draw_callback,
                               language = list(info = info_text,
                                               infoFiltered = "(filtered from _MAX_ total records)")
                             ),
                             extensions = c("FixedHeader"),
                             rownames = FALSE, escape = FALSE)
-        # Format Actual and Expected columns (A - E is formatted via render function above)
-        num_cols_fmt <- intersect(c("Actual","Expected"), names(dfp))
+        num_cols_fmt <- intersect(c("Actual","Expected","A - E"), names(dfp))
         if (length(num_cols_fmt)) {
           dt <- DT::formatCurrency(dt, columns = num_cols_fmt, currency = "", interval = 3, mark = ",", digits = 0)
         }
