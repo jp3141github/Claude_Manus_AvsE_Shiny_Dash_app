@@ -60,7 +60,7 @@ apply_filters <- function(df, model_type, projection_date, event_type) {
     if (isTRUE(has_any)) {
       keep <- keep & (as.Date(proj_col) == tgt)
     } else {
-      showNotification(glue::glue("Skipping Projection Date filter (no rows match {format(tgt,'%d-%m-%Y')})."),
+      showNotification(glue::glue("Skipping Projection Date filter (no rows match {format(tgt,'%Y/%m/%d')})."),
                        type = "warning", duration = 5)
     }
   }
