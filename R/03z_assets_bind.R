@@ -29,6 +29,27 @@ table.dataTable {
   border-collapse: collapse !important;
   border-spacing: 0 !important;
 }
+/* EXPLICIT: Remove borders from tbody and first body row */
+table.dataTable tbody,
+table.dataTable tbody tr,
+table.dataTable tbody tr:first-child,
+table.dataTable tbody tr:first-child td,
+.dataTables_scrollBody table.dataTable tbody,
+.dataTables_scrollBody table.dataTable tbody tr:first-child,
+.dataTables_scrollBody table.dataTable tbody tr:first-child td {
+  border-top: none !important;
+  border-bottom: none !important;
+}
+/* EXPLICIT: Remove bottom border from scrollHead wrapper and its children */
+div.dataTables_scrollHead,
+div.dataTables_scrollHeadInner,
+div.dataTables_scrollHead table,
+div.dataTables_scrollHead table thead,
+div.dataTables_scrollBody {
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+}
 /* Add back ONLY the single header separator line */
 table.dataTable thead tr:last-child th,
 .dataTables_scrollHead table.dataTable thead tr:last-child th,
