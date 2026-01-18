@@ -270,7 +270,7 @@ window.dtAdvInit = function() {
           return {
             term: trimmed,
             isNumericRange: false,
-            error: "Cannot filter: '" + trimmed + "' creates disjoint ranges. DT only supports single continuous range. Try a single comparison like '>614' or a range like '500..600'."
+            error: "Cannot filter: [" + trimmed + "] creates disjoint ranges. DT only supports single continuous range. Try a single comparison like >614 or a range like 500..600."
           };
         }
 
