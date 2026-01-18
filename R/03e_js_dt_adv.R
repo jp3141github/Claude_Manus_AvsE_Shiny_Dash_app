@@ -151,7 +151,7 @@ window.dtAdvInit = function() {
       }
 
       // ---- Numeric column filter formatting for DT server-side ----
-      // DT\'s server-side filterRange() expects "min ... max" format for numeric columns
+      // DT server-side filterRange() expects "min ... max" format for numeric columns
       // Supports: exact value, >=, <=, >, <, range (e.g., "100..200"), and semicolon OR expressions
       // Returns {term: string, isNumericRange: boolean, error: string|null}
 
