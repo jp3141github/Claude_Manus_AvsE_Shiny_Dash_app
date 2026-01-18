@@ -38,7 +38,7 @@ This update adds **column filters** and **advanced multi-column sorting** to ALL
 | **A/D/- Sort Buttons** | Each column has Ascending (A), Descending (D), and Neutral (-) sort buttons |
 | **Multi-Sort with Priority** | When multiple columns are sorted, badges (1, 2, 3...) show the sort order |
 | **Clear Sort Button** | "✖ clear" link to reset all sorting |
-| **Column Filters** | Per-column text filter inputs with OR support (use `;` to separate terms) |
+| **Column Filters** | Per-column text filter inputs with OR support (`;`) and wildcards (`*`, `?`, `%`) |
 | **Apply Filters Button** | "✔ apply" link to apply all column filters at once |
 | **Clear Filters Button** | "✖ clear filters" link to reset all column filters |
 | **Page Jumper** | "Jump to [page]" input near pagination controls |
@@ -59,6 +59,19 @@ This update adds **column filters** and **advanced multi-column sorting** to ALL
 3. Click "✔ apply" to apply all column filters at once
 4. Use semicolon (`;`) to filter for multiple values (OR logic): `NIG;DLI` matches rows containing "NIG" OR "DLI"
 5. Click "✖ clear filters" to reset all filters
+
+### Wildcard Support:
+
+| Wildcard | Meaning | Example | Matches |
+|----------|---------|---------|---------|
+| `*` | Any characters (zero or more) | `CMOT*` | CMOT, CMOT_DLI, CMOT_NIG_ALL |
+| `?` | Single character | `CM?T` | CMOT, CMAT, CMBT |
+| `%` | Any characters (SQL-style, same as `*`) | `%DLI%` | CMOT_DLI, DLI_BICP, NIG_DLI_ALL |
+
+**Combined examples:**
+- `CMOT_*_ALL` - Matches CMOT_DLI_ALL, CMOT_NIG_ALL, etc.
+- `*DLI*;*NIG*` - Matches rows containing "DLI" OR "NIG" anywhere
+- `20??.1` - Matches 2001.1, 2002.1, 2023.1, etc.
 
 ## Session Persistence:
 
