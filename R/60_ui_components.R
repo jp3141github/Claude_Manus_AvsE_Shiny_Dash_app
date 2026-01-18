@@ -200,6 +200,19 @@ ui <- page_sidebar(
 )
 
 css_overrides <- tags$style(HTML("
+  /* ===== REMOVE TAB UNDERLINE (merged with summary border below) ===== */
+  .nav-tabs, .nav-tabs .nav-link {
+    border-bottom: none !important;
+  }
+  .nav-tabs {
+    border-bottom: none !important;
+    margin-bottom: 0 !important;
+  }
+  .bslib-navs-card-title,
+  .tab-content {
+    border-top: none !important;
+  }
+
   /* ===== NUCLEAR: Remove ALL borders from DataTables ===== */
   .dataTables_wrapper table.dataTable,
   .dataTables_wrapper table.dataTable thead,
