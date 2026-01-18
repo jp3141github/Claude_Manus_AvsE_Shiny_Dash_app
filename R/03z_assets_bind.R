@@ -18,13 +18,29 @@ table.dataTable {
   border-spacing: 0 !important;
   border: none !important;
 }
-/* Remove ALL borders from DataTables header structure */
+/* Remove ALL borders from DataTables scroll wrapper structure */
+.dataTables_scroll,
 .dataTables_scrollHead,
+.dataTables_scrollHeadInner,
+.dataTables_scrollBody,
+div.dataTables_scroll,
 div.dataTables_scrollHead,
 div.dataTables_scrollHeadInner,
+div.dataTables_scrollBody {
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+/* Remove ALL borders from header table elements */
 table.dataTable thead,
 table.dataTable thead tr,
-table.dataTable thead th {
+table.dataTable thead th,
+.dataTables_scrollHead table.dataTable,
+.dataTables_scrollHead table.dataTable thead,
+.dataTables_scrollHead table.dataTable thead tr,
+.dataTables_scrollHead table.dataTable thead th {
   border: none !important;
   border-bottom: none !important;
   border-top: none !important;
@@ -43,7 +59,8 @@ table.dataTable tbody tr:first-child td {
   border-top: none !important;
 }
 /* Single clean border ONLY on the LAST header row TH elements */
-table.dataTable thead tr:last-child th {
+table.dataTable thead tr:last-child th,
+.dataTables_scrollHead table.dataTable thead tr:last-child th {
   border-bottom: 2px solid #333 !important;
 }
 /* FixedHeader clones also get the same single border */
