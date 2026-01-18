@@ -243,7 +243,7 @@ css_overrides <- tags$style(HTML("
     width: auto !important;
     display: inline-block !important;
     max-width: 100% !important;
-    overflow-x: auto !important;
+    overflow-x: visible !important;
     overflow-y: visible !important;
   }
 
