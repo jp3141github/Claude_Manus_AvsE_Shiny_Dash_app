@@ -1,0 +1,28 @@
+# R Package Requirements for AvsE Shiny Dashboard
+#
+# INSTALLATION (run in PowerShell):
+#   & 'C:\Program Files\R\R-4.5.1\bin\Rscript.exe' install_packages.R
+#
+# Or install all packages manually (PowerShell one-liner):
+#   & 'C:\Program Files\R\R-4.5.1\bin\Rscript.exe' -e "install.packages(c('shiny','bslib','DT','readr','readxl','dplyr','tidyr','stringr','lubridate','purrr','rlang','fs','glue','ggplot2','openxlsx','zip','scales','plotly','tibble'), repos='https://cloud.r-project.org')"
+#
+
+shiny
+bslib
+DT
+readr
+readxl
+dplyr
+tidyr
+stringr
+lubridate
+purrr
+rlang
+fs
+glue
+ggplot2
+openxlsx
+zip
+scales
+plotly
+tibble

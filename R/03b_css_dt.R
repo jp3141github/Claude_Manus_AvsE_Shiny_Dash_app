@@ -150,7 +150,7 @@ css_dt <- htmltools::HTML(
   table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting_desc:after {
     position: absolute !important;
     display: block !important;
-    content: "" !important;
+    content: '' !important;
     left: 6px !important;
     right: auto !important;
     opacity: 0.3;
@@ -162,7 +162,7 @@ css_dt <- htmltools::HTML(
   table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting:before,
   table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting_asc:before,
   table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting_desc:before {
-    content: "▲" !important;
+    content: '\\25B2' !important;
     bottom: 55% !important;
     top: auto !important;
   }
@@ -171,7 +171,7 @@ css_dt <- htmltools::HTML(
   table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting:after,
   table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting_asc:after,
   table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting_desc:after {
-    content: "▼" !important;
+    content: '\\25BC' !important;
     top: 55% !important;
     bottom: auto !important;
   }
