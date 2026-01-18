@@ -110,33 +110,12 @@ css_dt <- htmltools::HTML(
   table.dataTable thead .sorting_desc:after{
     display:none !important;
     content:none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
   }
   /* Remove extra right padding reserved for icons */
   table.dataTable thead > tr > th.sorting,
   table.dataTable thead > tr > th.sorting_asc,
   table.dataTable thead > tr > th.sorting_desc{
     padding-right: 8px !important;
-  }
-
-  /* Hide DataTables 2.x sort indicator element (dt-column-order) */
-  table.dataTable thead .dt-column-order,
-  table.dataTable thead span.dt-column-order {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    width: 0 !important;
-    height: 0 !important;
-  }
-
-  /* Hide any sort icon elements (i tags, font icons) */
-  table.dataTable thead th.sorting i,
-  table.dataTable thead th.sorting_asc i,
-  table.dataTable thead th.sorting_desc i,
-  table.dataTable thead th.dt-orderable i {
-    display: none !important;
-    visibility: hidden !important;
   }
 
   /* ----- A-E VALUE COLORING (green for negative, red for positive) ----- */

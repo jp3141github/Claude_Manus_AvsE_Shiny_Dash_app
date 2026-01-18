@@ -91,7 +91,7 @@ table.dataTable tbody td.dt-wrap{
   max-width: 260px;
 }
 
-/* Hide ALL native sort icons (old+new DT classnames) - COMPREHENSIVE */
+/* Hide ALL native sort icons (old+new DT classnames) */
 table.dataTable thead > tr > th.sorting,
 table.dataTable thead > tr > th.sorting_asc,
 table.dataTable thead > tr > th.sorting_desc,
@@ -122,53 +122,6 @@ table.dataTable thead .dt-ordering-desc:before,
 table.dataTable thead .dt-ordering-desc:after{
   content: none !important;
   display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
-/* HIDE sort indicator icons/diamonds completely - all possible selectors */
-table.dataTable thead th .dt-column-order,
-table.dataTable thead td .dt-column-order,
-table.dataTable thead th span.dt-column-order,
-table.dataTable thead td span.dt-column-order,
-.dataTable thead .dt-column-order,
-.dataTables_wrapper .dt-column-order,
-table.dataTable thead th > span:not(.dt-sortbox):not(.dt-sortbtn):not(.dt-badge),
-table.dataTable thead .sorting span.DataTables_sort_icon,
-table.dataTable thead .sorting_asc span.DataTables_sort_icon,
-table.dataTable thead .sorting_desc span.DataTables_sort_icon {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  width: 0 !important;
-  height: 0 !important;
-  font-size: 0 !important;
-  color: transparent !important;
-}
-
-/* Hide Bootstrap-style caret icons in DataTables */
-table.dataTable thead th .caret,
-table.dataTable thead th .dropup .caret,
-table.dataTable thead .sorting i,
-table.dataTable thead .sorting_asc i,
-table.dataTable thead .sorting_desc i {
-  display: none !important;
-  visibility: hidden !important;
-}
-
-/* Ensure no font-icon based sort indicators show */
-table.dataTable thead th[class*=\"sorting\"]::before,
-table.dataTable thead th[class*=\"sorting\"]::after,
-table.dataTable thead th[class*=\"dt-order\"]::before,
-table.dataTable thead th[class*=\"dt-order\"]::after {
-  content: \"\" !important;
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  background: transparent !important;
-  border: none !important;
 }
 "))
 
