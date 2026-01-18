@@ -38,8 +38,8 @@ css_preview <- htmltools::HTML(
     width: auto !important;
   }
 
-  /* Label row (with sort buttons) and filter row cells need 1% width */
-  #tbl_preview thead tr.dt-label-row th,
+  /* Sort row and filter row cells also need 1% width */
+  #tbl_preview thead tr.dt-sort-row th,
   #tbl_preview thead tr.dt-filter-row th {
     width: 1% !important;
     white-space: nowrap !important;
@@ -54,6 +54,12 @@ css_preview <- htmltools::HTML(
     padding: 2px 4px !important;
     height: 20px !important;
     font-size: 11px !important;
+  }
+
+  /* Labels row can wrap if needed, but keep compact */
+  #tbl_preview thead tr:not(.dt-sort-row):not(.dt-filter-row) th {
+    white-space: nowrap !important;
+    width: 1% !important;
   }
 
   /* FixedHeader clone must match */

@@ -38,20 +38,36 @@ div.dataTables_scrollBody table.dataTable {
 div.dataTables_scrollHead th,
 div.dataTables_scrollBody th { overflow: hidden !important; }
 
+/* Ensure label row wraps in ALL headers, including FixedHeader clones and scroll head */
+.fixedHeader-floating table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row) th,
+.fixedHeader-locked  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row) th,
+div.dataTables_scrollHead table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row) th {
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  line-height: 1.15 !important;
+}
+
 /* Box sizing consistency (prevents tiny padding mismatches from growing columns) */
 table.dataTable, table.dataTable th, table.dataTable td {
   box-sizing: border-box !important;
 }
 
-/* Label row (contains sort buttons + column names): nowrap to keep buttons inline */
-table.dataTable thead tr.dt-label-row th {
+/* Labels row: wrap; helper rows (chips/filters): nowrap */
+table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row) th{
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  line-height: 1.15 !important;
+}
+table.dataTable thead tr.dt-sort-row th,
+table.dataTable thead tr.dt-filter-row th{
   white-space: nowrap !important;
-  vertical-align: bottom !important;
 }
 
-/* Filter row: nowrap */
+/* CRITICAL: Ensure sort/filter rows inherit column widths from label row */
+table.dataTable thead tr.dt-sort-row th,
 table.dataTable thead tr.dt-filter-row th {
-  white-space: nowrap !important;
   padding: 3px 6px !important;
   vertical-align: bottom !important;
 }
@@ -69,7 +85,16 @@ table.dataTable thead th.dt-head-right,
   text-align: right !important;
 }
 
-/* CRITICAL: Right-align filter row for numeric columns */
+/* CRITICAL: Right-align sort and filter rows for numeric columns */
+/* Use text-align + float to preserve table-cell layout */
+table.dataTable thead tr.dt-sort-row th.dt-col-right,
+div.dataTables_scrollHead table.dataTable thead tr.dt-sort-row th.dt-col-right,
+.fixedHeader-floating thead tr.dt-sort-row th.dt-col-right {
+  text-align: right !important;
+}
+table.dataTable thead tr.dt-sort-row th.dt-col-right .dt-sortbox {
+  float: right !important;
+}
 table.dataTable thead tr.dt-filter-row th.dt-col-right,
 div.dataTables_scrollHead table.dataTable thead tr.dt-filter-row th.dt-col-right,
 .fixedHeader-floating thead tr.dt-filter-row th.dt-col-right {
@@ -91,7 +116,7 @@ table.dataTable tbody td.dt-wrap{
   max-width: 260px;
 }
 
-/* Hide ALL native sort icons (old+new DT classnames) - COMPREHENSIVE */
+/* Hide ALL native sort icons (old+new DT classnames) */
 table.dataTable thead > tr > th.sorting,
 table.dataTable thead > tr > th.sorting_asc,
 table.dataTable thead > tr > th.sorting_desc,
@@ -122,53 +147,6 @@ table.dataTable thead .dt-ordering-desc:before,
 table.dataTable thead .dt-ordering-desc:after{
   content: none !important;
   display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
-/* HIDE sort indicator icons/diamonds completely - all possible selectors */
-table.dataTable thead th .dt-column-order,
-table.dataTable thead td .dt-column-order,
-table.dataTable thead th span.dt-column-order,
-table.dataTable thead td span.dt-column-order,
-.dataTable thead .dt-column-order,
-.dataTables_wrapper .dt-column-order,
-table.dataTable thead th > span:not(.dt-sortbox):not(.dt-sortbtn):not(.dt-badge),
-table.dataTable thead .sorting span.DataTables_sort_icon,
-table.dataTable thead .sorting_asc span.DataTables_sort_icon,
-table.dataTable thead .sorting_desc span.DataTables_sort_icon {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  width: 0 !important;
-  height: 0 !important;
-  font-size: 0 !important;
-  color: transparent !important;
-}
-
-/* Hide Bootstrap-style caret icons in DataTables */
-table.dataTable thead th .caret,
-table.dataTable thead th .dropup .caret,
-table.dataTable thead .sorting i,
-table.dataTable thead .sorting_asc i,
-table.dataTable thead .sorting_desc i {
-  display: none !important;
-  visibility: hidden !important;
-}
-
-/* Ensure no font-icon based sort indicators show */
-table.dataTable thead th[class*=\"sorting\"]::before,
-table.dataTable thead th[class*=\"sorting\"]::after,
-table.dataTable thead th[class*=\"dt-order\"]::before,
-table.dataTable thead th[class*=\"dt-order\"]::after {
-  content: \"\" !important;
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  background: transparent !important;
-  border: none !important;
 }
 "))
 
