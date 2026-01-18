@@ -621,7 +621,7 @@ function forceColumnsToShrink(tableId) {
     // Remove colgroup entirely - it forces column widths
     $tbl.find("colgroup").remove();
 
-    // Get wrapper to check if we're in freeze-pane mode
+    // Get wrapper to check if we are in freeze-pane mode
     var $wrapper = $("#" + tableId + "_wrapper");
     var isFreezePaneMode = $wrapper.closest(".freeze-pane").length > 0;
 
