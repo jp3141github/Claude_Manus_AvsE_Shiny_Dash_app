@@ -150,7 +150,7 @@ css_dt <- htmltools::HTML(
   table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting_desc:after {
     position: absolute !important;
     display: block !important;
-    content: "" !important;
+    content: '' !important;
     left: 6px !important;
     right: auto !important;
     opacity: 0.3;
