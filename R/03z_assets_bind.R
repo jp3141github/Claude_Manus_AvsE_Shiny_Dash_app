@@ -38,36 +38,20 @@ div.dataTables_scrollBody table.dataTable {
 div.dataTables_scrollHead th,
 div.dataTables_scrollBody th { overflow: hidden !important; }
 
-/* Ensure label row wraps in ALL headers, including FixedHeader clones and scroll head */
-.fixedHeader-floating table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row) th,
-.fixedHeader-locked  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row) th,
-div.dataTables_scrollHead table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row) th {
-  white-space: normal !important;
-  word-break: break-word !important;
-  overflow-wrap: anywhere !important;
-  line-height: 1.15 !important;
-}
-
 /* Box sizing consistency (prevents tiny padding mismatches from growing columns) */
 table.dataTable, table.dataTable th, table.dataTable td {
   box-sizing: border-box !important;
 }
 
-/* Labels row: wrap; helper rows (chips/filters): nowrap */
-table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row) th{
-  white-space: normal !important;
-  word-break: break-word !important;
-  overflow-wrap: anywhere !important;
-  line-height: 1.15 !important;
-}
-table.dataTable thead tr.dt-sort-row th,
-table.dataTable thead tr.dt-filter-row th{
+/* Label row (contains sort buttons + column names): nowrap to keep buttons inline */
+table.dataTable thead tr.dt-label-row th {
   white-space: nowrap !important;
+  vertical-align: bottom !important;
 }
 
-/* CRITICAL: Ensure sort/filter rows inherit column widths from label row */
-table.dataTable thead tr.dt-sort-row th,
+/* Filter row: nowrap */
 table.dataTable thead tr.dt-filter-row th {
+  white-space: nowrap !important;
   padding: 3px 6px !important;
   vertical-align: bottom !important;
 }
@@ -85,16 +69,7 @@ table.dataTable thead th.dt-head-right,
   text-align: right !important;
 }
 
-/* CRITICAL: Right-align sort and filter rows for numeric columns */
-/* Use text-align + float to preserve table-cell layout */
-table.dataTable thead tr.dt-sort-row th.dt-col-right,
-div.dataTables_scrollHead table.dataTable thead tr.dt-sort-row th.dt-col-right,
-.fixedHeader-floating thead tr.dt-sort-row th.dt-col-right {
-  text-align: right !important;
-}
-table.dataTable thead tr.dt-sort-row th.dt-col-right .dt-sortbox {
-  float: right !important;
-}
+/* CRITICAL: Right-align filter row for numeric columns */
 table.dataTable thead tr.dt-filter-row th.dt-col-right,
 div.dataTables_scrollHead table.dataTable thead tr.dt-filter-row th.dt-col-right,
 .fixedHeader-floating thead tr.dt-filter-row th.dt-col-right {

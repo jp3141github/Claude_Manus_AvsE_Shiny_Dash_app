@@ -4,19 +4,13 @@ css_dt <- htmltools::HTML(
   "
 <style>
   /* ----- STRUCTURE -----
-     top:    chips (dt-sort-row)
-     middle: filters (dt-filter-row)
-     bottom: labels row (real headers)
+     top:    filters (dt-filter-row)
+     bottom: labels row with sort chips on left (dt-label-row)
   -------------------------------- */
 
-  /* Chips above label */
-  th .dt-head-label { display:block; }
-  thead tr:nth-child(1) th { vertical-align: bottom; }
-
-  thead th .dt-sortbox { display:block; margin-bottom:4px; }
-  .fixedHeader-floating thead th .dt-sortbox { display:block; margin-bottom:4px; }
+  /* Sort buttons inline with column header (on left) */
   thead th { position:relative; vertical-align:bottom; }
-  .dt-sortbox { display:inline-flex; align-items:center; gap:2px; }
+  .dt-sortbox { display:inline-flex; align-items:center; gap:2px; margin-right:6px; vertical-align:middle; }
 
   .dt-sortbtn {
     padding:0 4px;
@@ -29,7 +23,7 @@ css_dt <- htmltools::HTML(
     user-select:none;
     font-size:11px;
     position: relative;
-    color:#444 !important;   /* NEW → dark grey font instead of black */
+    color:#444 !important;
   }
 
   .dt-sortbtn.active {
@@ -38,8 +32,8 @@ css_dt <- htmltools::HTML(
   }
 
   /* Force dark grey text for A / D / − buttons */
-  thead tr.dt-sort-row th .dt-sortbtn { color:#555 !important; }  /* darker grey */
-  thead tr.dt-sort-row th .dt-sortbtn.active { color:#333 !important; } /* slightly darker when active */
+  thead .dt-sortbtn { color:#555 !important; }
+  thead .dt-sortbtn.active { color:#333 !important; }
 
   /* Small numeric badge for multi-sort order (position number) */
   .dt-sortbtn .dt-badge {
@@ -47,7 +41,7 @@ css_dt <- htmltools::HTML(
     min-width:16px; height:16px; line-height:16px;
     background:#dc3545; color:#fff; border-radius:50%;
     font-size:11px; font-weight:bold; text-align:center; padding:0 4px;
-    display:none;    /* hidden until used */
+    display:none;
     z-index: 10;
     box-shadow: 0 1px 3px rgba(0,0,0,0.3);
   }
@@ -58,20 +52,10 @@ css_dt <- htmltools::HTML(
     font-weight: bold;
   }
 
-  /* Keep helper rows compact & on one line */
-  thead tr.dt-sort-row th,
-  thead tr.dt-filter-row th { white-space: nowrap !important; }
-  thead tr.dt-sort-row th { padding: 3px 6px !important; }
-  thead tr.dt-sort-row .dt-sortbox { display: inline-flex; gap: 4px; }
+  /* Keep filter row compact */
+  thead tr.dt-filter-row th { white-space: nowrap !important; padding: 3px 6px !important; }
 
-  /* Right-aligned columns: align sort buttons and filter to the right */
-  /* Use text-align + float to preserve table-cell layout */
-  thead tr.dt-sort-row th.dt-col-right {
-    text-align: right !important;
-  }
-  thead tr.dt-sort-row th.dt-col-right .dt-sortbox {
-    float: right !important;
-  }
+  /* Right-aligned columns: filter input text alignment */
   thead tr.dt-filter-row th.dt-col-right {
     text-align: right !important;
   }
@@ -86,7 +70,6 @@ css_dt <- htmltools::HTML(
   }
 
   /* ----- FILTERS: adapt to column width, not fixed ----- */
-  thead tr.dt-filter-row th { padding: 3px 6px !important; }
   thead tr.dt-filter-row input.dt-filter-input{
     width: auto !important;
     min-width: 40px !important;
@@ -97,18 +80,15 @@ css_dt <- htmltools::HTML(
     font-size: 11px !important;
   }
 
-  /* ----- LABEL WRAPPING (bottom row only) -----
-     Chips + filters remain nowrap; labels wrap. */
-  thead tr:not(.dt-sort-row):not(.dt-filter-row) th{
-    white-space: normal !important;
-    word-break: break-word !important;
-    overflow-wrap: anywhere !important;
-    line-height: 1.15 !important;
+  /* ----- LABEL ROW (contains sort buttons + column names) ----- */
+  thead tr.dt-label-row th {
+    white-space: nowrap !important;
+    vertical-align: bottom !important;
   }
-  thead tr:not(.dt-sort-row):not(.dt-filter-row) th *{
-    white-space: inherit !important;
-    word-break: inherit !important;
-    overflow-wrap: inherit !important;
+
+  /* Clear sort link styling */
+  .dt-clear-sort {
+    vertical-align: middle;
   }
 
   /* ----- HIDE ALL BUILT-IN SORT ICONS (including pseudo-elements) ----- */

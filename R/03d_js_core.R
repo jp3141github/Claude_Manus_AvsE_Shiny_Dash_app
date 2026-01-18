@@ -316,9 +316,13 @@ Shiny.addCustomMessageHandler('injectKeys', function(_) {
     var headTable = wrapper.querySelector(\"div.dataTables_scrollHead table\") || wrapper.querySelector(\"table.dataTable\");
     if (!headTable) return [];
     var thead = headTable.querySelector(\"thead\"); if (!thead) return [];
-    // labels row only (skip our chips/filters rows)
-    var rows = thead.querySelectorAll(\"tr:not(.dt-sort-row):not(.dt-filter-row)\");
-    var row = rows[rows.length - 1];
+    // labels row only (skip our filter row)
+    var row = thead.querySelector(\"tr.dt-label-row\");
+    if (!row) {
+      // Fallback: last row that's not the filter row
+      var rows = thead.querySelectorAll(\"tr:not(.dt-filter-row)\");
+      row = rows[rows.length - 1];
+    }
     if (!row) return [];
     return Array.from(row.querySelectorAll(\"th\"));
   }
