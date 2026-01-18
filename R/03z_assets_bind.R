@@ -12,20 +12,35 @@ css_overrides <- htmltools::tags$style(htmltools::HTML("
 /* ===== FINAL OVERRIDES: widths & header alignment ===== */
 
 /* ===== FIX DUPLICATE HEADER SEPARATOR LINE ===== */
-/* Remove default DataTables border on scrollHead container - we add our own on last header row */
+/* Remove ALL borders from DataTables header structure */
 .dataTables_scrollHead,
-div.dataTables_scrollHead {
+div.dataTables_scrollHead,
+table.dataTable thead,
+table.dataTable thead tr,
+table.dataTable thead th {
+  border: none !important;
   border-bottom: none !important;
+  border-top: none !important;
 }
 /* Remove any top border on body table that could create double line */
 .dataTables_scrollBody,
 .dataTables_scrollBody table.dataTable,
 .dataTables_scrollBody table.dataTable thead,
-.dataTables_scrollBody table.dataTable tbody tr:first-child td {
+.dataTables_scrollBody table.dataTable tbody,
+.dataTables_scrollBody table.dataTable tbody tr:first-child,
+.dataTables_scrollBody table.dataTable tbody tr:first-child td,
+table.dataTable tbody,
+table.dataTable tbody tr:first-child,
+table.dataTable tbody tr:first-child td {
   border-top: none !important;
 }
-/* Single clean border under the last header row */
+/* Single clean border ONLY on the LAST header row */
 table.dataTable thead tr:last-child th {
+  border-bottom: 2px solid #333 !important;
+}
+/* FixedHeader clones also get the same single border */
+.fixedHeader-floating thead tr:last-child th,
+.fixedHeader-locked thead tr:last-child th {
   border-bottom: 2px solid #333 !important;
 }
 

@@ -211,27 +211,19 @@ css_overrides <- tags$style(HTML("
   }
 
   /* ===== LINE DIVIDER BETWEEN HEADERS AND DATA ===== */
-  /* Remove default DataTables border on scrollHead container to prevent double lines */
-  .dataTables_scrollHead {
+  /* Note: Main border fix is in 03z_assets_bind.R - this adds preview-specific overrides */
+  /* Remove ALL borders from header rows, then add single border on last row */
+  #tbl_preview thead,
+  #tbl_preview thead tr,
+  #tbl_preview thead th {
+    border: none !important;
     border-bottom: none !important;
   }
-  div.dataTables_scrollHead {
-    border-bottom: none !important;
-  }
-  /* Bottom border ONLY on the last header row (the bold column names) */
   #tbl_preview thead tr:last-child th {
     border-bottom: 2px solid #333 !important;
   }
-  /* Also style the FixedHeader clone */
-  .fixedHeader-floating thead tr:last-child th,
-  .fixedHeader-locked thead tr:last-child th {
-    border-bottom: 2px solid #333 !important;
-  }
-  /* Remove any top border on body table that could create double line */
-  .dataTables_scrollBody,
-  .dataTables_scrollBody table.dataTable,
-  .dataTables_scrollBody table.dataTable thead,
-  .dataTables_scrollBody table.dataTable tbody tr:first-child td {
+  #tbl_preview tbody,
+  #tbl_preview tbody tr:first-child td {
     border-top: none !important;
   }
 
