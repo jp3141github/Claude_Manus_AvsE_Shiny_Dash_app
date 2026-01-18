@@ -40,22 +40,32 @@ table.dataTable tbody tr:first-child td,
   border-top: none !important;
   border-bottom: none !important;
 }
-/* EXPLICIT: Remove bottom border from scrollHead wrapper and its children */
+/* EXPLICIT: Remove borders from scrollHead wrapper and its children */
 div.dataTables_scrollHead,
 div.dataTables_scrollHeadInner,
 div.dataTables_scrollHead table,
-div.dataTables_scrollHead table thead,
-div.dataTables_scrollBody {
+div.dataTables_scrollHead table thead {
   border: none !important;
   border-top: none !important;
   border-bottom: none !important;
 }
-/* Add back ONLY the single header separator line */
-table.dataTable thead tr:last-child th,
-.dataTables_scrollHead table.dataTable thead tr:last-child th,
-.fixedHeader-floating thead tr:last-child th,
-.fixedHeader-locked thead tr:last-child th {
-  border-bottom: 2px solid #333 !important;
+/* Add SINGLE bold line directly above data (border-top on scrollBody) */
+div.dataTables_scrollBody {
+  border-top: 2px solid #333 !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+/* For non-scroll tables: border-top on first data row cells */
+table.dataTable:not(.DTFC_Cloned):not([class*="scroll"]) > tbody > tr:first-child > td {
+  border-top: 2px solid #333 !important;
+}
+/* Remove gap between header and body */
+div.dataTables_scrollHead {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 /* CRITICAL: Force header and body tables to shrink to content */
