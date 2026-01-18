@@ -231,13 +231,21 @@ css_overrides <- tags$style(HTML("
   /* CRITICAL: Remove gap/border between scrollHead and scrollBody */
   div.dataTables_scrollHead {
     border-bottom: none !important;
-    margin-bottom: 0 !important;
+    margin-bottom: -2px !important;
     padding-bottom: 0 !important;
   }
   div.dataTables_scrollBody {
     border-top: none !important;
     margin-top: 0 !important;
     padding-top: 0 !important;
+  }
+  /* Reduce padding on header cells to minimize gap */
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th {
+    padding-bottom: 4px !important;
+  }
+  /* Reduce padding on first data row */
+  table.dataTable tbody tr:first-child td {
+    padding-top: 4px !important;
   }
   /* Remove any outline from scroll wrapper that could appear as a line */
   div.dataTables_scroll {
