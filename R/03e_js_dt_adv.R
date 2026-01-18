@@ -110,11 +110,44 @@ window.dtAdvInit = function() {
         return {$crow:$crow, $srow:$srow, $frow:$frow};
       }
 
-      // ---- Simple text search (no regex to avoid issues with numeric columns) ----
+      // ---- Filter search with wildcard support ----
+      // Supports: * (any chars), ? (single char), % (SQL-style, same as *)
       // For OR support: "NIG;DLI" is handled by searching for each term
+      // Returns {term: string, isRegex: boolean}
       function buildSearchTerm(raw){
-        if (!raw) return "";
-        return raw.trim();
+        if (!raw) return {term: "", isRegex: false};
+        var trimmed = raw.trim();
+        if (!trimmed) return {term: "", isRegex: false};
+
+        // Check if wildcards are present
+        var hasWildcard = /[*?%]/.test(trimmed);
+
+        if (!hasWildcard) {
+          // No wildcards - use simple text search
+          return {term: trimmed, isRegex: false};
+        }
+
+        // Convert wildcard syntax to regex
+        // First, escape regex special chars (except our wildcards)
+        var escaped = trimmed.replace(/([.+^${}()|[\\]\\\\])/g, "\\\\$1");
+
+        // Handle semicolon-separated OR values with wildcards
+        var parts = escaped.split(";").map(function(part){
+          part = part.trim();
+          if (!part) return null;
+          // Convert wildcards: * and % -> .*, ? -> .
+          part = part.replace(/\\*/g, ".*");
+          part = part.replace(/%/g, ".*");
+          part = part.replace(/\\?/g, ".");
+          return part;
+        }).filter(function(p){ return p !== null; });
+
+        if (parts.length === 0) return {term: "", isRegex: false};
+        if (parts.length === 1) {
+          return {term: parts[0], isRegex: true};
+        }
+        // Multiple parts - join with OR
+        return {term: "(" + parts.join("|") + ")", isRegex: true};
       }
 
       // Persist RAW input values (not regex) in container data
@@ -422,7 +455,7 @@ window.dtAdvInit = function() {
             setTimeout(function(){ forceColumnsToShrink(id); }, 500);
           });
 
-        // filters — apply on Enter (simple text search, no regex to avoid numeric column issues)
+        // filters — apply on Enter (supports wildcards: *, ?, %)
         $(document).off("keydown"+ns, "thead.dtadv-owner-"+id+" tr.dt-filter-row input.dt-filter-input")
           .on("keydown"+ns, "thead.dtadv-owner-"+id+" tr.dt-filter-row input.dt-filter-input", function(e){
             if (e.key === "Enter"){
@@ -430,9 +463,10 @@ window.dtAdvInit = function() {
               var i = parseInt($(this).attr("data-col"),10);
               var raw = this.value || "";
               saveRawFiltersFromHead($thead);
-              var term = buildSearchTerm(raw);
-              // Use simple text search (regex=FALSE, smart=TRUE, case-insensitive=TRUE)
-              api.column(i).search(term, false, true, true);
+              var searchObj = buildSearchTerm(raw);
+              // Use regex mode if wildcards detected, otherwise simple text search
+              // search(term, regex, smart, caseInsensitive)
+              api.column(i).search(searchObj.term, searchObj.isRegex, !searchObj.isRegex, true);
               api.draw(false);
               setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
               // Force columns to shrink after filter Enter
@@ -478,7 +512,7 @@ window.dtAdvInit = function() {
             setTimeout(function(){ forceColumnsToShrink(id); }, 300);
           });
 
-        // Apply all filters (simple text search)
+        // Apply all filters (supports wildcards: *, ?, %)
         $(document).off("click"+ns, "thead.dtadv-owner-"+id+" .dt-apply-filters")
           .on("click"+ns, "thead.dtadv-owner-"+id+" .dt-apply-filters", function(e){
             e.preventDefault();
@@ -487,12 +521,13 @@ window.dtAdvInit = function() {
             $thead.find("tr.dt-filter-row th input.dt-filter-input").each(function(i){ rawVals[i] = this.value || ""; });
             // Save RAW values
             $cont.data(KEY_FILTERS, rawVals);
-            // Apply as simple text search (no regex to avoid numeric column issues)
+            // Apply filters with wildcard support
             api.columns(":visible").every(function(vidx){
               var raw = rawVals[vidx] || "";
-              var term = buildSearchTerm(raw);
-              // Use simple text search (regex=FALSE, smart=TRUE, case-insensitive=TRUE)
-              this.search(term, false, true, true);
+              var searchObj = buildSearchTerm(raw);
+              // Use regex mode if wildcards detected, otherwise simple text search
+              // search(term, regex, smart, caseInsensitive)
+              this.search(searchObj.term, searchObj.isRegex, !searchObj.isRegex, true);
             });
             api.draw(false);
             setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
