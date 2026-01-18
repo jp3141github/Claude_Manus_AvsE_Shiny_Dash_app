@@ -211,7 +211,14 @@ css_overrides <- tags$style(HTML("
   }
 
   /* ===== LINE DIVIDER BETWEEN HEADERS AND DATA ===== */
-  /* Bottom border on the last header row (the bold column names) */
+  /* Remove default DataTables border on scrollHead container to prevent double lines */
+  .dataTables_scrollHead {
+    border-bottom: none !important;
+  }
+  div.dataTables_scrollHead {
+    border-bottom: none !important;
+  }
+  /* Bottom border ONLY on the last header row (the bold column names) */
   #tbl_preview thead tr:last-child th {
     border-bottom: 2px solid #333 !important;
   }
@@ -219,6 +226,13 @@ css_overrides <- tags$style(HTML("
   .fixedHeader-floating thead tr:last-child th,
   .fixedHeader-locked thead tr:last-child th {
     border-bottom: 2px solid #333 !important;
+  }
+  /* Remove any top border on body table that could create double line */
+  .dataTables_scrollBody,
+  .dataTables_scrollBody table.dataTable,
+  .dataTables_scrollBody table.dataTable thead,
+  .dataTables_scrollBody table.dataTable tbody tr:first-child td {
+    border-top: none !important;
   }
 
   /* ===== CRITICAL: Force ALL cells to shrink to minimum content width ===== */
