@@ -60,10 +60,10 @@ register_checks_server <- function(input, output, session, uploaded_df, results_
       model_type  = { v <- input$model_type; if (is.null(v) || !nzchar(as.character(v))) "—" else as.character(v) },
       projection_date = {
         v <- input$projection_date
-        if (inherits(v, "Date")) format(v, "%d-%m-%Y")
+        if (inherits(v, "Date")) format(v, "%Y/%m/%d")
         else if (!is.null(v) && nzchar(as.character(v))) {
-          vv <- suppressWarnings(as.Date(v, tryFormats = c("%d-%m-%Y","%Y-%m-%d","%d/%m/%Y","%Y/%m/%d")))
-          if (!is.na(vv)) format(vv, "%d-%m-%Y") else as.character(v)
+          vv <- suppressWarnings(as.Date(v, tryFormats = c("%Y/%m/%d","%Y-%m-%d","%d-%m-%Y","%d/%m/%Y")))
+          if (!is.na(vv)) format(vv, "%Y/%m/%d") else as.character(v)
         } else "—"
       }
     )

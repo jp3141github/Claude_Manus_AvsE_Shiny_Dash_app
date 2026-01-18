@@ -16,7 +16,7 @@ register_run_export_server <- function(input, output, session, uploaded_df, resu
       df <- uploaded_df(); if (is.null(df) || !nrow(df)) { showNotification("Upload a CSV first.", type = "error"); return() }
       mt <- input$model_type; pd_str <- input$projection_date; ev <- input$event_type %||% "Non-Event"
       if (is.null(mt) || !nzchar(mt) || is.null(pd_str) || !nzchar(pd_str)) { showNotification("Select Model Type and Projection Date.", type = "error"); return() }
-      proj_dt <- suppressWarnings(lubridate::dmy(pd_str))
+      proj_dt <- suppressWarnings(lubridate::ymd(pd_str))
       if (is.na(proj_dt) || proj_dt < as.Date("2000-01-01") || proj_dt > as.Date("2100-12-31")) {
         showNotification(glue::glue("Projection Date not parseable or out of range: {pd_str}"), type = "error"); return()
       }
@@ -103,7 +103,7 @@ register_run_export_server <- function(input, output, session, uploaded_df, resu
                       uploaded_df = df,
                       filters = list(
                         model_type = mt,
-                        projection_date = format(proj_dt, "%d-%m-%Y"),
+                        projection_date = format(proj_dt, "%Y/%m/%d"),
                         event_type = ev,
                         excluded_products = input$exclude_products %||% character(0)
                       ))
@@ -132,7 +132,7 @@ register_run_export_server <- function(input, output, session, uploaded_df, resu
       df <- uploaded_df(); if (is.null(df) || !nrow(df)) { showNotification("Upload a CSV/XLSX first.", type="error"); return() }
       mt <- input$model_type; pdstr <- input$projection_date; ev <- input$event_type %||% "Non-Event"
       if (is.null(mt) || !nzchar(mt) || is.null(pdstr) || !nzchar(pdstr)) { showNotification("Select Model Type and Projection Date.", type="error"); return() }
-      proj_dt <- suppressWarnings(lubridate::dmy(pdstr)); if (is.na(proj_dt)) { showNotification("Projection Date not parseable.", type="error"); return() }
+      proj_dt <- suppressWarnings(lubridate::ymd(pdstr)); if (is.na(proj_dt)) { showNotification("Projection Date not parseable.", type="error"); return() }
 
       # Step 2: Building tables (30%)
       incProgress(0.2, detail = "Building tables...")

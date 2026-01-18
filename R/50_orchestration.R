@@ -101,7 +101,7 @@ build_all_tables <- function(raw_df,
   raw_out <- df[, c(EXPECTED_COLUMNS, "A - E"), drop = FALSE]
   if ("ProjectionDate" %in% names(raw_out)) {
     pd <- parse_projection_date_dateonly(raw_out[["ProjectionDate"]])
-    raw_out[["ProjectionDate"]] <- ifelse(!is.na(pd), format(pd, "%d-%m-%Y"), NA_character_)
+    raw_out[["ProjectionDate"]] <- ifelse(!is.na(pd), format(pd, "%Y/%m/%d"), NA_character_)
   }
   
   class_summary_pct       <- .ids_text_guard(class_summary_pct)

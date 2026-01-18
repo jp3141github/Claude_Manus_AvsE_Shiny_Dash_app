@@ -606,7 +606,7 @@ register_charts_server <- function(input, output, session, results_obj, chart_da
     df <- apply_filters(
       df,
       model_type      = input$model_type,
-      projection_date = suppressWarnings(lubridate::dmy(input$projection_date)),
+      projection_date = suppressWarnings(lubridate::ymd(input$projection_date)),
       event_type      = input$event_type
     )
     validate(need(nrow(df) > 0, "No data after model/date/event filters"))

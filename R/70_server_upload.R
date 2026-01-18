@@ -35,8 +35,8 @@ register_upload_server <- function(input, output, session, uploaded_df) {
       if ("ProjectionDate" %in% names(df)) {
         parsed_proj <- parse_projection_date_dateonly(df[["ProjectionDate"]]) |> as.Date()
         clean_proj  <- parsed_proj[!is.na(parsed_proj) & parsed_proj >= as.Date("2000-01-01") & parsed_proj <= as.Date("2100-12-31")]
-        dropdown_choices <- if (length(clean_proj)) format(sort(unique(clean_proj)), "%d-%m-%Y") else character(0)
-        preferred <- c("31-05-2025", "31-05-25")
+        dropdown_choices <- if (length(clean_proj)) format(sort(unique(clean_proj)), "%Y/%m/%d") else character(0)
+        preferred <- c("2025/05/31")
         sel_pd <- (intersect(preferred, dropdown_choices))[1]; if (is.na(sel_pd) || length(sel_pd) == 0) sel_pd <- character(0)
         updateSelectizeInput(session, "projection_date", choices = dropdown_choices, server = TRUE, selected = sel_pd)
       } else updateSelectizeInput(session, "projection_date", choices = character(0), server = TRUE, selected = character(0))
@@ -52,7 +52,7 @@ register_upload_server <- function(input, output, session, uploaded_df) {
           dfp[["ProjectionDate"]] <- ifelse(!is.na(cleaned) &
                                               cleaned >= as.Date("2000-01-01") &
                                               cleaned <= as.Date("2100-12-31"),
-                                            format(cleaned, "%d-%m-%Y"), NA_character_)
+                                            format(cleaned, "%Y/%m/%d"), NA_character_)
         }
         if ("Actual" %in% names(dfp))   dfp[["Actual"]]   <- to_float(dfp[["Actual"]])
         if ("Expected" %in% names(dfp)) dfp[["Expected"]] <- to_float(dfp[["Expected"]])
