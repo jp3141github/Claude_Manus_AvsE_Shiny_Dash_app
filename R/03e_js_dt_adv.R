@@ -343,13 +343,20 @@ window.dtAdvInit = function() {
             var targetIdx = (sectionIdx >= 0 && sectionIdx < $filterCells.length) ? sectionIdx : 0;
             var $targetTh = $filterCells.eq(targetIdx);
 
+
+            // Save the existing input, clear the cell, then add controls first, input second
+            var $existingInput = $targetTh.find("input.dt-filter-input").detach();
             var html = [
               \'<span class="dt-filter-controls" style="white-space:nowrap;display:block;margin-bottom:2px;">\',
               \'<a href="#" class="dt-apply-filters" title="Apply all column filters" style="font-size:11px;text-decoration:none;margin-right:6px;">✔ apply</a>\',
               \'<a href="#" class="dt-clear-filters" title="Clear all column filters" style="font-size:11px;text-decoration:none;">✖ clear filters</a>\',
               \'</span>\'
             ].join("");
-            $targetTh.prepend(html);
+            
+            // Clear and rebuild: controls first, then input below
+            $targetTh.empty();
+            $targetTh.append(html);
+            $targetTh.append($existingInput);
           });
         }catch(e){}
       }
