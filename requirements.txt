@@ -1,0 +1,23 @@
+# R Package Requirements for AvsE Shiny Dashboard
+# Install all packages with: Rscript -e "install.packages(readLines('requirements.txt')[!grepl('^#', readLines('requirements.txt'))])"
+# Or run in R: source('install_packages.R')
+
+shiny
+bslib
+DT
+readr
+readxl
+dplyr
+tidyr
+stringr
+lubridate
+purrr
+rlang
+fs
+glue
+ggplot2
+openxlsx
+zip
+scales
+plotly
+tibble
