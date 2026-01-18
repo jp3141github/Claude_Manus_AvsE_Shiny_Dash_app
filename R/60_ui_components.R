@@ -228,6 +228,31 @@ css_overrides <- tags$style(HTML("
     border-bottom: none !important;
   }
 
+  /* CRITICAL: Remove gap/border between scrollHead and scrollBody */
+  div.dataTables_scrollHead {
+    border-bottom: none !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  div.dataTables_scrollBody {
+    border-top: none !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  /* Remove any outline from scroll wrapper that could appear as a line */
+  div.dataTables_scroll {
+    border: none !important;
+    outline: none !important;
+  }
+  /* Ensure first data row has no top border */
+  table.dataTable tbody tr:first-child,
+  table.dataTable tbody tr:first-child td,
+  div.dataTables_scrollBody table.dataTable tbody tr:first-child,
+  div.dataTables_scrollBody table.dataTable tbody tr:first-child td {
+    border-top: none !important;
+    box-shadow: none !important;
+  }
+
   /* ===== A-E VALUE COLORING (green for negative, red for positive) ===== */
   table.dataTable td.ae-negative {
     background-color: rgba(144, 238, 144, 0.4) !important;
@@ -238,15 +263,30 @@ css_overrides <- tags$style(HTML("
     color: darkred !important;
   }
 
-  /* ===== LINE DIVIDER: Use box-shadow instead of border (more reliable) ===== */
+  /* ===== LINE DIVIDER: Use box-shadow instead of border ===== */
+  /* CRITICAL FIX: Prevent double lines when DataTables uses scroll mode */
+
+  /* Step 1: Apply line to ALL table headers (fallback for non-scroll tables) */
   table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th {
     border-bottom: none !important;
     box-shadow: inset 0 -2px 0 #333 !important;
   }
+
+  /* Step 2: For scroll tables, scrollHead header gets the line */
   div.dataTables_scrollHead table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th {
     border-bottom: none !important;
     box-shadow: inset 0 -2px 0 #333 !important;
   }
+
+  /* Step 3: CRITICAL - Remove line from scrollBody header (it's hidden but may still render) */
+  div.dataTables_scrollBody table.dataTable thead th,
+  div.dataTables_scrollBody table.dataTable thead tr th,
+  div.dataTables_scrollBody table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th {
+    box-shadow: none !important;
+    border-bottom: none !important;
+  }
+
+  /* FixedHeader floating/locked headers */
   .fixedHeader-floating thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th,
   .fixedHeader-locked thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th {
     border-bottom: none !important;
