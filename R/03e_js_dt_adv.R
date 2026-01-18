@@ -151,23 +151,28 @@ window.dtAdvInit = function() {
       }
 
       // ---- Numeric column filter formatting for DT server-side ----
-      // DT server-side filterRange() expects "min ... max" format for numeric columns
-      // Supports: exact value, >=, <=, >, <, and range (e.g., "100..200" or "100-200")
-      // Returns {term: string, isNumericRange: boolean}
-      function buildNumericSearchTerm(raw){
-        if (!raw) return {term: "", isNumericRange: false};
-        var trimmed = raw.trim();
-        if (!trimmed) return {term: "", isNumericRange: false};
+      // DT's server-side filterRange() expects "min ... max" format for numeric columns
+      // Supports: exact value, >=, <=, >, <, range (e.g., "100..200"), and semicolon OR expressions
+      // Returns {term: string, isNumericRange: boolean, error: string|null}
 
-        // Range operators: "100..200", "100...200", "100-200" (but not negative like "-100")
-        var rangeMatch = trimmed.match(/^(-?[\\d.]+)\\s*(?:\\.\\.\\.?|\\s+to\\s+|\\s*-\\s*(?=[\\d]))\\s*(-?[\\d.]+)$/i);
+      // Parse a SINGLE numeric expression (no semicolons)
+      // Returns {min, max} or null if can't parse
+      function parseSingleNumericExpr(expr){
+        if (!expr) return null;
+        var trimmed = expr.trim();
+        if (!trimmed) return null;
+
+        var MINVAL = -1e308;
+        var MAXVAL = 1e308;
+
+        // Range operators: "100..200", "100...200", "100 to 200"
+        var rangeMatch = trimmed.match(/^(-?[\\d.]+)\\s*(?:\\.\\.\\.?|\\s+to\\s+)\\s*(-?[\\d.]+)$/i);
         if (rangeMatch) {
           var min = parseFloat(rangeMatch[1]);
           var max = parseFloat(rangeMatch[2]);
           if (!isNaN(min) && !isNaN(max)) {
-            // Ensure min <= max
             if (min > max) { var tmp = min; min = max; max = tmp; }
-            return {term: min + " ... " + max, isNumericRange: true};
+            return {min: min, max: max};
           }
         }
 
@@ -175,54 +180,102 @@ window.dtAdvInit = function() {
         var gteMatch = trimmed.match(/^>=\\s*(-?[\\d.]+)$/);
         if (gteMatch) {
           var val = parseFloat(gteMatch[1]);
-          if (!isNaN(val)) {
-            // Use very large max for unbounded upper range
-            return {term: val + " ... " + 1e308, isNumericRange: true};
-          }
+          if (!isNaN(val)) return {min: val, max: MAXVAL};
         }
 
         // Less than or equal: "<=100", "<= 100"
         var lteMatch = trimmed.match(/^<=\\s*(-?[\\d.]+)$/);
         if (lteMatch) {
           var val = parseFloat(lteMatch[1]);
-          if (!isNaN(val)) {
-            // Use very small min for unbounded lower range
-            return {term: -1e308 + " ... " + val, isNumericRange: true};
-          }
+          if (!isNaN(val)) return {min: MINVAL, max: val};
         }
 
         // Greater than: ">100", "> 100"
         var gtMatch = trimmed.match(/^>\\s*(-?[\\d.]+)$/);
         if (gtMatch) {
           var val = parseFloat(gtMatch[1]);
-          if (!isNaN(val)) {
-            // Add tiny epsilon to exclude the exact value
-            return {term: (val + 1e-10) + " ... " + 1e308, isNumericRange: true};
-          }
+          if (!isNaN(val)) return {min: val + 1e-10, max: MAXVAL};
         }
 
         // Less than: "<100", "< 100"
         var ltMatch = trimmed.match(/^<\\s*(-?[\\d.]+)$/);
         if (ltMatch) {
           var val = parseFloat(ltMatch[1]);
-          if (!isNaN(val)) {
-            // Subtract tiny epsilon to exclude the exact value
-            return {term: -1e308 + " ... " + (val - 1e-10), isNumericRange: true};
-          }
+          if (!isNaN(val)) return {min: MINVAL, max: val - 1e-10};
         }
 
         // Exact numeric value: "100", "100.5", "-50"
         var numMatch = trimmed.match(/^-?[\\d.]+$/);
         if (numMatch) {
           var val = parseFloat(trimmed);
-          if (!isNaN(val)) {
-            // For exact match, use same value for min and max
-            return {term: val + " ... " + val, isNumericRange: true};
-          }
+          if (!isNaN(val)) return {min: val, max: val};
         }
 
-        // Not a recognized numeric pattern - return as text (will likely fail but let DT handle it)
-        return {term: trimmed, isNumericRange: false};
+        return null; // Can't parse
+      }
+
+      // Merge multiple ranges using OR (union) logic
+      // Returns {min, max} if result is a single continuous range, null otherwise
+      function mergeRangesOR(ranges){
+        if (!ranges || ranges.length === 0) return null;
+        if (ranges.length === 1) return {min: ranges[0].min, max: ranges[0].max};
+
+        // Sort by min value
+        ranges.sort(function(a, b){ return a.min - b.min; });
+
+        // Try to merge into single continuous range
+        var merged = {min: ranges[0].min, max: ranges[0].max};
+        for (var i = 1; i < ranges.length; i++) {
+          var r = ranges[i];
+          // Check if r overlaps or touches merged (with small tolerance for floating point)
+          if (r.min <= merged.max + 1e-9) {
+            // Overlaps or adjacent - extend merged
+            merged.max = Math.max(merged.max, r.max);
+          } else {
+            // Gap between ranges - can't merge into single range
+            // e.g., <592;>614 creates gap [592, 614]
+            return null;
+          }
+        }
+        return merged;
+      }
+
+      function buildNumericSearchTerm(raw){
+        if (!raw) return {term: "", isNumericRange: false, error: null};
+        var trimmed = raw.trim();
+        if (!trimmed) return {term: "", isNumericRange: false, error: null};
+
+        // Split on semicolon for OR expressions
+        var parts = trimmed.split(";").map(function(p){ return p.trim(); }).filter(function(p){ return p.length > 0; });
+
+        if (parts.length === 0) return {term: "", isNumericRange: false, error: null};
+
+        // Parse each part
+        var ranges = [];
+        for (var i = 0; i < parts.length; i++) {
+          var range = parseSingleNumericExpr(parts[i]);
+          if (range === null) {
+            // Can't parse this part - not a valid numeric expression
+            return {term: trimmed, isNumericRange: false, error: "Cannot parse: " + parts[i]};
+          }
+          ranges.push(range);
+        }
+
+        // Try to merge all ranges into single continuous range
+        var merged = mergeRangesOR(ranges);
+
+        if (merged === null) {
+          // Ranges are disjoint - can't represent as single range for DT
+          // e.g., "<592;>614" means (-inf,592) OR (614,+inf) which has a gap
+          return {
+            term: trimmed,
+            isNumericRange: false,
+            error: "Cannot filter: '" + trimmed + "' creates disjoint ranges. DT only supports single continuous range. Try a single comparison like '>614' or a range like '500..600'."
+          };
+        }
+
+        // Successfully merged into single range
+        return {term: merged.min + " ... " + merged.max, isNumericRange: true, error: null};
       }
 
       // Check if a column is numeric based on column name or data inspection
@@ -589,7 +642,8 @@ window.dtAdvInit = function() {
           .on("keydown"+ns, "thead.dtadv-owner-"+id+" tr.dt-filter-row input.dt-filter-input", function(e){
             if (e.key === "Enter"){
               var $thead = $(this).closest("thead");
-              var i = parseInt($(this).attr("data-col"),10);
+              var $input = $(this);
+              var i = parseInt($input.attr("data-col"),10);
               var raw = this.value || "";
               saveRawFiltersFromHead($thead);
 
@@ -600,9 +654,23 @@ window.dtAdvInit = function() {
               if (isNumeric && raw.trim()) {
                 // Use numeric range format for DT server-side filterRange()
                 var numSearchObj = buildNumericSearchTerm(raw);
-                console.log("[DT Filter] Numeric column", i, "raw:", raw, "formatted:", numSearchObj.term);
-                // For numeric columns, use the range format directly (no regex, no smart search)
-                api.column(i).search(numSearchObj.term, false, false, true);
+                console.log("[DT Filter] Numeric column", i, "raw:", raw, "formatted:", numSearchObj.term, "error:", numSearchObj.error);
+
+                if (numSearchObj.error) {
+                  // Can not represent as single range - show error and clear this column filter
+                  console.warn("[DT Filter] " + numSearchObj.error);
+                  alert("Filter Error:\\n" + numSearchObj.error);
+                  $input.css("background-color", "#ffcccc"); // highlight error
+                  api.column(i).search(""); // clear this column filter
+                } else if (numSearchObj.isNumericRange) {
+                  // Valid numeric range - apply it
+                  $input.css("background-color", ""); // clear error highlight
+                  api.column(i).search(numSearchObj.term, false, false, true);
+                } else {
+                  // Empty or cleared
+                  $input.css("background-color", "");
+                  api.column(i).search("");
+                }
               } else {
                 // Use text/wildcard search for non-numeric columns
                 var searchObj = buildSearchTerm(raw);
@@ -660,26 +728,44 @@ window.dtAdvInit = function() {
             e.preventDefault();
             var $thead = $(this).closest("thead");
             var rawVals = [];
-            $thead.find("tr.dt-filter-row th input.dt-filter-input").each(function(i){ rawVals[i] = this.value || ""; });
+            var $inputs = $thead.find("tr.dt-filter-row th input.dt-filter-input");
+            $inputs.each(function(i){ rawVals[i] = this.value || ""; });
             // Save RAW values
             $cont.data(KEY_FILTERS, rawVals);
             // Apply filters with numeric range support for numeric columns
             var heads = locateHeads();
+            var errors = [];
             api.columns(":visible").every(function(vidx){
               var raw = rawVals[vidx] || "";
               var isNumeric = isNumericColumn(vidx, heads);
+              var $input = $inputs.eq(vidx);
 
               if (isNumeric && raw.trim()) {
                 // Use numeric range format for DT server-side filterRange()
                 var numSearchObj = buildNumericSearchTerm(raw);
-                console.log("[DT Filter] Apply: Numeric column", vidx, "raw:", raw, "formatted:", numSearchObj.term);
-                this.search(numSearchObj.term, false, false, true);
+                console.log("[DT Filter] Apply: Numeric column", vidx, "raw:", raw, "formatted:", numSearchObj.term, "error:", numSearchObj.error);
+
+                if (numSearchObj.error) {
+                  // Can not represent as single range - collect error
+                  errors.push(numSearchObj.error);
+                  $input.css("background-color", "#ffcccc"); // highlight error
+                  this.search(""); // clear this column filter
+                } else if (numSearchObj.isNumericRange) {
+                  $input.css("background-color", ""); // clear error highlight
+                  this.search(numSearchObj.term, false, false, true);
+                } else {
+                  $input.css("background-color", "");
+                  this.search("");
+                }
               } else {
                 // Use text/wildcard search for non-numeric columns
                 var searchObj = buildSearchTerm(raw);
                 this.search(searchObj.term, searchObj.isRegex, !searchObj.isRegex, true);
               }
             });
+            if (errors.length > 0) {
+              alert("Filter Errors:\\n" + errors.join("\\n\\n"));
+            }
             api.draw(false);
             setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
             // Force columns to shrink after filter apply
