@@ -83,49 +83,25 @@ window.dtAdvInit = function() {
         return { $theadVis: $theadVis, $theads: $theads };
       }
 
-      function buildFilterRow(n){
+      function buildRows(n){
+        var $srow = $("<tr class=\\"dt-sort-row\\"></tr>");
         var $frow = $("<tr class=\\"dt-filter-row\\"></tr>");
         for (var i=0;i<n;i++){
+          var $thS = $("<th></th>");
+          var $box = $("<span class=\\"dt-sortbox\\"></span>");
+          function mk(txt, dir){
+            var $b = $("<span class=\\"dt-sortbtn\\"></span>").text(txt).attr("data-dir",dir);
+            $b.append("<span class=\\"dt-badge\\"></span>");
+            return $b;
+          }
+          $box.append(mk("A","asc"), mk("D","desc"), mk("−","none"));
+          $thS.append($box); $srow.append($thS);
+
           var $thF = $("<th></th>");
           var $inp = $("<input type=\\"text\\" class=\\"dt-filter-input\\" placeholder=\\"filter\\" data-col=\\""+i+"\\">");
           $thF.append($inp); $frow.append($thF);
         }
-        return $frow;
-      }
-
-      // Add sort buttons to the left of each column header label
-      function addSortToLabelRow(heads){
-        try{
-          heads.$theads.each(function(){
-            var $h = $(this);
-            // Find the label row (not sort-row, not filter-row, last row with th elements)
-            var $labelRow = $h.find("tr:not(.dt-filter-row):last");
-            if (!$labelRow.length) return;
-            var $labelCells = $labelRow.find("th");
-            if (!$labelCells.length) return;
-
-            // Mark the label row for styling
-            $labelRow.addClass("dt-label-row");
-
-            $labelCells.each(function(i){
-              var $th = $(this);
-              // Skip if sort box already exists
-              if ($th.find(".dt-sortbox").length) return;
-
-              // Create sort box with A/D/- buttons
-              var $box = $("<span class=\\"dt-sortbox\\"></span>");
-              function mk(txt, dir){
-                var $b = $("<span class=\\"dt-sortbtn\\"></span>").text(txt).attr("data-dir",dir).attr("data-col",i);
-                $b.append("<span class=\\"dt-badge\\"></span>");
-                return $b;
-              }
-              $box.append(mk("A","asc"), mk("D","desc"), mk("−","none"));
-
-              // Prepend sort box to the th (appears on left of column name)
-              $th.prepend($box);
-            });
-          });
-        }catch(e){ console.warn("addSortToLabelRow error:", e); }
+        return {$srow:$srow, $frow:$frow};
       }
 
       // ---- Simple text search (no regex to avoid issues with numeric columns) ----
@@ -209,8 +185,7 @@ window.dtAdvInit = function() {
           sortStack.forEach(function(entry, idx){
             var visIdx = api.column(entry.colIdx).visible() ? api.column(entry.colIdx).index("toVisible") : null;
             if (visIdx == null) return;
-            // Find sort buttons in the label row (not filter row)
-            var $cell = $scope.find("tr.dt-label-row th").eq(visIdx);
+            var $cell = $scope.find("tr.dt-sort-row th").eq(visIdx);
             var sel   = entry.dir === "asc" ? ".dt-sortbtn[data-dir=asc]" : ".dt-sortbtn[data-dir=desc]";
             var $btn  = $cell.find(sel);
             $btn.addClass("active has-badge").find(".dt-badge").text(idx+1);
@@ -221,12 +196,8 @@ window.dtAdvInit = function() {
       // Detect column alignment based on column name and data content (numeric = right-aligned)
       function detectColumnAlignments(heads){
         try{
-          // Get column names from header labels (label row has sort buttons prepended)
-          var $labelRow = heads.$theadVis.find("tr.dt-label-row th");
-          if (!$labelRow.length) {
-            // Fallback if dt-label-row not yet added
-            $labelRow = heads.$theadVis.find("tr:not(.dt-filter-row):last th");
-          }
+          // Get column names from header labels
+          var $labelRow = heads.$theadVis.find("tr:not(.dt-sort-row):not(.dt-filter-row):last th");
           var alignments = [];
 
           // Check first few rows of data to detect if column is numeric
@@ -287,7 +258,7 @@ window.dtAdvInit = function() {
         }catch(e){ console.warn("detectColumnAlignments error:", e); return []; }
       }
 
-      // Apply alignment to label and filter rows (class-based for CSS)
+      // Apply alignment to sort and filter rows (class-based for CSS flexbox)
       function applyColumnAlignments(heads, alignments){
         try{
           console.log("[DT Alignment] applyColumnAlignments called, theads count:", heads.$theads.length, "alignments:", alignments.length);
@@ -299,34 +270,38 @@ window.dtAdvInit = function() {
 
           heads.$theads.each(function(theadIdx){
             var $h = $(this);
-            var $labelCells = $h.find("tr.dt-label-row th");
+            var $sortCells = $h.find("tr.dt-sort-row th");
             var $filterCells = $h.find("tr.dt-filter-row th");
-            console.log("[DT Alignment] Thead", theadIdx, "- labelCells:", $labelCells.length, "filterCells:", $filterCells.length);
+            console.log("[DT Alignment] Thead", theadIdx, "- sortCells:", $sortCells.length, "filterCells:", $filterCells.length);
 
-            if ($labelCells.length === 0) {
-              console.warn("[DT Alignment] No label cells found in thead", theadIdx);
+            if ($sortCells.length === 0) {
+              console.warn("[DT Alignment] No sort cells found in thead", theadIdx);
               return;
             }
 
             alignments.forEach(function(align, i){
               if (align === "right") {
-                var $labelCell = $labelCells.eq(i);
+                var $sortCell = $sortCells.eq(i);
                 var $filterCell = $filterCells.eq(i);
 
-                if ($labelCell.length === 0) {
-                  console.warn("[DT Alignment] No labelCell at index", i);
+                if ($sortCell.length === 0) {
+                  console.warn("[DT Alignment] No sortCell at index", i);
                   return;
                 }
 
-                // Add alignment class to cells
-                $labelCell.addClass("dt-col-right");
+                // Add the class - CSS uses text-align:right + float:right for sortbox
+                // DO NOT use display:flex as it breaks table-cell layout
+                $sortCell.addClass("dt-col-right").css("text-align", "right");
                 $filterCell.addClass("dt-col-right").css("text-align", "right");
+
+                // Float the sortbox to the right
+                $sortCell.find(".dt-sortbox").css("float", "right");
 
                 // Also right-align the filter input text
                 $filterCell.find("input.dt-filter-input").css("text-align", "right");
 
                 console.log("[DT Alignment] Applied dt-col-right to col", i,
-                  "- labelCell has class:", $labelCell.hasClass("dt-col-right"),
+                  "- sortCell has class:", $sortCell.hasClass("dt-col-right"),
                   "- filterCell has class:", $filterCell.hasClass("dt-col-right"));
               }
             });
@@ -337,16 +312,10 @@ window.dtAdvInit = function() {
       // Find the column index for "Section" (to place filter controls above it)
       function findSectionColumnIndex(heads){
         try{
-          var $labelCells = heads.$theadVis.find("tr.dt-label-row th");
-          if (!$labelCells.length) {
-            $labelCells = heads.$theadVis.find("tr:not(.dt-filter-row):last th");
-          }
+          var $labelRow = heads.$theadVis.find("tr:not(.dt-sort-row):not(.dt-filter-row):last th");
           var sectionIdx = -1;
-          $labelCells.each(function(i){
-            // Get text content excluding the sortbox
-            var $clone = $(this).clone();
-            $clone.find(".dt-sortbox").remove();
-            var colName = $clone.text().trim().toLowerCase();
+          $labelRow.each(function(i){
+            var colName = $(this).text().trim().toLowerCase();
             if (colName === "section") {
               sectionIdx = i;
               return false; // break
@@ -396,18 +365,11 @@ window.dtAdvInit = function() {
         try{
           heads.$theads.each(function(){
             var $h = $(this);
-            // Add clear sort button to the first th in the label row (after the sortbox)
-            var $firstTh = $h.find("tr.dt-label-row th").first();
+            var $firstTh = $h.find("tr.dt-sort-row th").first();
             if (!$firstTh.length) return;
             if ($firstTh.find(".dt-clear-sort").length) return;
             var $a = $(\'<a href="#" class="dt-clear-sort" title="Clear all sorting" style="margin-left:8px; font-size:11px; text-decoration:none;">✖ clear</a>\');
-            // Insert after the sortbox
-            var $sortbox = $firstTh.find(".dt-sortbox");
-            if ($sortbox.length) {
-              $sortbox.after($a);
-            } else {
-              $firstTh.prepend($a);
-            }
+            $firstTh.append($a);
           });
         }catch(e){}
       }
@@ -427,28 +389,23 @@ window.dtAdvInit = function() {
           cachedRaw = readFilterValsFromApi();
         }
 
-        // remove old filter row and any existing sortboxes/clear-sort from label row
-        heads.$theads.find("tr.dt-filter-row").remove();
-        heads.$theads.find(".dt-sortbox, .dt-clear-sort").remove();
-        heads.$theads.find("tr").removeClass("dt-label-row");
+        // remove old helper rows
+        heads.$theads.find("tr.dt-sort-row, tr.dt-filter-row").remove();
 
         // build per-<thead> using its live column count
         heads.$theads.each(function(){
           var $h = $(this);
           var n  = $h.find("tr:last th").length;
           if (!n) n = api.columns().count();
-          var $frow = buildFilterRow(n);
-          $h.prepend($frow);
+          var rows = buildRows(n);
+          $h.prepend(rows.$frow); $h.prepend(rows.$srow);
         });
-
-        // Add sort buttons to the left of each column header in the label row
-        addSortToLabelRow(heads);
 
         var ns = ".dtadv."+id;
 
         // sort clicks — multi-order stack with position badges
-        $(document).off("click"+ns, "thead.dtadv-owner-"+id+" .dt-sortbtn")
-          .on("click"+ns, "thead.dtadv-owner-"+id+" .dt-sortbtn", function(e){
+        $(document).off("click"+ns, "thead.dtadv-owner-"+id+" tr.dt-sort-row .dt-sortbtn")
+          .on("click"+ns, "thead.dtadv-owner-"+id+" tr.dt-sort-row .dt-sortbtn", function(e){
             e.preventDefault(); e.stopPropagation();
             var $btn = $(this), dir = $btn.attr("data-dir");
             var visIdx = $btn.closest("th").index();
