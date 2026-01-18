@@ -148,7 +148,7 @@ register_results_server <- function(input, output, session, results_obj, uploade
         output[[sid]] <- renderDT({
           req(input$tabs_results_inner == nm)   # only build when visible
           make_dt(df, nm)
-        }, server = TRUE)
+        }, server = FALSE)  # Client-side processing enables text filtering on numeric columns
       })
     })
 
