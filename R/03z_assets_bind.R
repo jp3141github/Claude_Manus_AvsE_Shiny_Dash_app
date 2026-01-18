@@ -59,7 +59,7 @@ div.dataTables_scrollBody {
   padding-top: 0 !important;
 }
 /* For non-scroll tables: border-top on first data row cells */
-table.dataTable:not(.DTFC_Cloned):not([class*="scroll"]) > tbody > tr:first-child > td {
+table.dataTable:not(.DTFC_Cloned):not(.nowrap) > tbody > tr:first-child > td {
   border-top: 2px solid #333 !important;
 }
 /* Remove gap between header and body */
