@@ -612,7 +612,7 @@ window.dtAdvInitWithJumper = function(){
   return function(settings){ try{ adv(settings); }catch(e){} try{ jumper(settings); }catch(e){} };
 };
 
-/* -------- FORCE COLUMNS TO SHRINK: Strip all inline widths ----- */
+/* -------- FORCE COLUMNS TO SHRINK: Strip width-related inline styles ----- */
 function forceColumnsToShrink(tableId) {
   try {
     var $tbl = $("#" + tableId);
@@ -621,18 +621,32 @@ function forceColumnsToShrink(tableId) {
     // Remove colgroup entirely - it forces column widths
     $tbl.find("colgroup").remove();
 
-    // Remove DataTables inline width from table element - let CSS handle it
-    $tbl.removeAttr("style");
+    // Get wrapper to check if we're in freeze-pane mode
+    var $wrapper = $("#" + tableId + "_wrapper");
+    var isFreezePaneMode = $wrapper.closest(".freeze-pane").length > 0;
 
-    // Strip width attributes from th cells
-    $tbl.find("th").removeAttr("style").removeAttr("width");
-    
+    // Remove DataTables inline width from table element - let CSS handle it
+    // But preserve table-layout property
+    var tableLayout = $tbl.css("table-layout");
+    $tbl.css("width", "").css("min-width", "");
+    if (tableLayout) $tbl.css("table-layout", tableLayout);
+
+    // Strip width attributes from th cells but preserve text-align for right-aligned columns
+    $tbl.find("th").each(function() {
+      var $th = $(this);
+      var textAlign = $th.css("text-align");
+      $th.css("width", "").removeAttr("width");
+      if (textAlign === "right") {
+        $th.css("text-align", "right");
+      }
+    });
+
     // Strip width from td cells BUT preserve background-color and color for A-E coloring
     $tbl.find("td").each(function() {
       var $td = $(this);
       var bgColor = $td.css("background-color");
       var textColor = $td.css("color");
-      $td.removeAttr("style").removeAttr("width");
+      $td.css("width", "").removeAttr("width");
       // Restore A-E coloring if it was set (non-default colors)
       if (bgColor && bgColor !== "rgba(0, 0, 0, 0)" && bgColor !== "transparent" && bgColor !== "rgb(255, 255, 255)") {
         $td.css("background-color", bgColor);
@@ -642,14 +656,17 @@ function forceColumnsToShrink(tableId) {
       }
     });
 
-    // Strip inline styles from wrapper - let CSS handle it
-    var $wrapper = $("#" + tableId + "_wrapper");
-    if ($wrapper.length) {
-      $wrapper.removeAttr("style");
+    // For freeze-pane mode: DO NOT strip styles from scroll containers
+    // The scroll containers need their height/overflow styles for freeze panes to work
+    if (!isFreezePaneMode) {
+      // Only strip width-related styles from wrapper for non-freeze-pane tables
+      if ($wrapper.length) {
+        $wrapper.css("width", "");
+      }
     }
 
-    // Also strip from any parent scroll containers
-    $tbl.closest(".dataTables_scrollHead, .dataTables_scrollBody").removeAttr("style");
+    // NEVER strip styles from scroll containers - they control freeze pane behavior
+    // The height and overflow properties must be preserved
 
   } catch(e) {
     console.warn("[Column Shrink] Error:", e);
