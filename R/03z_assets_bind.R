@@ -12,58 +12,26 @@ css_overrides <- htmltools::tags$style(htmltools::HTML("
 /* ===== FINAL OVERRIDES: widths & header alignment ===== */
 
 /* ===== FIX DUPLICATE HEADER SEPARATOR LINE ===== */
-/* Force border-collapse and remove table-level borders */
-table.dataTable {
-  border-collapse: collapse !important;
-  border-spacing: 0 !important;
-  border: none !important;
-}
-/* Remove ALL borders from DataTables scroll wrapper structure */
-.dataTables_scroll,
-.dataTables_scrollHead,
-.dataTables_scrollHeadInner,
-.dataTables_scrollBody,
-div.dataTables_scroll,
-div.dataTables_scrollHead,
-div.dataTables_scrollHeadInner,
-div.dataTables_scrollBody {
+/* NUCLEAR: Remove ALL borders from EVERYTHING in DataTables */
+.dataTables_wrapper *,
+.dataTables_wrapper *::before,
+.dataTables_wrapper *::after {
   border: none !important;
   border-top: none !important;
   border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
   box-shadow: none !important;
   outline: none !important;
 }
-/* Remove ALL borders from header table elements */
-table.dataTable thead,
-table.dataTable thead tr,
-table.dataTable thead th,
-.dataTables_scrollHead table.dataTable,
-.dataTables_scrollHead table.dataTable thead,
-.dataTables_scrollHead table.dataTable thead tr,
-.dataTables_scrollHead table.dataTable thead th {
-  border: none !important;
-  border-bottom: none !important;
-  border-top: none !important;
-  box-shadow: none !important;
+/* Force table settings */
+table.dataTable {
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
 }
-/* Remove any top border on body table that could create double line */
-.dataTables_scrollBody,
-.dataTables_scrollBody table.dataTable,
-.dataTables_scrollBody table.dataTable thead,
-.dataTables_scrollBody table.dataTable tbody,
-.dataTables_scrollBody table.dataTable tbody tr:first-child,
-.dataTables_scrollBody table.dataTable tbody tr:first-child td,
-table.dataTable tbody,
-table.dataTable tbody tr:first-child,
-table.dataTable tbody tr:first-child td {
-  border-top: none !important;
-}
-/* Single clean border ONLY on the LAST header row TH elements */
+/* Add back ONLY the single header separator line */
 table.dataTable thead tr:last-child th,
-.dataTables_scrollHead table.dataTable thead tr:last-child th {
-  border-bottom: 2px solid #333 !important;
-}
-/* FixedHeader clones also get the same single border */
+.dataTables_scrollHead table.dataTable thead tr:last-child th,
 .fixedHeader-floating thead tr:last-child th,
 .fixedHeader-locked thead tr:last-child th {
   border-bottom: 2px solid #333 !important;
