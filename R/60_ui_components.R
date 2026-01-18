@@ -211,7 +211,17 @@ css_overrides <- tags$style(HTML("
   }
 
   /* ===== LINE DIVIDER BETWEEN HEADERS AND DATA ===== */
-  /* Main nuclear border fix is in 03z_assets_bind.R */
+  /* Bold line under column headers (labels row) */
+  table.dataTable thead tr:last-child th {
+    border-bottom: 2px solid #333 !important;
+  }
+  div.dataTables_scrollHead table.dataTable thead tr:last-child th {
+    border-bottom: 2px solid #333 !important;
+  }
+  .fixedHeader-floating thead tr:last-child th,
+  .fixedHeader-locked thead tr:last-child th {
+    border-bottom: 2px solid #333 !important;
+  }
 
   /* ===== CRITICAL: Force ALL cells to shrink to minimum content width ===== */
   /* The 1% width trick forces columns to be as narrow as possible */
