@@ -58,9 +58,19 @@ div.dataTables_scrollBody {
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
-/* For non-scroll tables: border-top on first data row cells */
-table.dataTable:not(.DTFC_Cloned):not(.nowrap) > tbody > tr:first-child > td {
-  border-top: 2px solid #333 !important;
+/* HEADER SEPARATOR LINE: border-bottom on the labels row (last thead row) */
+/* This targets the column header row (Section, ObjectName, etc.) */
+table.dataTable thead tr:last-child th {
+  border-bottom: 2px solid #333 !important;
+}
+/* Also for scroll tables - the header table inside scrollHead */
+div.dataTables_scrollHead table.dataTable thead tr:last-child th {
+  border-bottom: 2px solid #333 !important;
+}
+/* FixedHeader clones */
+.fixedHeader-floating thead tr:last-child th,
+.fixedHeader-locked thead tr:last-child th {
+  border-bottom: 2px solid #333 !important;
 }
 /* Remove gap between header and body */
 div.dataTables_scrollHead {
