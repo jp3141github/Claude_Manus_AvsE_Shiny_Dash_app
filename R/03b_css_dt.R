@@ -4,10 +4,18 @@ css_dt <- htmltools::HTML(
   "
 <style>
   /* ----- STRUCTURE -----
-     top:    chips (dt-sort-row)
-     middle: filters (dt-filter-row)
-     bottom: labels row (real headers)
+     top:    controls (dt-controls-row) - apply/clear filters
+     second: chips (dt-sort-row) - A/D/- buttons
+     third:  filters (dt-filter-row)
+     bottom: labels row (real headers) - with diamond sort icons on LEFT
   -------------------------------- */
+
+  /* Controls row - minimal height, compact */
+  thead tr.dt-controls-row th {
+    padding: 2px 6px !important;
+    white-space: nowrap !important;
+    border-bottom: none !important;
+  }
 
   /* Chips above label */
   th .dt-head-label { display:block; }
@@ -98,20 +106,21 @@ css_dt <- htmltools::HTML(
   }
 
   /* ----- LABEL WRAPPING (bottom row only) -----
-     Chips + filters remain nowrap; labels wrap. */
-  thead tr:not(.dt-sort-row):not(.dt-filter-row) th{
+     Controls + Chips + filters remain nowrap; labels wrap. */
+  thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th{
     white-space: normal !important;
     word-break: break-word !important;
     overflow-wrap: anywhere !important;
     line-height: 1.15 !important;
   }
-  thead tr:not(.dt-sort-row):not(.dt-filter-row) th *{
+  thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th *{
     white-space: inherit !important;
     word-break: inherit !important;
     overflow-wrap: inherit !important;
   }
 
-  /* ----- HIDE ALL BUILT-IN SORT ICONS (including pseudo-elements) ----- */
+  /* ----- DIAMOND SORT ICONS: Position on LEFT of column header text ----- */
+  /* Remove background images (old DataTables style) */
   table.dataTable thead > tr > th.sorting,
   table.dataTable thead > tr > th.sorting_asc,
   table.dataTable thead > tr > th.sorting_desc,
@@ -121,21 +130,71 @@ css_dt <- htmltools::HTML(
     background-image: none !important;
     background: none !important;
   }
-  /* DataTables uses :before/:after triangles – kill them */
-  table.dataTable thead .sorting:before,
-  table.dataTable thead .sorting:after,
-  table.dataTable thead .sorting_asc:before,
-  table.dataTable thead .sorting_asc:after,
-  table.dataTable thead .sorting_desc:before,
-  table.dataTable thead .sorting_desc:after{
-    display:none !important;
-    content:none !important;
-  }
-  /* Remove extra right padding reserved for icons */
-  table.dataTable thead > tr > th.sorting,
-  table.dataTable thead > tr > th.sorting_asc,
-  table.dataTable thead > tr > th.sorting_desc{
+
+  /* Style the :before/:after triangles (diamond) and position on LEFT */
+  /* Only show on label row, not on sort/filter/controls rows */
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th.sorting,
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th.sorting_asc,
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th.sorting_desc {
+    position: relative;
+    padding-left: 22px !important;  /* Space for diamond on left */
     padding-right: 8px !important;
+  }
+
+  /* Position triangles on the LEFT */
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting:before,
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting:after,
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting_asc:before,
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting_asc:after,
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting_desc:before,
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting_desc:after {
+    position: absolute !important;
+    display: block !important;
+    content: "" !important;
+    left: 6px !important;
+    right: auto !important;
+    opacity: 0.3;
+    font-size: 10px;
+    line-height: 1;
+  }
+
+  /* Up triangle (before) */
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting:before,
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting_asc:before,
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting_desc:before {
+    content: "▲" !important;
+    bottom: 55% !important;
+    top: auto !important;
+  }
+
+  /* Down triangle (after) */
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting:after,
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting_asc:after,
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting_desc:after {
+    content: "▼" !important;
+    top: 55% !important;
+    bottom: auto !important;
+  }
+
+  /* Highlight active sort direction */
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting_asc:before {
+    opacity: 1 !important;
+    color: #0d6efd !important;
+  }
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) .sorting_desc:after {
+    opacity: 1 !important;
+    color: #0d6efd !important;
+  }
+
+  /* Hide icons on helper rows (controls, sort, filter rows) */
+  table.dataTable thead tr.dt-sort-row th:before,
+  table.dataTable thead tr.dt-sort-row th:after,
+  table.dataTable thead tr.dt-filter-row th:before,
+  table.dataTable thead tr.dt-filter-row th:after,
+  table.dataTable thead tr.dt-controls-row th:before,
+  table.dataTable thead tr.dt-controls-row th:after {
+    display: none !important;
+    content: none !important;
   }
 
   /* ----- A-E VALUE COLORING (green for negative, red for positive) ----- */
