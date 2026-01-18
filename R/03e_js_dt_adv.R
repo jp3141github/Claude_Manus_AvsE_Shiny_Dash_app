@@ -84,9 +84,15 @@ window.dtAdvInit = function() {
       }
 
       function buildRows(n){
+        // Controls row (apply/clear filters) - sits ABOVE sort row
+        var $crow = $("<tr class=\\"dt-controls-row\\"></tr>");
         var $srow = $("<tr class=\\"dt-sort-row\\"></tr>");
         var $frow = $("<tr class=\\"dt-filter-row\\"></tr>");
         for (var i=0;i<n;i++){
+          // Controls row cell (only first cell has content, rest are empty)
+          var $thC = $("<th></th>");
+          $crow.append($thC);
+
           var $thS = $("<th></th>");
           var $box = $("<span class=\\"dt-sortbox\\"></span>");
           function mk(txt, dir){
@@ -101,7 +107,7 @@ window.dtAdvInit = function() {
           var $inp = $("<input type=\\"text\\" class=\\"dt-filter-input\\" placeholder=\\"filter\\" data-col=\\""+i+"\\">");
           $thF.append($inp); $frow.append($thF);
         }
-        return {$srow:$srow, $frow:$frow};
+        return {$crow:$crow, $srow:$srow, $frow:$frow};
       }
 
       // ---- Simple text search (no regex to avoid issues with numeric columns) ----
@@ -196,8 +202,8 @@ window.dtAdvInit = function() {
       // Detect column alignment based on column name and data content (numeric = right-aligned)
       function detectColumnAlignments(heads){
         try{
-          // Get column names from header labels
-          var $labelRow = heads.$theadVis.find("tr:not(.dt-sort-row):not(.dt-filter-row):last th");
+          // Get column names from header labels (exclude helper rows)
+          var $labelRow = heads.$theadVis.find("tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row):last th");
           var alignments = [];
 
           // Check first few rows of data to detect if column is numeric
@@ -309,10 +315,10 @@ window.dtAdvInit = function() {
         }catch(e){ console.warn("applyColumnAlignments error:", e); }
       }
 
-      // Find the column index for "Section" (to place filter controls above it)
+      // Find the column index for "Section" (not currently used, but kept for potential future use)
       function findSectionColumnIndex(heads){
         try{
-          var $labelRow = heads.$theadVis.find("tr:not(.dt-sort-row):not(.dt-filter-row):last th");
+          var $labelRow = heads.$theadVis.find("tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row):last th");
           var sectionIdx = -1;
           $labelRow.each(function(i){
             var colName = $(this).text().trim().toLowerCase();
@@ -327,36 +333,25 @@ window.dtAdvInit = function() {
 
       function ensureFilterControls(heads){
         try{
-          // Find Section column index - place controls above it
-          var sectionIdx = findSectionColumnIndex(heads);
-
           heads.$theads.each(function(){
             var $h = $(this);
-            var $filterCells = $h.find("tr.dt-filter-row th");
-            if (!$filterCells.length) return;
+            var $controlsCells = $h.find("tr.dt-controls-row th");
+            if (!$controlsCells.length) return;
 
             // Remove any existing filter controls first
             $h.find(".dt-filter-controls").remove();
 
-            // Determine which cell to put controls in
-            // If Section column exists, put controls there; otherwise use first column
-            var targetIdx = (sectionIdx >= 0 && sectionIdx < $filterCells.length) ? sectionIdx : 0;
-            var $targetTh = $filterCells.eq(targetIdx);
+            // Place controls in the first cell of the controls row
+            var $targetTh = $controlsCells.eq(0);
 
-
-            // Save the existing input, clear the cell, then add controls first, input second
-            var $existingInput = $targetTh.find("input.dt-filter-input").detach();
             var html = [
-              \'<span class="dt-filter-controls" style="white-space:nowrap;display:block;margin-bottom:2px;">\',
+              \'<span class="dt-filter-controls" style="white-space:nowrap;">\',
               \'<a href="#" class="dt-apply-filters" title="Apply all column filters" style="font-size:11px;text-decoration:none;margin-right:6px;">✔ apply</a>\',
               \'<a href="#" class="dt-clear-filters" title="Clear all column filters" style="font-size:11px;text-decoration:none;">✖ clear filters</a>\',
               \'</span>\'
             ].join("");
-            
-            // Clear and rebuild: controls first, then input below
-            $targetTh.empty();
-            $targetTh.append(html);
-            $targetTh.append($existingInput);
+
+            $targetTh.html(html);
           });
         }catch(e){}
       }
@@ -390,7 +385,7 @@ window.dtAdvInit = function() {
         }
 
         // remove old helper rows
-        heads.$theads.find("tr.dt-sort-row, tr.dt-filter-row").remove();
+        heads.$theads.find("tr.dt-controls-row, tr.dt-sort-row, tr.dt-filter-row").remove();
 
         // build per-<thead> using its live column count
         heads.$theads.each(function(){
@@ -398,7 +393,8 @@ window.dtAdvInit = function() {
           var n  = $h.find("tr:last th").length;
           if (!n) n = api.columns().count();
           var rows = buildRows(n);
-          $h.prepend(rows.$frow); $h.prepend(rows.$srow);
+          // Order: controls row (top), sort row, filter row, then original header row
+          $h.prepend(rows.$frow); $h.prepend(rows.$srow); $h.prepend(rows.$crow);
         });
 
         var ns = ".dtadv."+id;
