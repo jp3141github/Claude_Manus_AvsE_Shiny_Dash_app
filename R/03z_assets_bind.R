@@ -55,18 +55,7 @@ div.dataTables_scrollBody {
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
-/* HEADER SEPARATOR LINE: border-bottom on the labels row */
-/* Using :not() selectors to target only the labels row, not helper rows */
-table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th {
-  border-bottom: 2px solid #333 !important;
-}
-div.dataTables_scrollHead table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th {
-  border-bottom: 2px solid #333 !important;
-}
-.fixedHeader-floating thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th,
-.fixedHeader-locked thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th {
-  border-bottom: 2px solid #333 !important;
-}
+/* HEADER SEPARATOR LINE is in 60_ui_components.R css_overrides (using box-shadow) */
 /* Remove gap between header and body */
 div.dataTables_scrollHead {
   margin-bottom: 0 !important;
