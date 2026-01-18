@@ -170,25 +170,26 @@ register_results_server <- function(input, output, session, results_obj, uploade
     # Show total record count in header
     total_rows <- format(nrow(df), big.mark = ",")
     total_cols <- ncol(df)
-    # Card with inline-block display - table controls its own sizing
+    # Summary text + table (no card wrapper to avoid duplicate border with tabs)
     tagList(
       tags$style(HTML("
-        #preview-data-card {
+        #preview-data-wrapper {
           display: inline-block !important;
           width: auto !important;
           max-width: 100% !important;
           min-height: 200px;
-        }
-        #preview-data-card .card-body {
-          display: block !important;
-          width: auto !important;
-          overflow-x: auto !important;
           padding: 0.5rem !important;
         }
+        .preview-summary {
+          font-weight: 500;
+          padding: 8px 0;
+          margin-bottom: 8px;
+          border-bottom: 2px solid #333;
+        }
       ")),
-      card(
-        id = "preview-data-card",
-        card_header(
+      div(
+        id = "preview-data-wrapper",
+        div(class = "preview-summary",
           sprintf("Input Data — Records: %s | Columns: %d", total_rows, total_cols)
         ),
         div(class = "freeze-pane", DTOutput("tbl_preview"))
