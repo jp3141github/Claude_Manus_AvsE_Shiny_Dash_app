@@ -211,15 +211,15 @@ css_overrides <- tags$style(HTML("
   }
 
   /* ===== LINE DIVIDER BETWEEN HEADERS AND DATA ===== */
-  /* Bold line under column headers (labels row) */
-  table.dataTable thead tr:last-child th {
+  /* Bold line under column headers (labels row) - using the same selector pattern as rest of codebase */
+  table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th {
     border-bottom: 2px solid #333 !important;
   }
-  div.dataTables_scrollHead table.dataTable thead tr:last-child th {
+  div.dataTables_scrollHead table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th {
     border-bottom: 2px solid #333 !important;
   }
-  .fixedHeader-floating thead tr:last-child th,
-  .fixedHeader-locked thead tr:last-child th {
+  .fixedHeader-floating thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th,
+  .fixedHeader-locked thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th {
     border-bottom: 2px solid #333 !important;
   }
 

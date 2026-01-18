@@ -58,18 +58,16 @@ div.dataTables_scrollBody {
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
-/* HEADER SEPARATOR LINE: border-bottom on the labels row (last thead row) */
-/* This targets the column header row (Section, ObjectName, etc.) */
-table.dataTable thead tr:last-child th {
+/* HEADER SEPARATOR LINE: border-bottom on the labels row */
+/* Using :not() selectors to target only the labels row, not helper rows */
+table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th {
   border-bottom: 2px solid #333 !important;
 }
-/* Also for scroll tables - the header table inside scrollHead */
-div.dataTables_scrollHead table.dataTable thead tr:last-child th {
+div.dataTables_scrollHead table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th {
   border-bottom: 2px solid #333 !important;
 }
-/* FixedHeader clones */
-.fixedHeader-floating thead tr:last-child th,
-.fixedHeader-locked thead tr:last-child th {
+.fixedHeader-floating thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th,
+.fixedHeader-locked thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th {
   border-bottom: 2px solid #333 !important;
 }
 /* Remove gap between header and body */
