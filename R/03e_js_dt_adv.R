@@ -110,6 +110,52 @@ window.dtAdvInit = function() {
         return {$crow:$crow, $srow:$srow, $frow:$frow};
       }
 
+      // ---- Non-blocking error tooltip for filter inputs ----
+      // Shows error message near the input without stealing focus
+      function showFilterError($input, errorMsg){
+        // Remove any existing error tooltip
+        $input.siblings(".dt-filter-error").remove();
+
+        // Create tooltip element
+        var $tooltip = $("<div class=\\"dt-filter-error\\"></div>")
+          .text(errorMsg)
+          .css({
+            position: "absolute",
+            background: "#fff3cd",
+            border: "1px solid #ffc107",
+            borderRadius: "4px",
+            padding: "6px 10px",
+            fontSize: "11px",
+            color: "#856404",
+            maxWidth: "280px",
+            zIndex: 10000,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+            whiteSpace: "normal",
+            wordWrap: "break-word"
+          });
+
+        // Position relative to input
+        var $parent = $input.parent();
+        $parent.css("position", "relative");
+        $tooltip.css({
+          top: "100%",
+          left: "0",
+          marginTop: "4px"
+        });
+
+        $parent.append($tooltip);
+
+        // Auto-remove after 5 seconds
+        setTimeout(function(){
+          $tooltip.fadeOut(300, function(){ $tooltip.remove(); });
+        }, 5000);
+
+        // Also remove on next input focus or keydown
+        $input.one("focus keydown", function(){
+          $tooltip.remove();
+        });
+      }
+
       // ---- Filter search with wildcard support ----
       // Supports: * (any chars), ? (single char), % (SQL-style, same as *)
       // For OR support: "NIG;DLI" is handled by searching for each term
@@ -240,13 +286,49 @@ window.dtAdvInit = function() {
         return merged;
       }
 
+      // Merge multiple ranges using AND (intersection) logic
+      // Returns {min, max} if intersection exists, null if ranges don't overlap
+      // e.g., ">500 and <1000" -> intersection of (500, inf) and (-inf, 1000) = (500, 1000)
+      function mergeRangesAND(ranges){
+        if (!ranges || ranges.length === 0) return null;
+        if (ranges.length === 1) return {min: ranges[0].min, max: ranges[0].max};
+
+        // Start with the first range and intersect with each subsequent range
+        var result = {min: ranges[0].min, max: ranges[0].max};
+        for (var i = 1; i < ranges.length; i++) {
+          var r = ranges[i];
+          // Intersection: take the maximum of mins and minimum of maxes
+          result.min = Math.max(result.min, r.min);
+          result.max = Math.min(result.max, r.max);
+          // Check if intersection is valid (min <= max)
+          if (result.min > result.max) {
+            // No overlap - empty intersection
+            return null;
+          }
+        }
+        return result;
+      }
+
       function buildNumericSearchTerm(raw){
         if (!raw) return {term: "", isNumericRange: false, error: null};
         var trimmed = raw.trim();
         if (!trimmed) return {term: "", isNumericRange: false, error: null};
 
-        // Split on semicolon for OR expressions
-        var parts = trimmed.split(";").map(function(p){ return p.trim(); }).filter(function(p){ return p.length > 0; });
+        // Check if expression uses "and" keyword (case-insensitive) for intersection
+        // e.g., ">500 and <1000" means values that are BOTH >500 AND <1000
+        var hasAndKeyword = /\\band\\b/i.test(trimmed);
+        var hasSemicolon = trimmed.indexOf(";") >= 0;
+
+        var parts, mergeFunc;
+        if (hasAndKeyword && !hasSemicolon) {
+          // Split on "and" keyword for AND (intersection) expressions
+          parts = trimmed.split(/\\s+and\\s+/i).map(function(p){ return p.trim(); }).filter(function(p){ return p.length > 0; });
+          mergeFunc = mergeRangesAND;
+        } else {
+          // Split on semicolon for OR (union) expressions
+          parts = trimmed.split(";").map(function(p){ return p.trim(); }).filter(function(p){ return p.length > 0; });
+          mergeFunc = mergeRangesOR;
+        }
 
         if (parts.length === 0) return {term: "", isNumericRange: false, error: null};
 
@@ -256,22 +338,30 @@ window.dtAdvInit = function() {
           var range = parseSingleNumericExpr(parts[i]);
           if (range === null) {
             // Cannot parse this part - not a valid numeric expression
-            return {term: trimmed, isNumericRange: false, error: "Cannot parse: " + parts[i]};
+            return {term: trimmed, isNumericRange: false, error: "Cannot parse: " + parts[i] + ". Try formats like: >500, <1000, 500..1000, or >500 and <1000"};
           }
           ranges.push(range);
         }
 
-        // Try to merge all ranges into single continuous range
-        var merged = mergeRangesOR(ranges);
+        // Try to merge all ranges
+        var merged = mergeFunc(ranges);
 
         if (merged === null) {
-          // Ranges are disjoint - cannot represent as single range for DT
-          // e.g., "<592;>614" means (-inf,592) OR (614,+inf) which has a gap
-          return {
-            term: trimmed,
-            isNumericRange: false,
-            error: "Cannot filter: [" + trimmed + "] creates disjoint ranges. DT only supports single continuous range. Try a single comparison like >614 or a range like 500..600."
-          };
+          if (hasAndKeyword) {
+            // AND with no overlap - impossible filter
+            return {
+              term: trimmed,
+              isNumericRange: false,
+              error: "Cannot filter: [" + trimmed + "] has no overlapping range. The conditions contradict each other."
+            };
+          } else {
+            // OR with disjoint ranges - cannot represent as single range for DT
+            return {
+              term: trimmed,
+              isNumericRange: false,
+              error: "Cannot filter: [" + trimmed + "] creates disjoint ranges. DT only supports single continuous range. Try a single comparison like >614 or a range like 500..600."
+            };
+          }
         }
 
         // Successfully merged into single range
@@ -659,9 +749,11 @@ window.dtAdvInit = function() {
                 if (numSearchObj.error) {
                   // Can not represent as single range - show error and clear this column filter
                   console.warn("[DT Filter] " + numSearchObj.error);
-                  alert("Filter Error:\\n" + numSearchObj.error);
+                  showFilterError($input, numSearchObj.error);
                   $input.css("background-color", "#ffcccc"); // highlight error
                   api.column(i).search(""); // clear this column filter
+                  // Ensure input remains usable - refocus after a brief delay
+                  setTimeout(function(){ $input.focus(); }, 10);
                 } else if (numSearchObj.isNumericRange) {
                   // Valid numeric range - apply it
                   $input.css("background-color", ""); // clear error highlight
@@ -685,6 +777,16 @@ window.dtAdvInit = function() {
               setTimeout(function(){ forceColumnsToShrink(id); }, 150);
               setTimeout(function(){ forceColumnsToShrink(id); }, 300);
               e.preventDefault();
+            }
+          });
+
+        // Clear error highlight when user starts typing (input event)
+        $(document).off("input"+ns, "thead.dtadv-owner-"+id+" tr.dt-filter-row input.dt-filter-input")
+          .on("input"+ns, "thead.dtadv-owner-"+id+" tr.dt-filter-row input.dt-filter-input", function(){
+            var $input = $(this);
+            // Clear error highlighting when user types
+            if ($input.css("background-color") === "rgb(255, 204, 204)") { // #ffcccc
+              $input.css("background-color", "");
             }
           });
 
@@ -746,8 +848,8 @@ window.dtAdvInit = function() {
                 console.log("[DT Filter] Apply: Numeric column", vidx, "raw:", raw, "formatted:", numSearchObj.term, "error:", numSearchObj.error);
 
                 if (numSearchObj.error) {
-                  // Can not represent as single range - collect error
-                  errors.push(numSearchObj.error);
+                  // Can not represent as single range - collect error with input reference
+                  errors.push({msg: numSearchObj.error, $input: $input});
                   $input.css("background-color", "#ffcccc"); // highlight error
                   this.search(""); // clear this column filter
                 } else if (numSearchObj.isNumericRange) {
@@ -764,7 +866,12 @@ window.dtAdvInit = function() {
               }
             });
             if (errors.length > 0) {
-              alert("Filter Errors:\\n" + errors.join("\\n\\n"));
+              // Show non-blocking error tooltip on the first erroring input
+              var firstErr = errors[0];
+              var combinedMsg = errors.length === 1 ? firstErr.msg : errors.length + " filter errors. First: " + firstErr.msg;
+              showFilterError(firstErr.$input, combinedMsg);
+              // Refocus the first erroring input
+              setTimeout(function(){ firstErr.$input.focus(); }, 10);
             }
             api.draw(false);
             setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
@@ -783,6 +890,9 @@ window.dtAdvInit = function() {
             api.columns().every(function(){ this.search(""); });
             api.draw(false);
             try { var g = $cont.find("div.dataTables_filter input[type=search]"); if (g.length) g.val(""); } catch(_){}
+            // Clear any error highlights and tooltips
+            $cont.find(".dt-filter-input").css("background-color", "");
+            $cont.find(".dt-filter-error").remove();
             setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
             // Force columns to shrink after filter clear
             setTimeout(function(){ forceColumnsToShrink(id); }, 0);
