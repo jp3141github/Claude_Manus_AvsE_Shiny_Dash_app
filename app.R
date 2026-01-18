@@ -3,6 +3,7 @@
 
 suppressPackageStartupMessages({
   library(shiny)
+  library(bslib)
 })
 
 # -------- Working directory (local dev only) --------
