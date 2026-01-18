@@ -151,12 +151,12 @@ window.dtAdvInit = function() {
       }
 
       // ---- Numeric column filter formatting for DT server-side ----
-      // DT's server-side filterRange() expects "min ... max" format for numeric columns
+      // DT\'s server-side filterRange() expects "min ... max" format for numeric columns
       // Supports: exact value, >=, <=, >, <, range (e.g., "100..200"), and semicolon OR expressions
       // Returns {term: string, isNumericRange: boolean, error: string|null}
 
       // Parse a SINGLE numeric expression (no semicolons)
-      // Returns {min, max} or null if can't parse
+      // Returns {min, max} or null if cannot parse
       function parseSingleNumericExpr(expr){
         if (!expr) return null;
         var trimmed = expr.trim();
@@ -211,7 +211,7 @@ window.dtAdvInit = function() {
           if (!isNaN(val)) return {min: val, max: val};
         }
 
-        return null; // Can't parse
+        return null; // Cannot parse
       }
 
       // Merge multiple ranges using OR (union) logic
@@ -232,7 +232,7 @@ window.dtAdvInit = function() {
             // Overlaps or adjacent - extend merged
             merged.max = Math.max(merged.max, r.max);
           } else {
-            // Gap between ranges - can't merge into single range
+            // Gap between ranges - cannot merge into single range
             // e.g., <592;>614 creates gap [592, 614]
             return null;
           }
@@ -255,7 +255,7 @@ window.dtAdvInit = function() {
         for (var i = 0; i < parts.length; i++) {
           var range = parseSingleNumericExpr(parts[i]);
           if (range === null) {
-            // Can't parse this part - not a valid numeric expression
+            // Cannot parse this part - not a valid numeric expression
             return {term: trimmed, isNumericRange: false, error: "Cannot parse: " + parts[i]};
           }
           ranges.push(range);
@@ -265,7 +265,7 @@ window.dtAdvInit = function() {
         var merged = mergeRangesOR(ranges);
 
         if (merged === null) {
-          // Ranges are disjoint - can't represent as single range for DT
+          // Ranges are disjoint - cannot represent as single range for DT
           // e.g., "<592;>614" means (-inf,592) OR (614,+inf) which has a gap
           return {
             term: trimmed,
