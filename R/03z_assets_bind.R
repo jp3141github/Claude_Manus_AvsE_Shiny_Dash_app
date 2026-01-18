@@ -12,15 +12,23 @@ css_overrides <- htmltools::tags$style(htmltools::HTML("
 /* ===== FINAL OVERRIDES: widths & header alignment ===== */
 
 /* ===== FIX DUPLICATE HEADER SEPARATOR LINE ===== */
+/* Force border-collapse and remove table-level borders */
+table.dataTable {
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
+  border: none !important;
+}
 /* Remove ALL borders from DataTables header structure */
 .dataTables_scrollHead,
 div.dataTables_scrollHead,
+div.dataTables_scrollHeadInner,
 table.dataTable thead,
 table.dataTable thead tr,
 table.dataTable thead th {
   border: none !important;
   border-bottom: none !important;
   border-top: none !important;
+  box-shadow: none !important;
 }
 /* Remove any top border on body table that could create double line */
 .dataTables_scrollBody,
@@ -34,7 +42,7 @@ table.dataTable tbody tr:first-child,
 table.dataTable tbody tr:first-child td {
   border-top: none !important;
 }
-/* Single clean border ONLY on the LAST header row */
+/* Single clean border ONLY on the LAST header row TH elements */
 table.dataTable thead tr:last-child th {
   border-bottom: 2px solid #333 !important;
 }
