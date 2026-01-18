@@ -20,22 +20,13 @@ css_preview <- htmltools::HTML(
     table-layout: auto !important;
   }
 
-  /* Wrapper should not expand either - but allow DataTables scroll to handle overflow */
+  /* Wrapper should not expand either */
   #tbl_preview_wrapper {
     width: auto !important;
-    display: block !important;
+    display: inline-block !important;
     max-width: 100% !important;
-    overflow: visible !important;
-  }
-
-  /* DataTables scroll containers for freeze pane */
-  #tbl_preview_wrapper .dataTables_scrollHead,
-  #tbl_preview_wrapper .dataTables_scrollBody {
     overflow-x: auto !important;
-  }
-  #tbl_preview_wrapper .dataTables_scrollHead table,
-  #tbl_preview_wrapper .dataTables_scrollBody table {
-    width: auto !important;
+    overflow-y: visible !important;
   }
 
   /* Sort row and filter row cells also need 1% width */

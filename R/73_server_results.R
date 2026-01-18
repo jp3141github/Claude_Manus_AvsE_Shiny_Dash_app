@@ -191,7 +191,7 @@ register_results_server <- function(input, output, session, results_obj, uploade
         card_header(
           sprintf("Input Data — Records: %s | Columns: %d", total_rows, total_cols)
         ),
-        div(class = "freeze-pane", DTOutput("tbl_preview"))
+        DTOutput("tbl_preview")
       )
     )
   })
