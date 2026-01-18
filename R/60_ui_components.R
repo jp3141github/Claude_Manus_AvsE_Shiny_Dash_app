@@ -138,7 +138,7 @@ exp_card <- function(title, outputId, height = "300px") {
 }
 
 # ---- Sidebar (HYBRID) ----
-sidebar_controls <- sidebar(
+sidebar_controls <- bslib::sidebar(
   h4("Analysis Controls"),
   fileInput("csv_file", "Upload CSV File",
             accept = c(".csv"), multiple = FALSE),
@@ -174,11 +174,11 @@ sidebar_controls <- sidebar(
 )
 
 # ---- UI root (HYBRID) ----
-ui <- page_sidebar(
+ui <- bslib::page_sidebar(
   app_header,
   sidebar = sidebar_controls,
   uiOutput("full_header_block"),
-  
+
   # busy overlay element (CSS + JS control)
   # small corner spinner; non-blocking
   tags$div(
@@ -186,14 +186,14 @@ ui <- page_sidebar(
     class = "",    # JS toggles 'show'
     tags$div(class = "spinner")
   ),
-  
-  navset_tab(
-    nav_panel("Input Data", uiOutput("preview_card")),
-    nav_panel("Results",    uiOutput("results_tabs_ui")),
-    nav_panel("Charts",     uiOutput("charts_ui")),
+
+  bslib::navset_tab(
+    bslib::nav_panel("Input Data", uiOutput("preview_card")),
+    bslib::nav_panel("Results",    uiOutput("results_tabs_ui")),
+    bslib::nav_panel("Charts",     uiOutput("charts_ui")),
     id = "tabs_main"
   ),
-  
+
   if (ENABLE_ASSISTANT) assistant_button else NULL,
   header = header_css,
   title = "A v E Tracker (Desktop) – Shiny (R) – Actuarial Reporting Team"
@@ -219,6 +219,24 @@ css_overrides <- tags$style(HTML("
   .fixedHeader-floating thead tr:last-child th,
   .fixedHeader-locked thead tr:last-child th {
     border-bottom: 2px solid #333 !important;
+  }
+
+  /* ===== FIX: Remove duplicate border from DataTables scroll containers ===== */
+  /* The scrollHead wrapper should not have its own border (we have border on thead tr:last-child th) */
+  div.dataTables_scrollHead,
+  div.dataTables_scrollHeadInner,
+  #tbl_preview_wrapper .dataTables_scrollHead {
+    border-bottom: none !important;
+  }
+  /* Remove DataTables default top border on body table */
+  div.dataTables_scrollBody table.dataTable,
+  div.dataTables_scrollBody > table,
+  #tbl_preview_wrapper .dataTables_scrollBody table {
+    border-top: none !important;
+  }
+  /* Also remove any border-collapse artifacts */
+  div.dataTables_scrollBody table.dataTable thead {
+    display: none !important; /* Body table has a hidden thead for column sync - ensure it's hidden */
   }
 
   /* ===== CRITICAL: Force ALL cells to shrink to minimum content width ===== */

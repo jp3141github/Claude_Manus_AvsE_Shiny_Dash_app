@@ -34,6 +34,15 @@ div.dataTables_scrollBody table.dataTable {
   table-layout: auto !important;
 }
 
+/* ===== FIX: Remove duplicate horizontal line under headers ===== */
+/* Only the thead tr:last-child th should have the border, not the scroll container */
+div.dataTables_scrollHead {
+  border-bottom: none !important;
+}
+div.dataTables_scrollBody table.dataTable {
+  border-top: none !important;
+}
+
 /* Avoid header-cell overflow causing unexpected expansion */
 div.dataTables_scrollHead th,
 div.dataTables_scrollBody th { overflow: hidden !important; }

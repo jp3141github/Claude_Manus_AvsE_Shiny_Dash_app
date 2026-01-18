@@ -170,10 +170,15 @@ css_core <- htmltools::HTML(
   }
   .freeze-pane .dataTables_scrollHead {
     overflow: visible !important;
+    border-bottom: none !important;  /* Remove duplicate border - keep only thead tr:last-child th border */
   }
   .freeze-pane table.dataTable {
     width: auto !important;
     table-layout: auto !important;
+  }
+  /* Remove duplicate top border on body table */
+  .freeze-pane .dataTables_scrollBody table.dataTable {
+    border-top: none !important;
   }
   /* Ensure header and body tables stay aligned */
   .freeze-pane .dataTables_scroll {
