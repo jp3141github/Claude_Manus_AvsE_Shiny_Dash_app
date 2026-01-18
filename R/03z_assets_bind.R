@@ -12,8 +12,8 @@ css_overrides <- htmltools::tags$style(htmltools::HTML("
 /* ===== FINAL OVERRIDES: widths & header alignment ===== */
 
 /* ===== FIX DUPLICATE HEADER SEPARATOR LINE ===== */
-/* NUCLEAR: Remove ALL borders from EVERYTHING in DataTables */
-.dataTables_wrapper *,
+/* Remove borders from EVERYTHING in DataTables EXCEPT freeze-pane separators */
+.dataTables_wrapper *:not(.dataTables_scrollHead),
 .dataTables_wrapper *::before,
 .dataTables_wrapper *::after {
   border: none !important;
@@ -21,8 +21,18 @@ css_overrides <- htmltools::tags$style(htmltools::HTML("
   border-bottom: none !important;
   border-left: none !important;
   border-right: none !important;
-  box-shadow: none !important;
   outline: none !important;
+}
+/* Remove box-shadow except from freeze-pane header */
+.dataTables_wrapper *:not(.dataTables_scrollHead) {
+  box-shadow: none !important;
+}
+/* Preserve freeze-pane header shadow and border */
+.freeze-pane .dataTables_scrollHead {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+.freeze-pane .dataTables_scrollHead thead tr:last-child th {
+  border-bottom: 2px solid #333 !important;
 }
 /* Force table settings */
 table.dataTable {

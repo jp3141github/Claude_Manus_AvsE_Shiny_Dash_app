@@ -157,27 +157,79 @@ css_core <- htmltools::HTML(
   /* === FROZEN HEADER WRAPPER ===
      Apply this class around DTOutput to enable vertical scrolling inside the table
      while keeping the header pinned (DataTables scrollY + FixedHeader).
+     The header (including controls row, sort row, filter row, and labels row)
+     stays fixed while only the data body scrolls.
   */
   .freeze-pane .dataTables_wrapper {
-    min-height: 0 !important; height: auto !important;
-    max-height: none !important; overflow: hidden !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: hidden !important;
   }
+
+  /* The scroll container holds both header and body */
+  .freeze-pane .dataTables_scroll {
+    overflow: visible !important;
+    position: relative !important;
+  }
+
+  /* Header container - stays fixed/sticky above the scrollable body */
+  .freeze-pane .dataTables_scrollHead {
+    overflow: visible !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    background: #fff !important;
+  }
+
+  /* Inner header wrapper */
+  .freeze-pane .dataTables_scrollHeadInner {
+    width: auto !important;
+  }
+
+  /* Body container - this is what actually scrolls */
   .freeze-pane .dataTables_scrollBody {
     overflow-y: auto !important;
     overflow-x: auto !important;
     height: 60vh !important;
     max-height: 60vh !important;
+    /* Ensure the body starts right below the header with no gap */
+    margin-top: 0 !important;
+    padding-top: 0 !important;
   }
-  .freeze-pane .dataTables_scrollHead {
-    overflow: visible !important;
-  }
+
+  /* Tables inside freeze-pane should shrink to content */
   .freeze-pane table.dataTable {
     width: auto !important;
     table-layout: auto !important;
   }
-  /* Ensure header and body tables stay aligned */
-  .freeze-pane .dataTables_scroll {
-    overflow: visible !important;
+
+  /* Ensure header table and body table have matching widths */
+  .freeze-pane .dataTables_scrollHead table.dataTable,
+  .freeze-pane .dataTables_scrollBody table.dataTable {
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  /* Make sure all header rows have white background so they don't show body content underneath */
+  .freeze-pane .dataTables_scrollHead thead tr {
+    background: #fff !important;
+  }
+  .freeze-pane .dataTables_scrollHead thead tr.dt-controls-row th,
+  .freeze-pane .dataTables_scrollHead thead tr.dt-sort-row th,
+  .freeze-pane .dataTables_scrollHead thead tr.dt-filter-row th,
+  .freeze-pane .dataTables_scrollHead thead tr th {
+    background: #fff !important;
+  }
+
+  /* Visual separator between frozen header and scrollable body */
+  .freeze-pane .dataTables_scrollHead {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Ensure the labels row (last row in thead) has a bottom border for visual separation */
+  .freeze-pane .dataTables_scrollHead thead tr:last-child th {
+    border-bottom: 2px solid #333 !important;
   }
 
   /* === LEGACY: auto-height tables (no inner scrollbars) ===
