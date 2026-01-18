@@ -6,9 +6,12 @@ suppressPackageStartupMessages({
 })
 
 # -------- Working directory (local dev only) --------
-# If you're deploying (e.g., shinyapps.io/Shiny Server), either remove this
-# or let it silently skip when the path doesn't exist.
-app_dir <- "C:/Users/QLCY/Downloads/ActualVersusExpected_RStudio/CODE"
+# Use the directory where app.R is located
+app_dir <- dirname(normalizePath(sys.frame(1)$ofile %||% ".", mustWork = FALSE))
+if (app_dir == ".") {
+  # Fallback: if running interactively, use current working directory
+  app_dir <- getwd()
+}
 cat("== setwd/app_dir test ==\n")
 print(app_dir); print(dir.exists(app_dir))
 
@@ -47,8 +50,8 @@ if (!all(ok)) stop("Missing: ", paste(names(ok)[!ok], collapse = ", "))
 # -------- Load UI and server --------
 # ui.R must define `ui_bundle` (your chosen UI object name)
 # server.R must define `server`
-source("ui.R",     local = TRUE)
-source("server.R", local = TRUE)
+source("ui.R",     local = .GlobalEnv)
+source("server.R", local = .GlobalEnv)
 
 if (!exists("ui_bundle", inherits = TRUE)) {
   stop("ui_bundle not found after sourcing ui.R (did ui.R create `ui_bundle`?)")
