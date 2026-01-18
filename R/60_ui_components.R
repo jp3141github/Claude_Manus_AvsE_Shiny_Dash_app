@@ -212,17 +212,23 @@ css_overrides <- tags$style(HTML("
 
   /* ===== LINE DIVIDER BETWEEN HEADERS AND DATA ===== */
   /* Note: Main border fix is in 03z_assets_bind.R - this adds preview-specific overrides */
-  /* Remove ALL borders from header rows, then add single border on last row */
+  #tbl_preview {
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    border: none !important;
+  }
   #tbl_preview thead,
   #tbl_preview thead tr,
   #tbl_preview thead th {
     border: none !important;
     border-bottom: none !important;
+    box-shadow: none !important;
   }
   #tbl_preview thead tr:last-child th {
     border-bottom: 2px solid #333 !important;
   }
   #tbl_preview tbody,
+  #tbl_preview tbody tr:first-child,
   #tbl_preview tbody tr:first-child td {
     border-top: none !important;
   }
