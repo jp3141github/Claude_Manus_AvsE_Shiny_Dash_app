@@ -11,6 +11,24 @@ header_css <- htmltools::tagList(css_core, css_dt, css_preview)
 css_overrides <- htmltools::tags$style(htmltools::HTML("
 /* ===== FINAL OVERRIDES: widths & header alignment ===== */
 
+/* ===== FIX DUPLICATE HEADER SEPARATOR LINE ===== */
+/* Remove default DataTables border on scrollHead container - we add our own on last header row */
+.dataTables_scrollHead,
+div.dataTables_scrollHead {
+  border-bottom: none !important;
+}
+/* Remove any top border on body table that could create double line */
+.dataTables_scrollBody,
+.dataTables_scrollBody table.dataTable,
+.dataTables_scrollBody table.dataTable thead,
+.dataTables_scrollBody table.dataTable tbody tr:first-child td {
+  border-top: none !important;
+}
+/* Single clean border under the last header row */
+table.dataTable thead tr:last-child th {
+  border-bottom: 2px solid #333 !important;
+}
+
 /* CRITICAL: Force header and body tables to shrink to content */
 div.dataTables_scrollHeadInner {
   width: auto !important;
