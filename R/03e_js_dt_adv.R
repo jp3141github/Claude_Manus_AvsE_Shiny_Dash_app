@@ -150,6 +150,135 @@ window.dtAdvInit = function() {
         return {term: "(" + parts.join("|") + ")", isRegex: true};
       }
 
+      // ---- Numeric column filter formatting for DT server-side ----
+      // DT's server-side filterRange() expects "min ... max" format for numeric columns
+      // Supports: exact value, >=, <=, >, <, and range (e.g., "100..200" or "100-200")
+      // Returns {term: string, isNumericRange: boolean}
+      function buildNumericSearchTerm(raw){
+        if (!raw) return {term: "", isNumericRange: false};
+        var trimmed = raw.trim();
+        if (!trimmed) return {term: "", isNumericRange: false};
+
+        // Range operators: "100..200", "100...200", "100-200" (but not negative like "-100")
+        var rangeMatch = trimmed.match(/^(-?[\\d.]+)\\s*(?:\\.\\.\\.?|\\s+to\\s+|\\s*-\\s*(?=[\\d]))\\s*(-?[\\d.]+)$/i);
+        if (rangeMatch) {
+          var min = parseFloat(rangeMatch[1]);
+          var max = parseFloat(rangeMatch[2]);
+          if (!isNaN(min) && !isNaN(max)) {
+            // Ensure min <= max
+            if (min > max) { var tmp = min; min = max; max = tmp; }
+            return {term: min + " ... " + max, isNumericRange: true};
+          }
+        }
+
+        // Greater than or equal: ">=100", ">= 100"
+        var gteMatch = trimmed.match(/^>=\\s*(-?[\\d.]+)$/);
+        if (gteMatch) {
+          var val = parseFloat(gteMatch[1]);
+          if (!isNaN(val)) {
+            // Use very large max for unbounded upper range
+            return {term: val + " ... " + 1e308, isNumericRange: true};
+          }
+        }
+
+        // Less than or equal: "<=100", "<= 100"
+        var lteMatch = trimmed.match(/^<=\\s*(-?[\\d.]+)$/);
+        if (lteMatch) {
+          var val = parseFloat(lteMatch[1]);
+          if (!isNaN(val)) {
+            // Use very small min for unbounded lower range
+            return {term: -1e308 + " ... " + val, isNumericRange: true};
+          }
+        }
+
+        // Greater than: ">100", "> 100"
+        var gtMatch = trimmed.match(/^>\\s*(-?[\\d.]+)$/);
+        if (gtMatch) {
+          var val = parseFloat(gtMatch[1]);
+          if (!isNaN(val)) {
+            // Add tiny epsilon to exclude the exact value
+            return {term: (val + 1e-10) + " ... " + 1e308, isNumericRange: true};
+          }
+        }
+
+        // Less than: "<100", "< 100"
+        var ltMatch = trimmed.match(/^<\\s*(-?[\\d.]+)$/);
+        if (ltMatch) {
+          var val = parseFloat(ltMatch[1]);
+          if (!isNaN(val)) {
+            // Subtract tiny epsilon to exclude the exact value
+            return {term: -1e308 + " ... " + (val - 1e-10), isNumericRange: true};
+          }
+        }
+
+        // Exact numeric value: "100", "100.5", "-50"
+        var numMatch = trimmed.match(/^-?[\\d.]+$/);
+        if (numMatch) {
+          var val = parseFloat(trimmed);
+          if (!isNaN(val)) {
+            // For exact match, use same value for min and max
+            return {term: val + " ... " + val, isNumericRange: true};
+          }
+        }
+
+        // Not a recognized numeric pattern - return as text (will likely fail but let DT handle it)
+        return {term: trimmed, isNumericRange: false};
+      }
+
+      // Check if a column is numeric based on column name or data inspection
+      function isNumericColumn(colIndex, heads){
+        try {
+          // Get column name from header
+          var $labelRow = heads.$theadVis.find("tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row):last th");
+          var colName = $labelRow.eq(colIndex).text().trim().toLowerCase();
+
+          // Known numeric columns
+          var numericCols = ["actual", "expected", "a - e", "a-e", "accident period", "accidentperiod",
+                           "accident year", "accidentyear", "amount", "value", "count", "total",
+                           "grand total", "grandtotal"];
+
+          // Check if column name matches known numeric columns
+          var isKnownNumeric = numericCols.some(function(nc){ return colName.indexOf(nc) >= 0; });
+
+          // Check if column name is a year (e.g., 2010, 2011)
+          var isYearCol = /^[0-9]{4}$/.test(colName.trim());
+
+          if (isKnownNumeric || isYearCol) {
+            console.log("[DT Filter] Column", colIndex, "("+colName+") detected as numeric");
+            return true;
+          }
+
+          // Fallback: check actual data content
+          var $bodyTable = $cont.find("div.dataTables_scrollBody table.dataTable");
+          if (!$bodyTable.length) $bodyTable = $tbl;
+          var $rows = $bodyTable.find("tbody tr").slice(0, 5);
+          var numericCount = 0;
+          var totalChecked = 0;
+
+          $rows.each(function(){
+            var $cell = $(this).find("td").eq(colIndex);
+            if ($cell.length) {
+              var val = $cell.text().trim();
+              // Remove formatting chars and check if numeric
+              var cleaned = val.replace(/[,$£€%()\\s]/g, "").replace(/^-/, "");
+              totalChecked++;
+              if (/^[\\d.]+$/.test(cleaned) && cleaned.length > 0) {
+                numericCount++;
+              }
+            }
+          });
+
+          var isDataNumeric = totalChecked > 0 && (numericCount / totalChecked) > 0.7;
+          if (isDataNumeric) {
+            console.log("[DT Filter] Column", colIndex, "("+colName+") detected as numeric from data");
+          }
+          return isDataNumeric;
+        } catch(e) {
+          console.warn("[DT Filter] isNumericColumn error:", e);
+          return false;
+        }
+      }
+
       // Persist RAW input values (not regex) in container data
       function saveRawFiltersFromHead($thead){
         try{
@@ -455,7 +584,7 @@ window.dtAdvInit = function() {
             setTimeout(function(){ forceColumnsToShrink(id); }, 500);
           });
 
-        // filters — apply on Enter (supports wildcards: *, ?, %)
+        // filters — apply on Enter (supports wildcards for text, numeric ranges for numeric columns)
         $(document).off("keydown"+ns, "thead.dtadv-owner-"+id+" tr.dt-filter-row input.dt-filter-input")
           .on("keydown"+ns, "thead.dtadv-owner-"+id+" tr.dt-filter-row input.dt-filter-input", function(e){
             if (e.key === "Enter"){
@@ -463,10 +592,23 @@ window.dtAdvInit = function() {
               var i = parseInt($(this).attr("data-col"),10);
               var raw = this.value || "";
               saveRawFiltersFromHead($thead);
-              var searchObj = buildSearchTerm(raw);
-              // Use regex mode if wildcards detected, otherwise simple text search
-              // search(term, regex, smart, caseInsensitive)
-              api.column(i).search(searchObj.term, searchObj.isRegex, !searchObj.isRegex, true);
+
+              // Check if this is a numeric column - if so, use range format for server-side filtering
+              var heads = locateHeads();
+              var isNumeric = isNumericColumn(i, heads);
+
+              if (isNumeric && raw.trim()) {
+                // Use numeric range format for DT server-side filterRange()
+                var numSearchObj = buildNumericSearchTerm(raw);
+                console.log("[DT Filter] Numeric column", i, "raw:", raw, "formatted:", numSearchObj.term);
+                // For numeric columns, use the range format directly (no regex, no smart search)
+                api.column(i).search(numSearchObj.term, false, false, true);
+              } else {
+                // Use text/wildcard search for non-numeric columns
+                var searchObj = buildSearchTerm(raw);
+                // search(term, regex, smart, caseInsensitive)
+                api.column(i).search(searchObj.term, searchObj.isRegex, !searchObj.isRegex, true);
+              }
               api.draw(false);
               setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
               // Force columns to shrink after filter Enter
@@ -512,7 +654,7 @@ window.dtAdvInit = function() {
             setTimeout(function(){ forceColumnsToShrink(id); }, 300);
           });
 
-        // Apply all filters (supports wildcards: *, ?, %)
+        // Apply all filters (supports wildcards for text, numeric ranges for numeric columns)
         $(document).off("click"+ns, "thead.dtadv-owner-"+id+" .dt-apply-filters")
           .on("click"+ns, "thead.dtadv-owner-"+id+" .dt-apply-filters", function(e){
             e.preventDefault();
@@ -521,13 +663,22 @@ window.dtAdvInit = function() {
             $thead.find("tr.dt-filter-row th input.dt-filter-input").each(function(i){ rawVals[i] = this.value || ""; });
             // Save RAW values
             $cont.data(KEY_FILTERS, rawVals);
-            // Apply filters with wildcard support
+            // Apply filters with numeric range support for numeric columns
+            var heads = locateHeads();
             api.columns(":visible").every(function(vidx){
               var raw = rawVals[vidx] || "";
-              var searchObj = buildSearchTerm(raw);
-              // Use regex mode if wildcards detected, otherwise simple text search
-              // search(term, regex, smart, caseInsensitive)
-              this.search(searchObj.term, searchObj.isRegex, !searchObj.isRegex, true);
+              var isNumeric = isNumericColumn(vidx, heads);
+
+              if (isNumeric && raw.trim()) {
+                // Use numeric range format for DT server-side filterRange()
+                var numSearchObj = buildNumericSearchTerm(raw);
+                console.log("[DT Filter] Apply: Numeric column", vidx, "raw:", raw, "formatted:", numSearchObj.term);
+                this.search(numSearchObj.term, false, false, true);
+              } else {
+                // Use text/wildcard search for non-numeric columns
+                var searchObj = buildSearchTerm(raw);
+                this.search(searchObj.term, searchObj.isRegex, !searchObj.isRegex, true);
+              }
             });
             api.draw(false);
             setTimeout(function(){ writeRawFilterInputs(locateHeads(), getSavedRawFilters()); }, 0);
