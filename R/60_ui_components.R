@@ -200,7 +200,7 @@ ui <- page_sidebar(
 )
 
 css_overrides <- tags$style(HTML("
-  /* ===== NUCLEAR: Remove ALL borders from DataTables first ===== */
+  /* ===== NUCLEAR: Remove ALL borders from DataTables ===== */
   .dataTables_wrapper table.dataTable,
   .dataTables_wrapper table.dataTable thead,
   .dataTables_wrapper table.dataTable tbody,
@@ -208,7 +208,8 @@ css_overrides <- tags$style(HTML("
   .dataTables_wrapper table.dataTable th,
   .dataTables_wrapper table.dataTable td,
   .dataTables_wrapper div.dataTables_scrollHead,
-  .dataTables_wrapper div.dataTables_scrollBody {
+  .dataTables_wrapper div.dataTables_scrollBody,
+  table.dataTable tbody tr:first-child td {
     border: none !important;
     border-top: none !important;
     border-bottom: none !important;
@@ -224,16 +225,19 @@ css_overrides <- tags$style(HTML("
     color: darkred !important;
   }
 
-  /* ===== LINE DIVIDER: Single line under column headers ===== */
+  /* ===== LINE DIVIDER: Use box-shadow instead of border (more reliable) ===== */
   table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th {
-    border-bottom: 2px solid #333 !important;
+    border-bottom: none !important;
+    box-shadow: inset 0 -2px 0 #333 !important;
   }
   div.dataTables_scrollHead table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th {
-    border-bottom: 2px solid #333 !important;
+    border-bottom: none !important;
+    box-shadow: inset 0 -2px 0 #333 !important;
   }
   .fixedHeader-floating thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th,
   .fixedHeader-locked thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th {
-    border-bottom: 2px solid #333 !important;
+    border-bottom: none !important;
+    box-shadow: inset 0 -2px 0 #333 !important;
   }
 
   /* ===== CRITICAL: Force ALL cells to shrink to minimum content width ===== */
