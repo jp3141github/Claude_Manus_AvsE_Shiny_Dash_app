@@ -68,8 +68,8 @@ if (ENABLE_ASSISTANT) {
       p("Quick actions (", tags$span("Ctrl/Cmd+K", class = "assist-kbd"), " or ", tags$span("/", class = "assist-kbd"), " to open)"),
       textInput("assist_search", NULL, placeholder = "Type a command or question…", width = "100%"),
       fluidRow(
-        column(6, bslib::card(
-          bslib::card_header("Quick actions"),
+        column(6, card(
+          card_header("Quick actions"),
           div(
             actionButton("assist_run", "▶ Run analysis", class = "btn btn-primary me-2"),
             actionButton("assist_clear", "🗑 Clear selections", class = "btn btn-outline-secondary me-2"),
@@ -77,8 +77,8 @@ if (ENABLE_ASSISTANT) {
             actionButton("assist_xlsx", "⬇ Download Excel", class = "btn btn-outline-secondary")
           )
         )),
-        column(6, bslib::card(
-          bslib::card_header("FAQ"),
+        column(6, card(
+          card_header("FAQ"),
           div(
             tags$details(tags$summary("What columns are required?"),
                          p("At minimum: Model Type, ProjectionDate, Actual, Expected, Accident Year, Product, Peril, Segment, Event / Non-Event, Section, ObjectName, Current or Prior.")),
@@ -124,8 +124,8 @@ chart_download_btns <- function(outputId) {
 }
 
 exp_card <- function(title, outputId, height = "300px") {
-  bslib::card(
-    bslib::card_header(tagList(
+  card(
+    card_header(tagList(
       title,
       chart_download_btns(outputId),
       expand_btn(outputId)
