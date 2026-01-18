@@ -182,7 +182,7 @@ register_results_server <- function(input, output, session, results_obj, uploade
         #preview-data-card .card-body {
           display: block !important;
           width: auto !important;
-          overflow-x: auto !important;
+          overflow-x: visible !important;
           padding: 0.5rem !important;
         }
       ")),
