@@ -49,12 +49,9 @@ div.dataTables_scrollHead table thead {
   border-top: none !important;
   border-bottom: none !important;
 }
-/* Add SINGLE bold line directly above data (border-top on scrollBody) */
+/* scrollBody - no border (line is on labels row instead) */
 div.dataTables_scrollBody {
-  border-top: 2px solid #333 !important;
-  border-bottom: none !important;
-  border-left: none !important;
-  border-right: none !important;
+  border: none !important;
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
