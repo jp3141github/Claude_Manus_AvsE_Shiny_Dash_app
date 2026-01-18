@@ -200,6 +200,20 @@ ui <- page_sidebar(
 )
 
 css_overrides <- tags$style(HTML("
+  /* ===== NUCLEAR: Remove ALL borders from DataTables first ===== */
+  .dataTables_wrapper table.dataTable,
+  .dataTables_wrapper table.dataTable thead,
+  .dataTables_wrapper table.dataTable tbody,
+  .dataTables_wrapper table.dataTable tr,
+  .dataTables_wrapper table.dataTable th,
+  .dataTables_wrapper table.dataTable td,
+  .dataTables_wrapper div.dataTables_scrollHead,
+  .dataTables_wrapper div.dataTables_scrollBody {
+    border: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
+  }
+
   /* ===== A-E VALUE COLORING (green for negative, red for positive) ===== */
   table.dataTable td.ae-negative {
     background-color: rgba(144, 238, 144, 0.4) !important;
@@ -210,8 +224,7 @@ css_overrides <- tags$style(HTML("
     color: darkred !important;
   }
 
-  /* ===== LINE DIVIDER BETWEEN HEADERS AND DATA ===== */
-  /* Bold line under column headers (labels row) - using the same selector pattern as rest of codebase */
+  /* ===== LINE DIVIDER: Single line under column headers ===== */
   table.dataTable thead tr:not(.dt-sort-row):not(.dt-filter-row):not(.dt-controls-row) th {
     border-bottom: 2px solid #333 !important;
   }
