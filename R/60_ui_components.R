@@ -255,7 +255,7 @@ css_overrides <- tags$style(HTML("
   }
   #sidebar_accordion .accordion-button {
     padding: 10px 12px;
-    font-size: 21px;
+    font-size: 17px;
     font-weight: 500;
     background: #f8f9fa;
     border-radius: 6px !important;
@@ -279,7 +279,7 @@ css_overrides <- tags$style(HTML("
   }
   #sidebar_accordion .accordion-button .bi {
     margin-right: 8px;
-    font-size: 21px;
+    font-size: 17px;
   }
   /* Make download buttons full width in accordion */
   #sidebar_accordion .btn[id^='download_'] {
