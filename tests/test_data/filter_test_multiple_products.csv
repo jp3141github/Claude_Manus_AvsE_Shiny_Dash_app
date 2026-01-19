@@ -1,0 +1,17 @@
+Section,ObjectName,Accident Period,ProjectionDate,Actual,Expected,Accident Year,Current or Prior,Product,Peril,Segment,Event / Non-Event,Model Type,Measure
+Section1,Obj1,2024Q1,2025/05/31,100,90,2024,Current,Auto,Fire,NIG,Event,GLM,Paid
+Section1,Obj2,2024Q1,2025/05/31,110,95,2024,Current,Home,Fire,NIG,Event,GLM,Incurred
+Section1,Obj3,2024Q1,2025/05/31,120,100,2024,Current,Life,Fire,NIG,Event,GLM,Paid
+Section1,Obj4,2024Q1,2025/05/31,130,105,2024,Current,Health,Fire,NIG,Event,GLM,Incurred
+Section1,Obj5,2024Q1,2025/05/31,140,110,2024,Current,Commercial,Fire,NIG,Event,GLM,Paid
+Section1,Obj6,2024Q1,2025/05/31,150,115,2024,Current,Marine,Fire,NIG,Event,GLM,Incurred
+Section1,Obj7,2024Q1,2025/05/31,160,120,2024,Current,Aviation,Fire,NIG,Event,GLM,Paid
+Section1,Obj8,2024Q1,2025/05/31,170,125,2024,Current,Cyber,Fire,NIG,Event,GLM,Incurred
+Section1,Obj9,2024Q1,2025/05/31,180,130,2024,Current,Auto,Water,Non-NIG,Non-Event,XGBoost,Paid
+Section1,Obj10,2024Q1,2025/05/31,190,135,2024,Current,Home,Water,Non-NIG,Non-Event,XGBoost,Incurred
+Section1,Obj11,2024Q1,2025/05/31,200,145,2024,Current,Life,Water,Non-NIG,Non-Event,XGBoost,Paid
+Section1,Obj12,2024Q1,2025/05/31,210,155,2024,Current,Health,Water,Non-NIG,Non-Event,XGBoost,Incurred
+Section1,Obj13,2024Q1,2025/04/30,220,165,2024,Current,Auto,Wind,NIG,Event,Random Forest,Paid
+Section1,Obj14,2024Q1,2025/04/30,230,175,2024,Current,Home,Wind,NIG,Event,Random Forest,Incurred
+Section1,Obj15,2024Q1,2025/04/30,240,185,2024,Current,Life,Wind,Non-NIG,Non-Event,Random Forest,Paid
+Section1,Obj16,2024Q1,2025/04/30,250,195,2024,Current,Health,Wind,Non-NIG,Non-Event,Random Forest,Incurred

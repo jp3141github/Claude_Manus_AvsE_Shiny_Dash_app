@@ -1,0 +1,7 @@
+Section,ObjectName,Accident Period,ProjectionDate,Actual,Expected,Accident Year,Current or Prior,Product,Peril,Segment,Event / Non-Event,Model Type,Measure
+Section1,Obj1,2024Q1,2025/05/31,100,90,2024,Current,Auto & Home,Fire/Wind,NIG,Event,GLM-v1,Paid
+Section1,Obj2,2024Q1,2025/05/31,110,95,2024,Current,"Auto, Home",Water (damage),NIG,Event,GLM-v2,Incurred
+Section1,Obj3,2024Q1,2025/05/31,120,100,2024,Current,Auto's Best,Wind-Storm,NIG,Event,"Model, Type",Paid
+Section1,Obj4,2024Q1,2025/05/31,130,105,2024,Current,Home [Owners],Hail/Storm,Non-NIG,Non-Event,Model_v3,Incurred
+Section1,Obj5,2024Q1,2025/05/31,140,110,2024,Current,Life+Health,Earthquake,Non-NIG,Non-Event,XGBoost (tuned),Paid
+Section1,Obj6,2024Q1,2025/05/31,150,115,2024,Current,Health@2024,Flood.Damage,Non-NIG,Event,Random Forest v2.0,Incurred

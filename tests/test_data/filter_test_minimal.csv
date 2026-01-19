@@ -1,0 +1,5 @@
+Section,ObjectName,Accident Period,ProjectionDate,Actual,Expected,Accident Year,Current or Prior,Product,Peril,Segment,Event / Non-Event,Model Type,Measure
+Section1,Obj1,2024Q1,2025/05/31,100,90,2024,Current,Auto,Fire,NIG,Event,GLM,Paid
+Section1,Obj2,2024Q1,2025/05/31,200,180,2024,Current,Home,Water,Non-NIG,Non-Event,GLM,Incurred
+Section1,Obj3,2024Q2,2025/04/30,150,140,2024,Current,Life,Wind,NIG,Event,XGBoost,Paid
+Section1,Obj4,2024Q2,2025/04/30,250,240,2024,Prior,Health,Hail,Non-NIG,Non-Event,XGBoost,Incurred
