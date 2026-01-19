@@ -7,7 +7,7 @@ Sys.setenv(TMPDIR = .local_tmp, TEMP = .local_tmp, TMP = .local_tmp)
 
 # --- Packages ---
 suppressPackageStartupMessages({
-  library(shiny); library(bslib); library(DT)
+  library(shiny); library(bslib); library(bsicons); library(DT)
   library(readr); library(readxl)
   library(dplyr); library(tidyr); library(stringr)
   library(lubridate); library(purrr); library(rlang)
