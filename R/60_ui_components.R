@@ -139,6 +139,7 @@ exp_card <- function(title, outputId, height = "300px") {
 
 # ---- Sidebar (HYBRID) ----
 sidebar_controls <- sidebar(
+  id = "main_sidebar",  # ID for programmatic control (auto-collapse on upload)
   h4("Analysis Controls"),
   fileInput("csv_file", "Upload CSV File",
             accept = c(".csv"), multiple = FALSE),
