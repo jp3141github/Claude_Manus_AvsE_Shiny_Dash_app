@@ -235,10 +235,10 @@ ui <- page_sidebar(
   if (ENABLE_ASSISTANT) assistant_button else NULL,
   header = header_css,
   title = tags$div(
-    tags$span("A v E Tracker (Desktop) – Shiny (R) – Actuarial Reporting Team"),
+    tags$b("A v E Tracker (R Shiny) – Actuarial Reporting Team"),
     tags$br(),
     tags$span("written and created by James Peacock (QLCY@directlinegroup.co.uk)",
-              style = "font-size: 0.75em;")
+              style = "font-size: 1.125em;")
   )
 )
 
