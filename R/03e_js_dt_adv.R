@@ -287,7 +287,7 @@ window.dtAdvInit = function() {
       }
 
       // Merge multiple ranges using AND (intersection) logic
-      // Returns {min, max} if intersection exists, null if ranges don't overlap
+      // Returns {min, max} if intersection exists, null if ranges do not overlap
       // e.g., ">500 and <1000" -> intersection of (500, inf) and (-inf, 1000) = (500, 1000)
       function mergeRangesAND(ranges){
         if (!ranges || ranges.length === 0) return null;
