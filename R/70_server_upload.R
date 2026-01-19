@@ -122,6 +122,9 @@ register_upload_server <- function(input, output, session, uploaded_df) {
       incProgress(0.1, detail = "Upload complete!")
     })
 
+    # Auto-collapse sidebar after successful upload (user can re-open anytime)
+    bslib::sidebar_toggle("main_sidebar", open = FALSE, session = session)
+
     # Show success notification
     showNotification(sprintf("File uploaded: %s rows, %s columns", format(nrow(df), big.mark = ","), ncol(df)), type = "message", duration = 3)
   })
