@@ -208,7 +208,12 @@ sidebar_controls <- sidebar(
       downloadButton("download_zip",   "Download Results (ZIP of CSVs + charts)"),
       downloadButton("download_excel", "Download Results (Excel)")
     )
-  )
+  ),
+
+  # Resize button (below accordion)
+  tags$hr(style = "margin: 12px 0;"),
+  actionButton("resize_80", "Resize to 80%", class = "btn btn-outline-secondary btn-sm",
+               style = "width: 100%;", onclick = "resizeTo80();")
 )
 
 # ---- UI root (HYBRID) ----
@@ -581,6 +586,22 @@ css_overrides <- tags$style(HTML("
 # This preserves the DataTable advanced features (sorting, filtering)
 js_code_extra <- "
 var __assistKeysInit = false;
+
+// ==== RESIZE TO 80% FUNCTION ====
+function resizeTo80() {
+  // Use CSS zoom (works in Chrome, Edge, Safari)
+  // For Firefox, use transform scale as fallback
+  var isFirefox = typeof InstallTrigger !== 'undefined';
+  if (isFirefox) {
+    document.body.style.transformOrigin = 'top left';
+    document.body.style.transform = 'scale(0.8)';
+    document.body.style.width = '125%';
+  } else {
+    document.body.style.zoom = '80%';
+  }
+  console.log('[Resize] Browser zoom set to 80%');
+}
+// ==== END RESIZE FUNCTION ====
 
 // ==== SMART DEFAULTS: localStorage persistence ====
 (function() {
