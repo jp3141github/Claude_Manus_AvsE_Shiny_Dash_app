@@ -137,40 +137,77 @@ exp_card <- function(title, outputId, height = "300px") {
   )
 }
 
+# ---- Safe icon helper (fallback if bsicons not available) ----
+safe_icon <- function(name) {
+  if (requireNamespace("bsicons", quietly = TRUE)) {
+    bsicons::bs_icon(name)
+  } else {
+    NULL
+  }
+}
+
 # ---- Sidebar (HYBRID) ----
 sidebar_controls <- sidebar(
   h4("Analysis Controls"),
   fileInput("csv_file", "Upload CSV File",
             accept = c(".csv"), multiple = FALSE),
   actionButton("run_analysis", "Run Analysis", class = "btn-primary mb-2"),
-  textInput("output_location", "Output Directory (desktop only)",
-            placeholder = "C:/Users/me/Documents/outputs or /home/me/outputs"),
-  selectizeInput("model_type", "Model Type", choices = NULL,
-                 options = list(placeholder = "Select after upload…")),
-  selectizeInput("projection_date", "Projection Date", choices = NULL,
-                 options = list(placeholder = "Select after upload…")),
-  selectizeInput("event_type", "Event / Non-Event",
-                 choices = c("Event","Non-Event"), selected = "Non-Event"),
-  actionButton("export_excel_now", "Export (Python-style Excel)", class = "btn btn-success"),
-  
-  # Chart Controls
-  h6("Chart Controls:"),
-  selectInput("dyn_prod",  "Product", choices = c("ALL"), selected = "ALL"),
-  selectInput("dyn_segment_group", "Segment (Group)",
-              choices = c("All","NIG","Non NIG"), selected = "All"),
-  selectInput("dyn_peril", "Peril",   choices = c("ALL"), selected = "ALL"),
-  
-  # Exclude-from-Data (from first script)
-  h6("Exclude from Data:"),
-  div(
-    style = "max-height: 180px; overflow:auto; border:1px solid #ddd; padding:6px; border-radius:6px;",
-    checkboxGroupInput("exclude_products", label = NULL,
-                       choices = character(0), selected = character(0))
-  ),
-  
-  hr(),
-  downloadButton("download_zip",   "Download Results (ZIP of CSVs + charts)"),
-  downloadButton("download_excel", "Download Results (Excel)")
+
+  # Collapsible sections using bslib accordion
+  bslib::accordion(
+    id = "sidebar_accordion",
+    open = FALSE,  # All panels closed by default
+
+    # Output Settings
+    bslib::accordion_panel(
+      title = "Output Settings",
+      icon = safe_icon("folder"),
+      textInput("output_location", "Output Directory (desktop only)",
+                placeholder = "C:/Users/me/Documents/outputs or /home/me/outputs")
+    ),
+
+    # Data Controls
+    bslib::accordion_panel(
+      title = "Data Controls",
+      icon = safe_icon("sliders"),
+      selectizeInput("model_type", "Model Type", choices = NULL,
+                     options = list(placeholder = "Select after upload…")),
+      selectizeInput("projection_date", "Projection Date", choices = NULL,
+                     options = list(placeholder = "Select after upload…")),
+      selectizeInput("event_type", "Event / Non-Event",
+                     choices = c("Event","Non-Event"), selected = "Non-Event"),
+      actionButton("export_excel_now", "Export (Python-style Excel)", class = "btn btn-success")
+    ),
+
+    # Chart Controls
+    bslib::accordion_panel(
+      title = "Chart Controls",
+      icon = safe_icon("bar-chart"),
+      selectInput("dyn_prod",  "Product", choices = c("ALL"), selected = "ALL"),
+      selectInput("dyn_segment_group", "Segment (Group)",
+                  choices = c("All","NIG","Non NIG"), selected = "All"),
+      selectInput("dyn_peril", "Peril",   choices = c("ALL"), selected = "ALL")
+    ),
+
+    # Exclude from Data
+    bslib::accordion_panel(
+      title = "Exclude from Data",
+      icon = safe_icon("funnel"),
+      div(
+        style = "max-height: 180px; overflow:auto; border:1px solid #ddd; padding:6px; border-radius:6px;",
+        checkboxGroupInput("exclude_products", label = NULL,
+                           choices = character(0), selected = character(0))
+      )
+    ),
+
+    # Download
+    bslib::accordion_panel(
+      title = "Download",
+      icon = safe_icon("download"),
+      downloadButton("download_zip",   "Download Results (ZIP of CSVs + charts)"),
+      downloadButton("download_excel", "Download Results (Excel)")
+    )
+  )
 )
 
 # ---- UI root (HYBRID) ----
@@ -205,6 +242,55 @@ ui <- page_sidebar(
 )
 
 css_overrides <- tags$style(HTML("
+  /* ===== SIDEBAR ACCORDION STYLING ===== */
+  #sidebar_accordion {
+    margin-top: 10px;
+  }
+  #sidebar_accordion .accordion-item {
+    border: 1px solid #dee2e6;
+    border-radius: 6px !important;
+    margin-bottom: 8px;
+    background: #fff;
+  }
+  #sidebar_accordion .accordion-button {
+    padding: 10px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    background: #f8f9fa;
+    border-radius: 6px !important;
+  }
+  #sidebar_accordion .accordion-button:not(.collapsed) {
+    background: #e9ecef;
+    color: #212529;
+    box-shadow: none;
+  }
+  #sidebar_accordion .accordion-button:focus {
+    box-shadow: none;
+    border-color: #86b7fe;
+  }
+  #sidebar_accordion .accordion-button::after {
+    width: 1rem;
+    height: 1rem;
+    background-size: 1rem;
+  }
+  #sidebar_accordion .accordion-body {
+    padding: 12px;
+  }
+  #sidebar_accordion .accordion-button .bi {
+    margin-right: 8px;
+    font-size: 14px;
+  }
+  /* Make download buttons full width in accordion */
+  #sidebar_accordion .btn[id^='download_'] {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  /* Make export button full width */
+  #sidebar_accordion #export_excel_now {
+    width: 100%;
+    margin-top: 10px;
+  }
+
   /* ===== REMOVE TAB UNDERLINE (merged with summary border below) ===== */
   .nav-tabs, .nav-tabs .nav-link {
     border-bottom: none !important;
