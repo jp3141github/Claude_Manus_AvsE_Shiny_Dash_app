@@ -7,7 +7,9 @@ Sys.setenv(TMPDIR = .local_tmp, TEMP = .local_tmp, TMP = .local_tmp)
 
 # --- Packages ---
 suppressPackageStartupMessages({
-  library(shiny); library(bslib); library(bsicons); library(DT)
+  library(shiny); library(bslib); library(DT)
+  # bsicons is optional - safe_icon() in 60_ui_components.R provides fallback
+  if (requireNamespace("bsicons", quietly = TRUE)) library(bsicons)
   library(readr); library(readxl)
   library(dplyr); library(tidyr); library(stringr)
   library(lubridate); library(purrr); library(rlang)
