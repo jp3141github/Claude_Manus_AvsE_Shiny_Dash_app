@@ -35,7 +35,7 @@ css_dt <- htmltools::HTML(
     background:#f7f7f7;
     cursor:pointer;
     user-select:none;
-    font-size:11px;
+    font-size:17px;
     position: relative;
     color:#444 !important;   /* NEW → dark grey font instead of black */
   }
@@ -54,7 +54,7 @@ css_dt <- htmltools::HTML(
     position:absolute; top:-8px; right:-8px;
     min-width:16px; height:16px; line-height:16px;
     background:#dc3545; color:#fff; border-radius:50%;
-    font-size:11px; font-weight:bold; text-align:center; padding:0 4px;
+    font-size:17px; font-weight:bold; text-align:center; padding:0 4px;
     display:none;    /* hidden until used */
     z-index: 10;
     box-shadow: 0 1px 3px rgba(0,0,0,0.3);
@@ -102,7 +102,7 @@ css_dt <- htmltools::HTML(
     box-sizing: border-box !important;
     padding: 2px 4px !important;
     height: 20px !important;
-    font-size: 11px !important;
+    font-size: 17px !important;
   }
 
   /* ----- LABEL WRAPPING (bottom row only) -----
@@ -154,7 +154,7 @@ css_dt <- htmltools::HTML(
     left: 6px !important;
     right: auto !important;
     opacity: 0.3;
-    font-size: 10px;
+    font-size: 15px;
     line-height: 1;
   }
 

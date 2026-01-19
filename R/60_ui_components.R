@@ -111,13 +111,13 @@ chart_download_btns <- function(outputId) {
         outputId = paste0(outputId, "_download_png"),
         label = "PNG",
         class = "btn btn-outline-secondary btn-sm",
-        style = "font-size: 11px; padding: 2px 8px;"
+        style = "font-size: 17px; padding: 2px 8px;"
       ),
       downloadButton(
         outputId = paste0(outputId, "_download_csv"),
         label = "CSV",
         class = "btn btn-outline-secondary btn-sm",
-        style = "font-size: 11px; padding: 2px 8px;"
+        style = "font-size: 17px; padding: 2px 8px;"
       )
     )
   )
@@ -238,7 +238,7 @@ ui <- page_sidebar(
     tags$span("A v E Tracker (Desktop) – Shiny (R) – Actuarial Reporting Team"),
     tags$br(),
     tags$span("written and created by James Peacock (QLCY@directlinegroup.co.uk)",
-              style = "font-size: 0.5em;")
+              style = "font-size: 0.75em;")
   )
 )
 
@@ -255,7 +255,7 @@ css_overrides <- tags$style(HTML("
   }
   #sidebar_accordion .accordion-button {
     padding: 10px 12px;
-    font-size: 14px;
+    font-size: 21px;
     font-weight: 500;
     background: #f8f9fa;
     border-radius: 6px !important;
@@ -279,7 +279,7 @@ css_overrides <- tags$style(HTML("
   }
   #sidebar_accordion .accordion-button .bi {
     margin-right: 8px;
-    font-size: 14px;
+    font-size: 21px;
   }
   /* Make download buttons full width in accordion */
   #sidebar_accordion .btn[id^='download_'] {
@@ -434,7 +434,7 @@ css_overrides <- tags$style(HTML("
     box-sizing: border-box !important;
     padding: 2px 4px !important;
     height: 20px !important;
-    font-size: 11px !important;
+    font-size: 17px !important;
   }
 
   /* Labels row can wrap if needed, but keep compact */
@@ -509,7 +509,7 @@ css_overrides <- tags$style(HTML("
     background: #f7f7f7 !important;
     cursor: pointer !important;
     user-select: none !important;
-    font-size: 11px !important;
+    font-size: 17px !important;
     color: #444 !important;
     margin: 0 1px !important;
   }

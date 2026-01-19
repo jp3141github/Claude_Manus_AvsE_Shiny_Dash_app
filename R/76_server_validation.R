@@ -303,11 +303,11 @@ register_validation_server <- function(input, output, session, uploaded_df, resu
       div(
         style = "text-align: center; padding: 20px;",
         div(
-          style = sprintf("font-size: 48px; font-weight: bold; color: %s;", score_color),
+          style = sprintf("font-size: 72px; font-weight: bold; color: %s;", score_color),
           sprintf("%.0f%%", overall_score)
         ),
         div(
-          style = "font-size: 18px; color: #666; margin-top: 10px;",
+          style = "font-size: 27px; color: #666; margin-top: 10px;",
           "Overall Completeness"
         ),
         hr(),

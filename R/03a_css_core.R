@@ -115,7 +115,7 @@ css_core <- htmltools::HTML(
   }
   #fs-host .fs-close {
     position: absolute; top: 8px; right: 14px; z-index: 2;
-    font-size: 13px; padding: 4px 8px; border-radius: 4px;
+    font-size: 20px; padding: 4px 8px; border-radius: 4px;
     background: rgba(255,255,255,.92); border: 1px solid #ccc;
     cursor: pointer; user-select: none;
   }
