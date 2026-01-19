@@ -196,7 +196,12 @@ ui <- page_sidebar(
   
   if (ENABLE_ASSISTANT) assistant_button else NULL,
   header = header_css,
-  title = "A v E Tracker (Desktop) – Shiny (R) – Actuarial Reporting Team"
+  title = tags$div(
+    tags$span("A v E Tracker (Desktop) – Shiny (R) – Actuarial Reporting Team"),
+    tags$br(),
+    tags$span("written and created by James Peacock (QLCY@directlinegroup.co.uk)",
+              style = "font-size: 0.5em;")
+  )
 )
 
 css_overrides <- tags$style(HTML("
