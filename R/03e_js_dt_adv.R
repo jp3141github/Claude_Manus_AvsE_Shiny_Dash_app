@@ -33,7 +33,7 @@ window.dtAddPageJumper = function(){
         if ($p.find(".dt-jumpwrap").length) return;
 
         var html = [
-          \'<span class="dt-jumpwrap" style="margin-left:8px;font-size:12px;vertical-align:middle;">\',
+          \'<span class="dt-jumpwrap" style="margin-left:8px;font-size:18px;vertical-align:middle;">\',
           \'Jump to \',
           \'<input type="number" class="dt-jump" min="1" style="width:72px;height:24px;padding:2px 4px;display:inline-block;">\',
           \'</span>\'
@@ -125,7 +125,7 @@ window.dtAdvInit = function() {
             border: "1px solid #ffc107",
             borderRadius: "4px",
             padding: "6px 10px",
-            fontSize: "11px",
+            fontSize: "17px",
             color: "#856404",
             maxWidth: "280px",
             zIndex: 10000,
@@ -651,8 +651,8 @@ window.dtAdvInit = function() {
 
             var html = [
               \'<span class="dt-filter-controls" style="white-space:nowrap;">\',
-              \'<a href="#" class="dt-apply-filters" title="Apply all column filters" style="font-size:11px;text-decoration:none;margin-right:6px;">✔ apply</a>\',
-              \'<a href="#" class="dt-clear-filters" title="Clear all column filters" style="font-size:11px;text-decoration:none;">✖ clear filters</a>\',
+              \'<a href="#" class="dt-apply-filters" title="Apply all column filters" style="font-size:17px;text-decoration:none;margin-right:6px;">✔ apply</a>\',
+              \'<a href="#" class="dt-clear-filters" title="Clear all column filters" style="font-size:17px;text-decoration:none;">✖ clear filters</a>\',
               \'</span>\'
             ].join("");
 
@@ -668,7 +668,7 @@ window.dtAdvInit = function() {
             var $firstTh = $h.find("tr.dt-sort-row th").first();
             if (!$firstTh.length) return;
             if ($firstTh.find(".dt-clear-sort").length) return;
-            var $a = $(\'<a href="#" class="dt-clear-sort" title="Clear all sorting" style="margin-left:8px; font-size:11px; text-decoration:none;">✖ clear</a>\');
+            var $a = $(\'<a href="#" class="dt-clear-sort" title="Clear all sorting" style="margin-left:8px; font-size:17px; text-decoration:none;">✖ clear</a>\');
             $firstTh.append($a);
           });
         }catch(e){}

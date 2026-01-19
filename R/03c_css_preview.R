@@ -53,7 +53,7 @@ css_preview <- htmltools::HTML(
     box-sizing: border-box !important;
     padding: 2px 4px !important;
     height: 20px !important;
-    font-size: 11px !important;
+    font-size: 17px !important;
   }
 
   /* Labels row can wrap if needed, but keep compact */
