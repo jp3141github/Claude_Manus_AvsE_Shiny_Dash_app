@@ -314,20 +314,71 @@ window.dtAdvInit = function() {
         var trimmed = raw.trim();
         if (!trimmed) return {term: "", isNumericRange: false, error: null};
 
-        // Check if expression uses "and" keyword (case-insensitive) for intersection
-        // e.g., ">500 and <1000" means values that are BOTH >500 AND <1000
+        // Check for various AND/OR separators:
+        // - "and" keyword (case-insensitive): ">500 and <1000"
+        // - "&" symbol: ">500 & <1000" or ">500&<1000"
+        // - "," comma: ">500, <1000" or ">500,<1000"
+        // - "or" keyword (case-insensitive): ">500 or >700" (union)
+        // - ";" semicolon for OR: ">500; >700" (union)
+        // - "|" pipe for OR: ">500 | >700" (union)
+        // - Space-separated operators (implicit AND): "<1000 >600"
         var hasAndKeyword = /\\band\\b/i.test(trimmed);
+        var hasOrKeyword = /\\bor\\b/i.test(trimmed);
+        var hasAmpersand = trimmed.indexOf("&") >= 0;
+        var hasComma = trimmed.indexOf(",") >= 0;
         var hasSemicolon = trimmed.indexOf(";") >= 0;
+        var hasPipe = trimmed.indexOf("|") >= 0;
+
+        // Check for space-separated numeric expressions (implicit AND)
+        // e.g., "<1000 >600" or ">600 <1000" or ">=100 <=500"
+        // Pattern: number followed by space(s) then an operator
+        var hasSpaceSeparatedOps = /[\\d.]\\s+[<>]=?\\s*-?[\\d.]/.test(trimmed);
+
+        // Determine if this is an OR expression (check OR indicators first)
+        var isOrExpression = hasOrKeyword || hasSemicolon || hasPipe;
 
         var parts, mergeFunc;
-        if (hasAndKeyword && !hasSemicolon) {
-          // Split on "and" keyword for AND (intersection) expressions
-          parts = trimmed.split(/\\s+and\\s+/i).map(function(p){ return p.trim(); }).filter(function(p){ return p.length > 0; });
-          mergeFunc = mergeRangesAND;
-        } else {
+        if (hasOrKeyword && !hasAndKeyword) {
+          // Split on "or" keyword for OR (union) expressions
+          parts = trimmed.split(/\\s+or\\s+/i).map(function(p){ return p.trim(); }).filter(function(p){ return p.length > 0; });
+          mergeFunc = mergeRangesOR;
+          console.log("[DT Filter] OR keyword detected:", trimmed, "->", parts);
+        } else if (hasPipe && !hasAmpersand) {
+          // Split on "|" for OR (union) expressions
+          parts = trimmed.split(/\\s*\\|\\s*/).map(function(p){ return p.trim(); }).filter(function(p){ return p.length > 0; });
+          mergeFunc = mergeRangesOR;
+          console.log("[DT Filter] Pipe (|) OR detected:", trimmed, "->", parts);
+        } else if (hasSemicolon) {
           // Split on semicolon for OR (union) expressions
           parts = trimmed.split(";").map(function(p){ return p.trim(); }).filter(function(p){ return p.length > 0; });
           mergeFunc = mergeRangesOR;
+          console.log("[DT Filter] Semicolon (;) OR detected:", trimmed, "->", parts);
+        } else if (hasAndKeyword) {
+          // Split on "and" keyword for AND (intersection) expressions
+          parts = trimmed.split(/\\s+and\\s+/i).map(function(p){ return p.trim(); }).filter(function(p){ return p.length > 0; });
+          mergeFunc = mergeRangesAND;
+          console.log("[DT Filter] AND keyword detected:", trimmed, "->", parts);
+        } else if (hasAmpersand) {
+          // Split on "&" for AND (intersection) expressions
+          parts = trimmed.split(/\\s*&\\s*/).map(function(p){ return p.trim(); }).filter(function(p){ return p.length > 0; });
+          mergeFunc = mergeRangesAND;
+          console.log("[DT Filter] Ampersand (&) detected:", trimmed, "->", parts);
+        } else if (hasComma) {
+          // Split on "," for AND (intersection) expressions
+          parts = trimmed.split(/\\s*,\\s*/).map(function(p){ return p.trim(); }).filter(function(p){ return p.length > 0; });
+          mergeFunc = mergeRangesAND;
+          console.log("[DT Filter] Comma (,) detected:", trimmed, "->", parts);
+        } else if (hasSpaceSeparatedOps) {
+          // Split on space before operators for implicit AND expressions
+          // e.g., "<1000 >600" becomes ["<1000", ">600"]
+          // Use lookahead to split before operators: <, >, <=, >=
+          parts = trimmed.split(/\\s+(?=[<>]=?\\s*-?[\\d.])/).map(function(p){ return p.trim(); }).filter(function(p){ return p.length > 0; });
+          mergeFunc = mergeRangesAND;
+          console.log("[DT Filter] Space-separated operators (implicit AND):", trimmed, "->", parts);
+        } else {
+          // Single expression or no recognized separator - try to parse as single term
+          parts = [trimmed];
+          mergeFunc = mergeRangesAND; // Default to AND (doesn\'t matter for single part)
         }
 
         if (parts.length === 0) return {term: "", isNumericRange: false, error: null};
@@ -338,7 +389,7 @@ window.dtAdvInit = function() {
           var range = parseSingleNumericExpr(parts[i]);
           if (range === null) {
             // Cannot parse this part - not a valid numeric expression
-            return {term: trimmed, isNumericRange: false, error: "Cannot parse: " + parts[i] + ". Try formats like: >500, <1000, 500..1000, or >500 and <1000"};
+            return {term: trimmed, isNumericRange: false, error: "Cannot parse: [" + parts[i] + "]. Try: >500, <1000, >=500, <=1000, 500..1000, 500 to 1000"};
           }
           ranges.push(range);
         }
@@ -346,20 +397,24 @@ window.dtAdvInit = function() {
         // Try to merge all ranges
         var merged = mergeFunc(ranges);
 
+        // Check if we used any form of AND logic (vs OR logic)
+        var usedAndLogic = hasAndKeyword || hasAmpersand || hasComma || hasSpaceSeparatedOps;
+        var usedOrLogic = hasOrKeyword || hasSemicolon || hasPipe;
+
         if (merged === null) {
-          if (hasAndKeyword) {
+          if (usedAndLogic && !usedOrLogic) {
             // AND with no overlap - impossible filter
             return {
               term: trimmed,
               isNumericRange: false,
-              error: "Cannot filter: [" + trimmed + "] has no overlapping range. The conditions contradict each other."
+              error: "Cannot filter: [" + trimmed + "] has no overlapping range. The conditions contradict each other (e.g., >1000 <500 is impossible)."
             };
           } else {
             // OR with disjoint ranges - cannot represent as single range for DT
             return {
               term: trimmed,
               isNumericRange: false,
-              error: "Cannot filter: [" + trimmed + "] creates disjoint ranges. DT only supports single continuous range. Try a single comparison like >614 or a range like 500..600."
+              error: "Cannot filter: [" + trimmed + "] creates disjoint ranges. DT only supports single continuous range. Try a range like 500..600."
             };
           }
         }
